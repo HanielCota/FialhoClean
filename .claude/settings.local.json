@@ -18,7 +18,8 @@
       "Read(//d//**)",
       "Bash(cmd.exe /c \"cd D:\\\\FialhoClean\\\\src-tauri && cargo check\")",
       "Bash(cmd.exe /c \"cargo check --manifest-path D:\\\\FialhoClean\\\\src-tauri\\\\Cargo.toml 2>&1\")",
-      "Bash(powershell.exe -Command \"Set-Location ''D:\\\\FialhoClean\\\\src-tauri''; cargo check 2>&1\")"
+      "Bash(powershell.exe -Command \"Set-Location ''D:\\\\FialhoClean\\\\src-tauri''; cargo check 2>&1\")",
+      "Bash(ls -la /d/FialhoClean/*.json /d/FialhoClean/*.config.*)"
     ]
   }
 }
