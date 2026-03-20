@@ -1,7 +1,7 @@
-import { BatteryCharging, Flame, Zap } from "lucide-react";
+import { BatteryCharging, Flame, MemoryStick, Monitor, Zap } from "lucide-react";
 import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { PowerPlan } from "../../../types/optimizer";
+import type { GpuSettings, PowerPlan } from "../../../types/optimizer";
 import { Card } from "../../shared/Card";
 import { SectionHeading } from "../../shared/SectionHeading";
 import { Toggle } from "../../shared/Toggle";
@@ -11,19 +11,27 @@ const ULTIMATE_PERF_GUID = "e9a42b02-d5df-448d-aa00-03f14749eb61";
 interface PerformanceTabProps {
   powerPlans: PowerPlan[];
   visualEffectsPerformanceMode: boolean;
+  gpuSettings: GpuSettings;
+  isOptimizingRam: boolean;
   onChangePowerPlan: (guid: string) => void;
   onSetVisualEffects: (enabled: boolean) => void;
   onApplyGameMode: () => Promise<void>;
   onApplyUltimatePerformance: () => Promise<void>;
+  onOptimizeRam: () => Promise<void>;
+  onSetGpuHags: (enabled: boolean) => void;
 }
 
 export function PerformanceTab({
   powerPlans,
   visualEffectsPerformanceMode,
+  gpuSettings,
+  isOptimizingRam,
   onChangePowerPlan,
   onSetVisualEffects,
   onApplyGameMode,
   onApplyUltimatePerformance,
+  onOptimizeRam,
+  onSetGpuHags,
 }: PerformanceTabProps) {
   const { t } = useTranslation();
   const visualLabelId = useId();
@@ -103,6 +111,60 @@ export function PerformanceTab({
               onChange={onSetVisualEffects}
               aria-labelledby={visualLabelId}
             />
+          </div>
+        </Card>
+      </section>
+
+      {/* GPU HAGS */}
+      <section>
+        <SectionHeading>{t("optimizer.sections.gpuScheduling")}</SectionHeading>
+        <Card>
+          <div className="flex items-center gap-4">
+            <Monitor className="w-5 h-5 text-text-muted flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-[15px] font-semibold text-text">
+                {t("optimizer.gpuHags.title")}
+              </p>
+              <p className="text-[13px] text-text-muted mt-1">
+                {t("optimizer.gpuHags.description")}
+              </p>
+            </div>
+            <Toggle
+              checked={gpuSettings.hags_enabled}
+              onChange={onSetGpuHags}
+              aria-label={t("optimizer.gpuHags.title")}
+            />
+          </div>
+        </Card>
+      </section>
+
+      {/* RAM Optimizer */}
+      <section>
+        <SectionHeading>{t("optimizer.sections.ramOptimizer")}</SectionHeading>
+        <Card>
+          <div className="flex items-center gap-4">
+            <MemoryStick className="w-5 h-5 text-text-muted flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-[15px] font-semibold text-text">
+                {t("optimizer.ramOptimizer.title")}
+              </p>
+              <p className="text-[13px] text-text-muted mt-1">
+                {t("optimizer.ramOptimizer.description")}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => void onOptimizeRam()}
+              disabled={isOptimizingRam}
+              className="focus-ring flex items-center gap-2 rounded-[10px] border border-white/[0.08] bg-white/[0.04] px-5 h-10 text-[14px] font-semibold text-text-muted hover:text-text hover:bg-white/[0.07] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isOptimizingRam ? (
+                <span className="w-4 h-4 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+              ) : (
+                <MemoryStick className="w-4 h-4" />
+              )}
+              {t("optimizer.ramOptimizer.button")}
+            </button>
           </div>
         </Card>
       </section>

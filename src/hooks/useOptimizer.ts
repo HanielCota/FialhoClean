@@ -1,24 +1,24 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { sanitizeError } from "../lib/errors";
+import { optimizerService } from "../services/optimizerService";
+import { useUiStore } from "../stores/uiStore";
 import { useStartup } from "./useStartup";
 import { useServices } from "./useServices";
 import { usePowerSettings } from "./usePowerSettings";
 import { useSystemTweaks } from "./useSystemTweaks";
 import { useScheduledTasks } from "./useScheduledTasks";
 
-/**
- * Composite hook that delegates to five focused sub-hooks.
- * Each sub-hook manages only its slice of optimizer state and only
- * reloads its own data — e.g. changeServiceStatus no longer triggers
- * a full reload of startup items and power plans.
- *
- * OptimizerView consumes this hook unchanged.
- */
 export function useOptimizer() {
   const startup = useStartup();
   const services = useServices();
   const power = usePowerSettings();
   const tweaks = useSystemTweaks();
   const scheduledTasks = useScheduledTasks();
+  const { addToast } = useUiStore();
+  const { t } = useTranslation();
+
+  const [isOptimizingRam, setIsOptimizingRam] = useState(false);
 
   const loadAll = useCallback(async () => {
     await Promise.all([
@@ -29,6 +29,23 @@ export function useOptimizer() {
       scheduledTasks.load(),
     ]);
   }, [startup.load, services.load, power.load, tweaks.load, scheduledTasks.load]);
+
+  const optimizeRam = useCallback(async () => {
+    setIsOptimizingRam(true);
+    try {
+      const result = await optimizerService.optimizeRam();
+      const { formatBytes } = await import("../lib/format");
+      if (result.freed_bytes > 0) {
+        addToast(t("optimizer.toast.ramOptimized", { size: formatBytes(result.freed_bytes) }), "success");
+      } else {
+        addToast(t("optimizer.toast.ramOptimizedNoChange"), "info");
+      }
+    } catch (err) {
+      addToast(t("optimizer.toast.tweakFailed", { msg: sanitizeError(err) }), "error");
+    } finally {
+      setIsOptimizingRam(false);
+    }
+  }, [addToast, t]);
 
   return {
     // startup
@@ -46,10 +63,17 @@ export function useOptimizer() {
     // system tweaks
     hibernateSettings: tweaks.hibernateSettings,
     networkSettings: tweaks.networkSettings,
+    gpuSettings: tweaks.gpuSettings,
+    privacySettings: tweaks.privacySettings,
     setHibernate: tweaks.setHibernate,
     setFastStartup: tweaks.setFastStartup,
     applyGameMode: tweaks.applyGameMode,
     setNetworkOptimized: tweaks.setNetworkOptimized,
+    setGpuHags: tweaks.setGpuHags,
+    setPrivacy: tweaks.setPrivacy,
+    // RAM
+    optimizeRam,
+    isOptimizingRam,
     // scheduled tasks
     scheduledTasks: scheduledTasks.tasks,
     toggleScheduledTask: scheduledTasks.toggleTask,

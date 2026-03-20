@@ -86,3 +86,22 @@ pub struct ScheduledTask {
     pub state: String,
     pub description: String,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GpuSettings {
+    pub hags_enabled: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PrivacySettings {
+    pub telemetry_disabled: bool,
+    pub bing_search_disabled: bool,
+    pub advertising_id_disabled: bool,
+    pub activity_history_disabled: bool,
+    pub location_disabled: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RamOptimizationResult {
+    pub freed_bytes: i64,
+}

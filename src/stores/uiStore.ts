@@ -9,7 +9,7 @@ export interface Toast {
   type: ToastType;
 }
 
-type ActiveView = "dashboard" | "cleaner" | "optimizer" | "debloater" | "settings";
+type ActiveView = "dashboard" | "cleaner" | "optimizer" | "debloater" | "repair" | "settings";
 
 interface UiState {
   activeView: ActiveView;

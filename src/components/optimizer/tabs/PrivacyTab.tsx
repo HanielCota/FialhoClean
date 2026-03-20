@@ -1,7 +1,7 @@
 import { CalendarClock, ChevronDown, ChevronUp, Info, Network } from "lucide-react";
 import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { NetworkSettings, ScheduledTask } from "../../../types/optimizer";
+import type { NetworkSettings, PrivacySettings, ScheduledTask } from "../../../types/optimizer";
 import { Card } from "../../shared/Card";
 import { SectionHeading } from "../../shared/SectionHeading";
 import { Toggle } from "../../shared/Toggle";
@@ -9,15 +9,19 @@ import { Toggle } from "../../shared/Toggle";
 interface PrivacyTabProps {
   networkSettings: NetworkSettings;
   scheduledTasks: ScheduledTask[];
+  privacySettings: PrivacySettings;
   onSetNetworkOptimized: (enabled: boolean) => void;
   onToggleScheduledTask: (taskPath: string, enabled: boolean) => void;
+  onSetPrivacy: (key: string, disabled: boolean) => void;
 }
 
 export function PrivacyTab({
   networkSettings,
   scheduledTasks,
+  privacySettings,
   onSetNetworkOptimized,
   onToggleScheduledTask,
+  onSetPrivacy,
 }: PrivacyTabProps) {
   const { t } = useTranslation();
   const networkLabelId = useId();
@@ -50,6 +54,36 @@ export function PrivacyTab({
             />
           </div>
         </Card>
+      </section>
+
+      {/* Privacy Tweaks */}
+      <section>
+        <SectionHeading>{t("optimizer.sections.privacyTweaks")}</SectionHeading>
+        <div className="space-y-2">
+          {(
+            [
+              { key: "telemetry",        title: t("optimizer.privacy.telemetry.title"),       desc: t("optimizer.privacy.telemetry.description"),       value: privacySettings.telemetry_disabled },
+              { key: "bing_search",      title: t("optimizer.privacy.bingSearch.title"),      desc: t("optimizer.privacy.bingSearch.description"),      value: privacySettings.bing_search_disabled },
+              { key: "advertising_id",   title: t("optimizer.privacy.advertisingId.title"),   desc: t("optimizer.privacy.advertisingId.description"),   value: privacySettings.advertising_id_disabled },
+              { key: "activity_history", title: t("optimizer.privacy.activityHistory.title"), desc: t("optimizer.privacy.activityHistory.description"), value: privacySettings.activity_history_disabled },
+              { key: "location",         title: t("optimizer.privacy.location.title"),        desc: t("optimizer.privacy.location.description"),        value: privacySettings.location_disabled },
+            ] as const
+          ).map(({ key, title, desc, value }) => (
+            <Card key={key}>
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <p className="text-[15px] font-semibold text-text">{title}</p>
+                  <p className="text-[13px] text-text-muted mt-1">{desc}</p>
+                </div>
+                <Toggle
+                  checked={value}
+                  onChange={(v) => onSetPrivacy(key, v)}
+                  aria-label={title}
+                />
+              </div>
+            </Card>
+          ))}
+        </div>
       </section>
 
       {/* Scheduled Tasks */}

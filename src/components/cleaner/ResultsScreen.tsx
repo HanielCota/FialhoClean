@@ -1,8 +1,9 @@
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronRight, File, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useConfirmModal } from "../../hooks/useConfirmModal";
 import { formatBytes } from "../../lib/format";
-import type { ScanSummary } from "../../types/cleaner";
+import type { CleanCategory, ScanSummary } from "../../types/cleaner";
 import { Button } from "../shared/Button";
 import { Modal } from "../shared/Modal";
 import { CATEGORY_ICONS } from "../../constants/categoryIcons";
@@ -22,6 +23,7 @@ export function ResultsScreen({
 }) {
   const { t } = useTranslation();
   const { isOpen: confirmOpen, request: requestConfirm, confirm: handleConfirm, cancel: handleCancel } = useConfirmModal(onClean);
+  const [expandedCategory, setExpandedCategory] = useState<CleanCategory | null>(null);
   const totalSize = scanSummary.total_size_bytes;
   const totalFiles = scanSummary.categories.reduce((s, c) => s + c.files.length, 0);
 
@@ -58,26 +60,82 @@ export function ResultsScreen({
       <div className="space-y-2 mb-6">
         {scanSummary.categories.map((cat) => {
           const Icon = CATEGORY_ICONS[cat.category];
+          const isExpandable = cat.category !== "recycle_bin" && cat.files.length > 0;
+          const isExpanded = expandedCategory === cat.category;
+          const previewFiles = cat.files.slice(0, 10);
+
           return (
             <div
               key={cat.category}
-              className="flex items-center gap-4 p-3 bg-card border border-white/[0.06] rounded-xl"
+              className="bg-card border border-white/[0.06] rounded-xl overflow-hidden"
             >
-              <Icon className="w-4 h-4 text-text-muted" />
-              <div className="flex-1">
-                <p className="text-[14px] font-medium text-text">
-                  {t(`cleaner.categories.${cat.category}.label` as const)}
-                </p>
-                <p className="text-[12px] text-text-muted">
-                  {formatBytes(cat.total_size_bytes)}
-                  {cat.category !== "recycle_bin"
-                    ? ` ${t("cleaner.results.files", { count: cat.files.length })}`
-                    : ` ${t("cleaner.results.estimated")}`}
-                </p>
+              <div
+                className={`flex items-center gap-4 p-3 ${isExpandable ? "cursor-pointer hover:bg-white/[0.02] transition-colors" : ""}`}
+                onClick={() => {
+                  if (isExpandable) {
+                    setExpandedCategory(isExpanded ? null : cat.category);
+                  }
+                }}
+                role={isExpandable ? "button" : undefined}
+                tabIndex={isExpandable ? 0 : undefined}
+                onKeyDown={(e) => {
+                  if (isExpandable && (e.key === "Enter" || e.key === " ")) {
+                    e.preventDefault();
+                    setExpandedCategory(isExpanded ? null : cat.category);
+                  }
+                }}
+              >
+                <Icon className="w-4 h-4 text-text-muted" />
+                <div className="flex-1">
+                  <p className="text-[14px] font-medium text-text">
+                    {t(`cleaner.categories.${cat.category}.label` as const)}
+                  </p>
+                  <p className="text-[12px] text-text-muted">
+                    {formatBytes(cat.total_size_bytes)}
+                    {cat.category !== "recycle_bin"
+                      ? ` ${t("cleaner.results.files", { count: cat.files.length })}`
+                      : ` ${t("cleaner.results.estimated")}`}
+                  </p>
+                </div>
+                <span className="inline-flex items-center h-5 px-2 rounded text-[11px] font-semibold bg-green/[0.15] text-green">
+                  {t("cleaner.results.safeBadge")}
+                </span>
+                {isExpandable && (
+                  <span className="text-text-muted/60 ml-1">
+                    {isExpanded ? (
+                      <ChevronDown className="w-4 h-4" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4" />
+                    )}
+                  </span>
+                )}
               </div>
-              <span className="inline-flex items-center h-5 px-2 rounded text-[11px] font-semibold bg-green/[0.15] text-green">
-                {t("cleaner.results.safeBadge")}
-              </span>
+
+              {isExpanded && previewFiles.length > 0 && (
+                <div className="border-t border-white/[0.06] px-3 pb-2">
+                  <div className="space-y-0.5 pt-1">
+                    {previewFiles.map((file) => {
+                      const basename = file.path.split(/[\\/]/).pop() ?? file.path;
+                      return (
+                        <div key={file.path} className="flex items-center gap-2 py-1 px-1">
+                          <File className="w-3 h-3 text-text-muted/50 flex-shrink-0" />
+                          <span className="text-[12px] text-text-muted truncate flex-1" title={file.path}>
+                            {basename}
+                          </span>
+                          <span className="text-[11px] text-text-muted/50 flex-shrink-0">
+                            {formatBytes(file.size_bytes)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                    {cat.files.length > 10 && (
+                      <p className="text-[11px] text-text-muted/50 px-1 pt-1">
+                        +{cat.files.length - 10} more files
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}

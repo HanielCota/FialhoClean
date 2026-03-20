@@ -1,12 +1,19 @@
 {
-  "app": { "name": "FialhoClean" },
-  "titlebar": { "close": "Fechar", "minimize": "Minimizar", "maximize": "Maximizar" },
+  "app": {
+    "name": "FialhoClean"
+  },
+  "titlebar": {
+    "close": "Fechar",
+    "minimize": "Minimizar",
+    "maximize": "Maximizar"
+  },
   "nav": {
     "label": "Navegação",
     "dashboard": "Painel",
     "cleaner": "Limpeza",
     "optimizer": "Otimização",
-    "debloater": "Debloater"
+    "debloater": "Debloater",
+    "repair": "Reparar"
   },
   "common": {
     "cancel": "Cancelar",
@@ -229,7 +236,10 @@
       "scheduledTasks": "Tarefas Agendadas",
       "telemetry": "Telemetria",
       "backgroundServices": "Serviços em Segundo Plano",
-      "expertMode": "Modo Avançado"
+      "expertMode": "Modo Avançado",
+      "ramOptimizer": "Otimizador de RAM",
+      "gpuScheduling": "Agendamento de GPU",
+      "privacyTweaks": "Privacidade"
     },
     "visualEffects": {
       "title": "Animações e Transparência",
@@ -258,6 +268,37 @@
     "network": {
       "title": "Desativar Throttling de Rede",
       "description": "Remove o throttling de rede multimídia do Windows — reduz latência em jogos e apps em tempo real."
+    },
+    "ramOptimizer": {
+      "title": "Liberar RAM",
+      "description": "Limpa os conjuntos de trabalho de processos em segundo plano para liberar memória do sistema imediatamente.",
+      "button": "Otimizar"
+    },
+    "gpuHags": {
+      "title": "Agendamento de GPU por Hardware",
+      "description": "Permite que a GPU gerencie diretamente sua memória de vídeo, reduzindo a sobrecarga da CPU e a latência em jogos."
+    },
+    "privacy": {
+      "telemetry": {
+        "title": "Desativar Telemetria",
+        "description": "Impede que o Windows envie dados de diagnóstico e uso para os servidores da Microsoft."
+      },
+      "bingSearch": {
+        "title": "Desativar Bing no Menu Iniciar",
+        "description": "Remove os resultados web do Bing da barra de pesquisa do Menu Iniciar."
+      },
+      "advertisingId": {
+        "title": "Desativar ID de Publicidade",
+        "description": "Impede que apps usem seu ID de publicidade para mostrar anúncios personalizados."
+      },
+      "activityHistory": {
+        "title": "Desativar Histórico de Atividades",
+        "description": "Impede que o Windows registre apps e arquivos abertos para criar uma linha do tempo de uso."
+      },
+      "location": {
+        "title": "Desativar Acesso à Localização",
+        "description": "Bloqueia o acesso padrão de apps à sua localização geográfica."
+      }
     },
     "activePlan": "Ativo: {{name}}",
     "expertWarning": {
@@ -332,7 +373,51 @@
       "networkRestored": "Configurações de rede restauradas",
       "taskEnabled": "Tarefa ativada",
       "taskDisabled": "Tarefa desativada",
-      "tweakFailed": "Falha: {{msg}}"
+      "tweakFailed": "Falha: {{msg}}",
+      "hagsEnabled": "Agendamento de GPU por hardware ativado",
+      "hagsDisabled": "Agendamento de GPU por hardware desativado",
+      "privacyEnabled": "Configuração de privacidade aplicada",
+      "privacyDisabled": "Configuração de privacidade restaurada",
+      "ramOptimized": "RAM otimizada — {{size}} liberados",
+      "ramOptimizedNoChange": "A RAM já está otimizada"
+    }
+  },
+  "repair": {
+    "title": "Ferramentas de Reparo",
+    "subtitle": "Verifica e corrige problemas no sistema Windows",
+    "adminWarning": "Essas ferramentas requerem privilégios de administrador. Se o app não estiver elevado, as ferramentas reportarão um erro.",
+    "reset": "Redefinir",
+    "runAgain": "Executar Novamente",
+    "sections": {
+      "restorePoint": "Ponto de Restauração do Sistema",
+      "systemFiles": "Verificador de Arquivos do Sistema",
+      "windowsImage": "Reparo da Imagem do Windows"
+    },
+    "restorePoint": {
+      "title": "Criar Ponto de Restauração",
+      "description": "Cria um snapshot do Sistema de Restauração do Windows para reverter caso algo dê errado.",
+      "placeholder": "Descrição do ponto de restauração…",
+      "button": "Criar"
+    },
+    "sfc": {
+      "title": "SFC /scannow",
+      "description": "Verifica todos os arquivos protegidos do sistema e substitui versões corrompidas por uma cópia em cache.",
+      "duration": "Leva de 5 a 20 minutos",
+      "button": "Executar SFC"
+    },
+    "dism": {
+      "title": "DISM /RestoreHealth",
+      "description": "Repara o repositório de componentes do Windows usado pelo SFC. Execute primeiro se o SFC continuar falhando.",
+      "duration": "Leva de 10 a 30 minutos",
+      "button": "Executar DISM"
+    },
+    "toast": {
+      "sfcSuccess": "SFC concluído com sucesso",
+      "sfcFailed": "Falha no SFC ou requer direitos de administrador",
+      "dismSuccess": "Reparo DISM concluído com sucesso",
+      "dismFailed": "Falha no DISM ou requer direitos de administrador",
+      "restorePointCreated": "Ponto de restauração criado com sucesso",
+      "restorePointFailed": "Falha ao criar ponto de restauração: {{msg}}"
     }
   },
   "settings": {

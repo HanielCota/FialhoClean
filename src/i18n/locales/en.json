@@ -6,7 +6,8 @@
     "dashboard": "Dashboard",
     "cleaner": "Cleaner",
     "optimizer": "Optimizer",
-    "debloater": "Debloater"
+    "debloater": "Debloater",
+    "repair": "Repair"
   },
   "common": {
     "cancel": "Cancel",
@@ -229,7 +230,10 @@
       "scheduledTasks": "Scheduled Tasks",
       "telemetry": "Telemetry",
       "backgroundServices": "Background Services",
-      "expertMode": "Expert Mode"
+      "expertMode": "Expert Mode",
+      "ramOptimizer": "RAM Optimizer",
+      "gpuScheduling": "GPU Scheduling",
+      "privacyTweaks": "Privacy Tweaks"
     },
     "visualEffects": {
       "title": "Animations & Transparency",
@@ -258,6 +262,37 @@
     "network": {
       "title": "Disable Network Throttling",
       "description": "Removes Windows multimedia network throttling — reduces latency for games and real-time apps."
+    },
+    "ramOptimizer": {
+      "title": "Free Up RAM",
+      "description": "Clears working sets of background processes to free up system memory immediately.",
+      "button": "Optimize"
+    },
+    "gpuHags": {
+      "title": "Hardware-Accelerated GPU Scheduling",
+      "description": "Lets the GPU manage its own video memory directly, reducing CPU overhead and latency in games."
+    },
+    "privacy": {
+      "telemetry": {
+        "title": "Disable Telemetry",
+        "description": "Stops Windows from sending diagnostic and usage data to Microsoft servers."
+      },
+      "bingSearch": {
+        "title": "Disable Bing in Start Menu",
+        "description": "Removes Bing web results from the Start Menu search bar."
+      },
+      "advertisingId": {
+        "title": "Disable Advertising ID",
+        "description": "Prevents apps from using your advertising ID to show personalized ads."
+      },
+      "activityHistory": {
+        "title": "Disable Activity History",
+        "description": "Stops Windows from recording apps and files you open to build a usage timeline."
+      },
+      "location": {
+        "title": "Disable Location Access",
+        "description": "Blocks apps from accessing your geographic location by default."
+      }
     },
     "activePlan": "Active: {{name}}",
     "expertWarning": {
@@ -332,7 +367,51 @@
       "networkRestored": "Network settings restored",
       "taskEnabled": "Task enabled",
       "taskDisabled": "Task disabled",
-      "tweakFailed": "Failed: {{msg}}"
+      "tweakFailed": "Failed: {{msg}}",
+      "hagsEnabled": "GPU Hardware Scheduling enabled",
+      "hagsDisabled": "GPU Hardware Scheduling disabled",
+      "privacyEnabled": "Privacy setting applied",
+      "privacyDisabled": "Privacy setting restored",
+      "ramOptimized": "RAM optimized — {{size}} freed",
+      "ramOptimizedNoChange": "RAM is already optimized"
+    }
+  },
+  "repair": {
+    "title": "Repair Tools",
+    "subtitle": "Scan and fix Windows system issues",
+    "adminWarning": "These tools require administrator privileges to run. If the app is not elevated, tools will report an error.",
+    "reset": "Reset",
+    "runAgain": "Run Again",
+    "sections": {
+      "restorePoint": "System Restore Point",
+      "systemFiles": "System File Checker",
+      "windowsImage": "Windows Image Repair"
+    },
+    "restorePoint": {
+      "title": "Create Restore Point",
+      "description": "Creates a Windows System Restore snapshot you can revert to if something goes wrong.",
+      "placeholder": "Restore point description…",
+      "button": "Create"
+    },
+    "sfc": {
+      "title": "SFC /scannow",
+      "description": "Scans all protected Windows system files and replaces corrupted versions with a cached copy.",
+      "duration": "Takes 5–20 minutes",
+      "button": "Run SFC"
+    },
+    "dism": {
+      "title": "DISM /RestoreHealth",
+      "description": "Repairs the Windows component store used by SFC. Run this first if SFC keeps failing.",
+      "duration": "Takes 10–30 minutes",
+      "button": "Run DISM"
+    },
+    "toast": {
+      "sfcSuccess": "SFC completed successfully",
+      "sfcFailed": "SFC scan failed or requires admin rights",
+      "dismSuccess": "DISM repair completed successfully",
+      "dismFailed": "DISM repair failed or requires admin rights",
+      "restorePointCreated": "Restore point created successfully",
+      "restorePointFailed": "Failed to create restore point: {{msg}}"
     }
   },
   "settings": {

@@ -4,6 +4,37 @@ import { ALL_CATEGORIES } from "../constants/categories";
 
 export type ScanProgressStatus = "pending" | "scanning" | "done" | "error";
 
+const HISTORY_STORAGE_KEY = "fc_clean_history";
+const MAX_HISTORY_ENTRIES = 30;
+
+export interface CleanHistoryEntry {
+  id: string;
+  date: string; // ISO string
+  freed_bytes: number;
+  deleted_count: number;
+  categories: string[];
+}
+
+function loadHistory(): CleanHistoryEntry[] {
+  try {
+    const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed as CleanHistoryEntry[];
+  } catch {
+    return [];
+  }
+}
+
+function saveHistory(history: CleanHistoryEntry[]) {
+  try {
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+  } catch {
+    // storage full, ignore
+  }
+}
+
 interface CleanerState {
   selectedCategories: Set<CleanCategory>;
   scanSummary: ScanSummary | null;
@@ -12,6 +43,7 @@ interface CleanerState {
   isCleaning: boolean;
   error: string | null;
   scanProgress: Record<CleanCategory, ScanProgressStatus> | null;
+  cleanHistory: CleanHistoryEntry[];
 
   toggleCategory: (category: CleanCategory) => void;
   selectAllCategories: () => void;
@@ -29,6 +61,7 @@ interface CleanerState {
     category: CleanCategory,
     status: ScanProgressStatus
   ) => void;
+  addCleanHistory: (entry: Omit<CleanHistoryEntry, "id" | "date">) => void;
   reset: () => void;
 }
 
@@ -40,6 +73,7 @@ export const useCleanerStore = create<CleanerState>((set) => ({
   isCleaning: false,
   error: null,
   scanProgress: null,
+  cleanHistory: loadHistory(),
 
   toggleCategory: (category) =>
     set((s) => {
@@ -70,6 +104,18 @@ export const useCleanerStore = create<CleanerState>((set) => ({
         ? { ...s.scanProgress, [category]: status }
         : null,
     })),
+
+  addCleanHistory: (entry) =>
+    set((s) => {
+      const newEntry: CleanHistoryEntry = {
+        ...entry,
+        id: crypto.randomUUID(),
+        date: new Date().toISOString(),
+      };
+      const updated = [newEntry, ...s.cleanHistory].slice(0, MAX_HISTORY_ENTRIES);
+      saveHistory(updated);
+      return { cleanHistory: updated };
+    }),
 
   reset: () =>
     set({

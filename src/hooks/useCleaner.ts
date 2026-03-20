@@ -99,6 +99,11 @@ export function useCleaner() {
       const result = await cleanerService.clean(fileGroups);
       useCleanerStore.getState().setCleanResult(result);
       // Keep scanSummary — success screen uses it for per-category breakdown
+      useCleanerStore.getState().addCleanHistory({
+        freed_bytes: result.freed_bytes,
+        deleted_count: result.deleted_count,
+        categories: fileGroups.map((g) => g.category),
+      });
       addToast(
         t('cleaner.toast.cleaned', {
           count: result.deleted_count,

@@ -773,3 +773,212 @@ pub async fn set_scheduled_task_enabled(
 
     Ok(())
 }
+
+// ── GPU Hardware-Accelerated GPU Scheduling (HAGS) ──────────────────────────
+
+pub async fn get_gpu_settings() -> Result<crate::models::optimizer::GpuSettings, AppError> {
+    use winreg::enums::*;
+    let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+    let result = hklm.open_subkey(r"SYSTEM\CurrentControlSet\Control\GraphicsDrivers");
+    let hags_enabled = match result {
+        Ok(key) => {
+            let val: u32 = key.get_value("HwSchMode").unwrap_or(1);
+            val == 2
+        }
+        Err(_) => false,
+    };
+    Ok(crate::models::optimizer::GpuSettings { hags_enabled })
+}
+
+pub async fn set_gpu_hags(enabled: bool) -> Result<(), AppError> {
+    use winreg::enums::*;
+    let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+    let key = hklm
+        .open_subkey_with_flags(
+            r"SYSTEM\CurrentControlSet\Control\GraphicsDrivers",
+            KEY_SET_VALUE,
+        )
+        .map_err(|e| AppError::Registry(e.to_string()))?;
+    let val: u32 = if enabled { 2 } else { 1 };
+    key.set_value("HwSchMode", &val)
+        .map_err(|e| AppError::Registry(e.to_string()))
+}
+
+// ── Privacy Settings ──────────────────────────────────────────────────────────
+
+const REG_TELEMETRY_KEY: &str =
+    r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection";
+const REG_SEARCH_KEY: &str = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Search";
+const REG_ADVERTISING_KEY: &str =
+    r"SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo";
+const REG_ACTIVITY_KEY: &str = r"SOFTWARE\Policies\Microsoft\Windows\System";
+const REG_LOCATION_KEY: &str =
+    r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location";
+
+pub async fn get_privacy_settings() -> Result<crate::models::optimizer::PrivacySettings, AppError> {
+    use winreg::enums::*;
+
+    let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+
+    // Telemetry disabled: AllowTelemetry == 0
+    let telemetry_disabled = hklm
+        .open_subkey(REG_TELEMETRY_KEY)
+        .ok()
+        .and_then(|k| k.get_value::<u32, _>("AllowTelemetry").ok())
+        .map(|v| v == 0)
+        .unwrap_or(false);
+
+    // Bing search disabled: BingSearchEnabled == 0
+    let bing_search_disabled = hkcu
+        .open_subkey(REG_SEARCH_KEY)
+        .ok()
+        .and_then(|k| k.get_value::<u32, _>("BingSearchEnabled").ok())
+        .map(|v| v == 0)
+        .unwrap_or(false);
+
+    // Advertising ID disabled: Enabled == 0
+    let advertising_id_disabled = hkcu
+        .open_subkey(REG_ADVERTISING_KEY)
+        .ok()
+        .and_then(|k| k.get_value::<u32, _>("Enabled").ok())
+        .map(|v| v == 0)
+        .unwrap_or(false);
+
+    // Activity history disabled: EnableActivityFeed == 0
+    let activity_history_disabled = hklm
+        .open_subkey(REG_ACTIVITY_KEY)
+        .ok()
+        .and_then(|k| k.get_value::<u32, _>("EnableActivityFeed").ok())
+        .map(|v| v == 0)
+        .unwrap_or(false);
+
+    // Location disabled: Value == "Deny"
+    let location_disabled = hkcu
+        .open_subkey(REG_LOCATION_KEY)
+        .ok()
+        .and_then(|k| k.get_value::<String, _>("Value").ok())
+        .map(|v| v.to_lowercase() == "deny")
+        .unwrap_or(false);
+
+    Ok(crate::models::optimizer::PrivacySettings {
+        telemetry_disabled,
+        bing_search_disabled,
+        advertising_id_disabled,
+        activity_history_disabled,
+        location_disabled,
+    })
+}
+
+pub async fn set_privacy_setting(setting_key: String, disabled: bool) -> Result<(), AppError> {
+    use winreg::enums::*;
+
+    let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+
+    match setting_key.as_str() {
+        "telemetry" => {
+            let (key, _) = hklm
+                .create_subkey(REG_TELEMETRY_KEY)
+                .map_err(|e| AppError::Registry(e.to_string()))?;
+            let val: u32 = if disabled { 0 } else { 1 };
+            key.set_value("AllowTelemetry", &val)
+                .map_err(|e| AppError::Registry(e.to_string()))?;
+
+            // Also set in the policies key for belt-and-suspenders
+            let policies_key = r"SOFTWARE\Policies\Microsoft\Windows\DataCollection";
+            if let Ok((pk, _)) = hklm.create_subkey(policies_key) {
+                let _ = pk.set_value("AllowTelemetry", &val);
+            }
+        }
+        "bing_search" => {
+            let (key, _) = hkcu
+                .create_subkey(REG_SEARCH_KEY)
+                .map_err(|e| AppError::Registry(e.to_string()))?;
+            let val: u32 = if disabled { 0 } else { 1 };
+            key.set_value("BingSearchEnabled", &val)
+                .map_err(|e| AppError::Registry(e.to_string()))?;
+        }
+        "advertising_id" => {
+            let (key, _) = hkcu
+                .create_subkey(REG_ADVERTISING_KEY)
+                .map_err(|e| AppError::Registry(e.to_string()))?;
+            let val: u32 = if disabled { 0 } else { 1 };
+            key.set_value("Enabled", &val)
+                .map_err(|e| AppError::Registry(e.to_string()))?;
+        }
+        "activity_history" => {
+            let (key, _) = hklm
+                .create_subkey(REG_ACTIVITY_KEY)
+                .map_err(|e| AppError::Registry(e.to_string()))?;
+            let val: u32 = if disabled { 0 } else { 1 };
+            key.set_value("EnableActivityFeed", &val)
+                .map_err(|e| AppError::Registry(e.to_string()))?;
+            key.set_value("PublishUserActivities", &val)
+                .map_err(|e| AppError::Registry(e.to_string()))?;
+        }
+        "location" => {
+            let (key, _) = hkcu
+                .create_subkey(REG_LOCATION_KEY)
+                .map_err(|e| AppError::Registry(e.to_string()))?;
+            let val = if disabled { "Deny" } else { "Allow" };
+            key.set_value("Value", &val)
+                .map_err(|e| AppError::Registry(e.to_string()))?;
+        }
+        _ => return Err(AppError::Custom(format!("Unknown privacy setting: {}", setting_key))),
+    }
+
+    Ok(())
+}
+
+// ── RAM Optimization ─────────────────────────────────────────────────────────
+
+pub async fn optimize_ram() -> Result<crate::models::optimizer::RamOptimizationResult, AppError> {
+    let script = r#"
+$before = [long](Get-WmiObject Win32_OperatingSystem).FreePhysicalMemory * 1024
+Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+public class WsUtil {
+    [DllImport("psapi.dll")]
+    public static extern bool EmptyWorkingSet(IntPtr handle);
+}
+"@ -ErrorAction SilentlyContinue
+$procs = [System.Diagnostics.Process]::GetProcesses()
+foreach ($p in $procs) {
+    try { [void][WsUtil]::EmptyWorkingSet($p.Handle) } catch {}
+}
+[System.GC]::Collect()
+[System.GC]::WaitForPendingFinalizers()
+Start-Sleep -Milliseconds 800
+$after = [long](Get-WmiObject Win32_OperatingSystem).FreePhysicalMemory * 1024
+$freed = $after - $before
+if ($freed -lt 0) { $freed = 0 }
+Write-Output $freed
+"#;
+
+    let output = timeout(
+        PROCESS_TIMEOUT,
+        tokio::process::Command::new("powershell")
+            .args(&[
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-Command",
+                script,
+            ])
+            .output(),
+    )
+    .await
+    .map_err(|_| AppError::Custom("RAM optimization timed out".to_string()))?
+    .map_err(AppError::Io)?;
+
+    if !output.status.success() {
+        return Ok(crate::models::optimizer::RamOptimizationResult { freed_bytes: 0 });
+    }
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let freed_bytes: i64 = stdout.trim().parse().unwrap_or(0);
+    Ok(crate::models::optimizer::RamOptimizationResult { freed_bytes })
+}

@@ -1,15 +1,14 @@
-import { useState, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { sanitizeError } from "../lib/errors";
 import { optimizerService } from "../services/optimizerService";
+import { useOptimizerStore } from "../stores/optimizerStore";
 import { useUiStore } from "../stores/uiStore";
-import type { ScheduledTask } from "../types/optimizer";
 
 export function useScheduledTasks() {
+  const { scheduledTasks, setScheduledTasks } = useOptimizerStore();
   const { addToast } = useUiStore();
   const { t } = useTranslation();
-
-  const [tasks, setTasks] = useState<ScheduledTask[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,40 +16,38 @@ export function useScheduledTasks() {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await optimizerService.getScheduledTasks();
-      setTasks(result);
+      const tasks = await optimizerService.getScheduledTasks();
+      setScheduledTasks(tasks);
     } catch (err) {
       setError(sanitizeError(err));
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [setScheduledTasks]);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useEffect(() => { void load(); }, [load]);
 
   const toggleTask = useCallback(
     async (taskPath: string, enabled: boolean) => {
       try {
         await optimizerService.setScheduledTaskEnabled(taskPath, enabled);
-        setTasks((prev) =>
-          prev.map((task) =>
-            task.task_path === taskPath
-              ? { ...task, state: enabled ? "Ready" : "Disabled" }
-              : task
+        setScheduledTasks(
+          scheduledTasks.map((t) =>
+            t.task_path === taskPath
+              ? { ...t, state: enabled ? "Ready" : "Disabled" }
+              : t
           )
         );
         addToast(
-          t(enabled ? "optimizer.toast.taskEnabled" : "optimizer.toast.taskDisabled"),
+          enabled ? t("optimizer.toast.taskEnabled") : t("optimizer.toast.taskDisabled"),
           "success"
         );
       } catch (err) {
         addToast(t("optimizer.toast.tweakFailed", { msg: sanitizeError(err) }), "error");
       }
     },
-    [addToast, t]
+    [addToast, scheduledTasks, setScheduledTasks, t]
   );
 
-  return { tasks, isLoading, error, load, toggleTask };
+  return { tasks: scheduledTasks, isLoading, error, load, toggleTask };
 }

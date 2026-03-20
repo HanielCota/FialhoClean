@@ -90,3 +90,28 @@ pub async fn set_scheduled_task_enabled(
 ) -> Result<(), AppError> {
     crate::services::optimizer::set_scheduled_task_enabled(task_path, enabled).await
 }
+
+#[tauri::command]
+pub async fn get_gpu_settings() -> Result<crate::models::optimizer::GpuSettings, AppError> {
+    crate::services::optimizer::get_gpu_settings().await
+}
+
+#[tauri::command]
+pub async fn set_gpu_hags(enabled: bool) -> Result<(), AppError> {
+    crate::services::optimizer::set_gpu_hags(enabled).await
+}
+
+#[tauri::command]
+pub async fn get_privacy_settings() -> Result<crate::models::optimizer::PrivacySettings, AppError> {
+    crate::services::optimizer::get_privacy_settings().await
+}
+
+#[tauri::command]
+pub async fn set_privacy_setting(setting_key: String, disabled: bool) -> Result<(), AppError> {
+    crate::services::optimizer::set_privacy_setting(setting_key, disabled).await
+}
+
+#[tauri::command]
+pub async fn optimize_ram() -> Result<crate::models::optimizer::RamOptimizationResult, AppError> {
+    crate::services::optimizer::optimize_ram().await
+}

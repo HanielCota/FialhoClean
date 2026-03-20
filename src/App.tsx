@@ -3,11 +3,13 @@ import { DashboardView } from "./components/dashboard/DashboardView";
 import { CleanerView } from "./components/cleaner/CleanerView";
 import { OptimizerView } from "./components/optimizer/OptimizerView";
 import { DebloaterView } from "./components/debloater/DebloaterView";
+import { RepairView } from "./components/repair/RepairView";
 import { SettingsView } from "./components/settings/SettingsView";
 import { Sidebar } from "./components/layout/Sidebar";
 import { PageContainer } from "./components/layout/PageContainer";
 import { TitleBar } from "./components/layout/TitleBar";
 import { ToastContainer } from "./components/shared/ToastContainer";
+import { ErrorBoundary } from "./components/shared/ErrorBoundary";
 import { useUiStore } from "./stores/uiStore";
 
 // Keeps each view mounted after its first visit so that navigating away and
@@ -39,27 +41,44 @@ export default function App() {
         <PageContainer>
           {everVisited.has("dashboard") && (
             <div className={hide("dashboard")}>
-              <DashboardView />
+              <ErrorBoundary key="dashboard">
+                <DashboardView />
+              </ErrorBoundary>
             </div>
           )}
           {everVisited.has("cleaner") && (
             <div className={hide("cleaner")}>
-              <CleanerView />
+              <ErrorBoundary key="cleaner">
+                <CleanerView />
+              </ErrorBoundary>
             </div>
           )}
           {everVisited.has("optimizer") && (
             <div className={hide("optimizer")}>
-              <OptimizerView />
+              <ErrorBoundary key="optimizer">
+                <OptimizerView />
+              </ErrorBoundary>
             </div>
           )}
           {everVisited.has("debloater") && (
             <div className={hide("debloater")}>
-              <DebloaterView />
+              <ErrorBoundary key="debloater">
+                <DebloaterView />
+              </ErrorBoundary>
+            </div>
+          )}
+          {everVisited.has("repair") && (
+            <div className={hide("repair")}>
+              <ErrorBoundary key="repair">
+                <RepairView />
+              </ErrorBoundary>
             </div>
           )}
           {everVisited.has("settings") && (
             <div className={hide("settings")}>
-              <SettingsView />
+              <ErrorBoundary key="settings">
+                <SettingsView />
+              </ErrorBoundary>
             </div>
           )}
         </PageContainer>

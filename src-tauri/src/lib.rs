@@ -3,7 +3,7 @@ pub mod errors;
 pub mod models;
 pub mod services;
 
-use commands::{cleaner, debloater, optimizer, system};
+use commands::{cleaner, debloater, optimizer, repair, system};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -38,9 +38,21 @@ pub fn run() {
             // Optimizer — scheduled tasks
             optimizer::get_scheduled_tasks,
             optimizer::set_scheduled_task_enabled,
+            // Optimizer — GPU
+            optimizer::get_gpu_settings,
+            optimizer::set_gpu_hags,
+            // Optimizer — privacy
+            optimizer::get_privacy_settings,
+            optimizer::set_privacy_setting,
+            // Optimizer — RAM
+            optimizer::optimize_ram,
             // Debloater
             debloater::get_installed_apps,
             debloater::remove_apps,
+            // Repair
+            repair::run_sfc,
+            repair::run_dism,
+            repair::create_restore_point,
         ])
         .run(tauri::generate_context!())
         .unwrap_or_else(|e| {

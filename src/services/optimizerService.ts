@@ -1,8 +1,11 @@
 import { invoke } from "../lib/invoke";
 import type {
+  GpuSettings,
   HibernateSettings,
   NetworkSettings,
   PowerPlan,
+  PrivacySettings,
+  RamOptimizationResult,
   ScheduledTask,
   ServiceAction,
   ServiceInfo,
@@ -46,4 +49,16 @@ export const optimizerService = {
   getScheduledTasks: () => invoke<ScheduledTask[]>("get_scheduled_tasks"),
   setScheduledTaskEnabled: (taskPath: string, enabled: boolean) =>
     invoke("set_scheduled_task_enabled", { taskPath, enabled }),
+
+  // GPU HAGS
+  getGpuSettings: () => invoke<GpuSettings>("get_gpu_settings"),
+  setGpuHags: (enabled: boolean) => invoke("set_gpu_hags", { enabled }),
+
+  // Privacy
+  getPrivacySettings: () => invoke<PrivacySettings>("get_privacy_settings"),
+  setPrivacySetting: (settingKey: string, disabled: boolean) =>
+    invoke("set_privacy_setting", { settingKey, disabled }),
+
+  // RAM
+  optimizeRam: () => invoke<RamOptimizationResult>("optimize_ram"),
 };

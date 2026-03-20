@@ -22,6 +22,15 @@ import { Button } from "../shared/Button";
 import { ErrorMessage } from "../shared/ErrorMessage";
 import { SectionHeading } from "../shared/SectionHeading";
 
+function relativeDate(isoDate: string): string {
+  const d = new Date(isoDate);
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - d.getTime()) / 86400000);
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  return `${diffDays} days ago`;
+}
+
 function HealthDot({ color }: { color: "green" | "orange" | "red" }) {
   const cls =
     color === "green"
@@ -90,7 +99,7 @@ function StatCard({
 
 export function DashboardView() {
   const { systemInfo, diskUsage, isLoading, error, refresh } = useSystemInfo();
-  const { cleanResult } = useCleanerStore();
+  const { cleanResult, cleanHistory } = useCleanerStore();
   const { setActiveView, setPendingQuickScan } = useUiStore();
   const { t } = useTranslation();
 
@@ -110,6 +119,8 @@ export function DashboardView() {
     setPendingQuickScan(true);
     setActiveView("cleaner");
   };
+
+  const recentHistory = cleanHistory.slice(0, 5);
 
   return (
     <div className="p-6 xl:p-8 space-y-6">
@@ -232,7 +243,26 @@ export function DashboardView() {
       <div>
         <SectionHeading>{t("dashboard.sections.recentActivity")}</SectionHeading>
         <div>
-          {cleanResult ? (
+          {recentHistory.length > 0 ? (
+            <div className="space-y-0">
+              {recentHistory.map((entry) => (
+                <div key={entry.id} className="flex items-center gap-3 py-3 border-b border-white/[0.06]">
+                  <CheckCircle2 className="w-4 h-4 text-green flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[14px] text-text">
+                      {t("dashboard.activity.cleaned", {
+                        size: formatBytes(entry.freed_bytes),
+                        files: entry.deleted_count.toLocaleString(),
+                      })}
+                    </p>
+                    <p className="text-[12px] text-text-muted/60">
+                      {relativeDate(entry.date)} · {entry.categories.length} {entry.categories.length === 1 ? "category" : "categories"}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : cleanResult ? (
             <div className="flex items-center gap-3 py-3 border-b border-white/[0.06]">
               <CheckCircle2 className="w-4 h-4 text-green flex-shrink-0" />
               <p className="text-[14px] text-text">

@@ -1,4 +1,4 @@
-import { LayoutDashboard, Shield, SlidersHorizontal, Trash2, Zap } from "lucide-react";
+import { LayoutDashboard, Shield, SlidersHorizontal, Trash2, Wrench, Zap } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useUiStore } from "../../stores/uiStore";
 
@@ -7,17 +7,19 @@ const NAV_ITEMS = [
   { id: "cleaner" as const, icon: Trash2 },
   { id: "optimizer" as const, icon: Zap },
   { id: "debloater" as const, icon: Shield },
+  { id: "repair" as const, icon: Wrench },
 ];
 
 export function Sidebar() {
   const { activeView, setActiveView } = useUiStore();
   const { t } = useTranslation();
 
-  const navLabels: Record<"dashboard" | "cleaner" | "optimizer" | "debloater" | "settings", string> = {
+  const navLabels: Record<"dashboard" | "cleaner" | "optimizer" | "debloater" | "repair" | "settings", string> = {
     dashboard: t("nav.dashboard"),
     cleaner: t("nav.cleaner"),
     optimizer: t("nav.optimizer"),
     debloater: t("nav.debloater"),
+    repair: t("nav.repair"),
     settings: t("settings.title"),
   };
 

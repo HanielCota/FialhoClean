@@ -40,3 +40,19 @@ export interface ScheduledTask {
   state: string;
   description: string;
 }
+
+export interface GpuSettings {
+  hags_enabled: boolean;
+}
+
+export interface PrivacySettings {
+  telemetry_disabled: boolean;
+  bing_search_disabled: boolean;
+  advertising_id_disabled: boolean;
+  activity_history_disabled: boolean;
+  location_disabled: boolean;
+}
+
+export interface RamOptimizationResult {
+  freed_bytes: number;
+}

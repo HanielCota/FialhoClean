@@ -25,6 +25,8 @@ export function OptimizerView() {
     visualEffectsPerformanceMode,
     hibernateSettings,
     networkSettings,
+    gpuSettings,
+    privacySettings,
     scheduledTasks,
     loadAll,
     toggleStartup,
@@ -36,6 +38,10 @@ export function OptimizerView() {
     setFastStartup,
     applyGameMode,
     setNetworkOptimized,
+    setGpuHags,
+    setPrivacy,
+    optimizeRam,
+    isOptimizingRam,
     toggleScheduledTask,
   } = useOptimizer();
 
@@ -78,10 +84,14 @@ export function OptimizerView() {
           <PerformanceTab
             powerPlans={powerPlans}
             visualEffectsPerformanceMode={visualEffectsPerformanceMode}
+            gpuSettings={gpuSettings}
+            isOptimizingRam={isOptimizingRam}
             onChangePowerPlan={changePowerPlan}
             onSetVisualEffects={setVisualEffects}
             onApplyGameMode={applyGameMode}
             onApplyUltimatePerformance={applyUltimatePerformance}
+            onOptimizeRam={optimizeRam}
+            onSetGpuHags={setGpuHags}
           />
         )}
 
@@ -100,8 +110,10 @@ export function OptimizerView() {
           <PrivacyTab
             networkSettings={networkSettings}
             scheduledTasks={scheduledTasks}
+            privacySettings={privacySettings}
             onSetNetworkOptimized={setNetworkOptimized}
             onToggleScheduledTask={toggleScheduledTask}
+            onSetPrivacy={setPrivacy}
           />
         )}
 
