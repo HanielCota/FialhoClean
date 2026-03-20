@@ -155,7 +155,7 @@ pub async fn set_startup_enabled(
         .set_raw_value(
             &name,
             &winreg::RegValue {
-                bytes: value_bytes,
+                bytes: value_bytes.into(),
                 vtype: winreg::enums::RegType::REG_BINARY,
             },
         )
