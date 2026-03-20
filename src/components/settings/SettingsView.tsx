@@ -47,11 +47,22 @@ export function SettingsView() {
   };
 
   const categoryLabels: Record<CleanCategory, string> = {
-    temp_files: t("cleaner.categories.temp_files.label"),
-    browser_cache: t("cleaner.categories.browser_cache.label"),
-    recycle_bin: t("cleaner.categories.recycle_bin.label"),
-    old_logs: t("cleaner.categories.old_logs.label"),
-    prefetch: t("cleaner.categories.prefetch.label"),
+    temp_files:               t("cleaner.categories.temp_files.label"),
+    browser_cache:            t("cleaner.categories.browser_cache.label"),
+    recycle_bin:              t("cleaner.categories.recycle_bin.label"),
+    old_logs:                 t("cleaner.categories.old_logs.label"),
+    prefetch:                 t("cleaner.categories.prefetch.label"),
+    windows_update_cache:     t("cleaner.categories.windows_update_cache.label"),
+    delivery_optimization:    t("cleaner.categories.delivery_optimization.label"),
+    windows_error_reports:    t("cleaner.categories.windows_error_reports.label"),
+    thumbnail_cache:          t("cleaner.categories.thumbnail_cache.label"),
+    icon_cache:               t("cleaner.categories.icon_cache.label"),
+    memory_dumps:             t("cleaner.categories.memory_dumps.label"),
+    discord_cache:            t("cleaner.categories.discord_cache.label"),
+    spotify_cache:            t("cleaner.categories.spotify_cache.label"),
+    steam_cache:              t("cleaner.categories.steam_cache.label"),
+    recent_files:             t("cleaner.categories.recent_files.label"),
+    dns_cache:                t("cleaner.categories.dns_cache.label"),
   };
 
   return (

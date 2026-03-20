@@ -67,3 +67,22 @@ pub struct PowerPlan {
     pub name: String,
     pub is_active: bool,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HibernateSettings {
+    pub hibernate_enabled: bool,
+    pub fast_startup_enabled: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NetworkSettings {
+    pub network_throttling_disabled: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ScheduledTask {
+    pub name: String,
+    pub task_path: String,
+    pub state: String,
+    pub description: String,
+}

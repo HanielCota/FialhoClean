@@ -1,6 +1,14 @@
 import type { SafetyLevel } from "./common";
 export type { SafetyLevel };
 
+export type BloatCategory =
+  | "microsoft"
+  | "communication"
+  | "entertainment"
+  | "third_party"
+  | "oem"
+  | "security_trials";
+
 export interface AppInfo {
   name: string;
   package_full_name: string;
@@ -9,6 +17,7 @@ export interface AppInfo {
   version: string;
   safety_level: SafetyLevel;
   description: string;
+  category: BloatCategory;
 }
 
 export interface RemoveResult {
@@ -22,4 +31,5 @@ export interface BloatwareEntry {
   friendly_name: string;
   safety_level: SafetyLevel;
   description: string;
+  category: BloatCategory;
 }

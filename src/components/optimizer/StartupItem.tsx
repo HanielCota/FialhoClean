@@ -9,11 +9,46 @@ interface StartupItemProps {
   onToggle: (name: string, keyPath: string, enabled: boolean) => void;
 }
 
+type ImpactLevel = "slow" | "medium" | "fast";
+
+const SLOW_KEYWORDS = [
+  "discord", "steam", "epicgames", "epic games", "spotify",
+  "onedrive", "dropbox", "googledrivesync", "googledrive",
+  "teams", "zoom", "skype", "battle.net", "battlenet",
+  "origin", "uplay", "ubisoft", "adobe", "acrotray",
+  "jusched", "javaw", "malwarebytes", "mcafee", "norton",
+  "avast", "avg ",
+];
+
+const FAST_PATHS = ["system32", "syswow64", "\\windows\\", "/windows/"];
+
+function getStartupImpact(item: StartupItemType): ImpactLevel {
+  const str = (item.name + " " + item.command).toLowerCase();
+  if (SLOW_KEYWORDS.some((k) => str.includes(k))) return "slow";
+  if (FAST_PATHS.some((p) => str.includes(p))) return "fast";
+  return "medium";
+}
+
+const IMPACT_CONFIG: Record<ImpactLevel, { dot: string; text: string }> = {
+  slow:   { dot: "bg-red-400",     text: "text-red-400" },
+  medium: { dot: "bg-amber-400",   text: "text-amber-400" },
+  fast:   { dot: "bg-emerald-400", text: "text-emerald-400" },
+};
+
 export const StartupItem = memo(function StartupItem({
   item,
   onToggle,
 }: StartupItemProps) {
   const { t } = useTranslation();
+  const impact = getStartupImpact(item);
+  const cfg = IMPACT_CONFIG[impact];
+
+  const impactLabel =
+    impact === "slow"
+      ? t("optimizer.startup.impactSlow")
+      : impact === "fast"
+      ? t("optimizer.startup.impactFast")
+      : t("optimizer.startup.impactMedium");
 
   return (
     <ItemRow
@@ -21,9 +56,22 @@ export const StartupItem = memo(function StartupItem({
       subtitle={item.command}
       trailing={
         <>
-          <span className="text-[12px] text-text-muted/50">
-            {item.source === "hkey_current_user" ? t('optimizer.startup.user') : t('optimizer.startup.system')}
+          {/* Source badge */}
+          <span className="text-[13px] text-text-muted/50">
+            {item.source === "hkey_current_user"
+              ? t("optimizer.startup.user")
+              : t("optimizer.startup.system")}
           </span>
+
+          {/* Startup impact pill */}
+          <span
+            className={`hidden sm:flex items-center gap-2 rounded-full border border-white/[0.06] bg-white/[0.04] px-3 py-1 text-[12px] font-medium ${cfg.text}`}
+            title={t("optimizer.startup.impactAria")}
+          >
+            <span className={`w-2 h-2 rounded-full ${cfg.dot} flex-shrink-0`} />
+            {impactLabel}
+          </span>
+
           <Toggle
             checked={item.enabled}
             onChange={(enabled) => onToggle(item.name, item.key_path, enabled)}

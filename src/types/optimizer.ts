@@ -24,3 +24,19 @@ export interface PowerPlan {
   name: string;
   is_active: boolean;
 }
+
+export interface HibernateSettings {
+  hibernate_enabled: boolean;
+  fast_startup_enabled: boolean;
+}
+
+export interface NetworkSettings {
+  network_throttling_disabled: boolean;
+}
+
+export interface ScheduledTask {
+  name: string;
+  task_path: string;
+  state: string;
+  description: string;
+}

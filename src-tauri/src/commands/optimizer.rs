@@ -1,5 +1,13 @@
 use crate::errors::AppError;
-use crate::models::optimizer::{PowerPlan, ServiceAction, ServiceInfo, StartupItem};
+use crate::models::optimizer::{
+    HibernateSettings, NetworkSettings, PowerPlan, ScheduledTask, ServiceAction, ServiceInfo,
+    StartupItem,
+};
+
+#[tauri::command]
+pub async fn apply_ultimate_performance() -> Result<(), AppError> {
+    crate::services::optimizer::apply_ultimate_performance().await
+}
 
 #[tauri::command]
 pub async fn get_startup_items() -> Result<Vec<StartupItem>, AppError> {
@@ -38,4 +46,47 @@ pub async fn set_power_plan(plan_guid: String) -> Result<(), AppError> {
 #[tauri::command]
 pub async fn set_visual_effects(performance_mode: bool) -> Result<(), AppError> {
     crate::services::optimizer::set_visual_effects(performance_mode).await
+}
+
+#[tauri::command]
+pub async fn get_hibernate_settings() -> Result<HibernateSettings, AppError> {
+    crate::services::optimizer::get_hibernate_settings().await
+}
+
+#[tauri::command]
+pub async fn set_hibernate(enabled: bool) -> Result<(), AppError> {
+    crate::services::optimizer::set_hibernate(enabled).await
+}
+
+#[tauri::command]
+pub async fn set_fast_startup(enabled: bool) -> Result<(), AppError> {
+    crate::services::optimizer::set_fast_startup(enabled).await
+}
+
+#[tauri::command]
+pub async fn apply_game_mode_preset() -> Result<(), AppError> {
+    crate::services::optimizer::apply_game_mode_preset().await
+}
+
+#[tauri::command]
+pub async fn get_network_settings() -> Result<NetworkSettings, AppError> {
+    crate::services::optimizer::get_network_settings().await
+}
+
+#[tauri::command]
+pub async fn set_network_optimized(enabled: bool) -> Result<(), AppError> {
+    crate::services::optimizer::set_network_optimized(enabled).await
+}
+
+#[tauri::command]
+pub async fn get_scheduled_tasks() -> Result<Vec<ScheduledTask>, AppError> {
+    crate::services::optimizer::get_scheduled_tasks().await
+}
+
+#[tauri::command]
+pub async fn set_scheduled_task_enabled(
+    task_path: String,
+    enabled: bool,
+) -> Result<(), AppError> {
+    crate::services::optimizer::set_scheduled_task_enabled(task_path, enabled).await
 }

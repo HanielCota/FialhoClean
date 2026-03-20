@@ -212,17 +212,52 @@
   "optimizer": {
     "title": "Otimizador",
     "subtitle": "Ajuste as configurações de velocidade do seu PC",
+    "tabs": {
+      "performance": "Desempenho",
+      "boot": "Boot",
+      "privacy": "Rede e Privacidade",
+      "services": "Serviços"
+    },
     "sections": {
       "powerMode": "Modo de Energia",
       "visualEffects": "Efeitos Visuais",
+      "sleepSettings": "Suspensão e Boot",
+      "gameMode": "Modo Jogo",
+      "network": "Rede",
       "startupPrograms": "Programas de Inicialização",
       "startupCount": "{{count}} programas",
+      "scheduledTasks": "Tarefas Agendadas",
+      "telemetry": "Telemetria",
       "backgroundServices": "Serviços em Segundo Plano",
       "expertMode": "Modo Avançado"
     },
     "visualEffects": {
       "title": "Animações e Transparência",
       "description": "Desativar acelera PCs mais antigos"
+    },
+    "hibernate": {
+      "title": "Hibernação",
+      "description": "Salva a RAM no disco ao desligar para retomar exatamente onde parou."
+    },
+    "fastStartup": {
+      "title": "Inicialização Rápida",
+      "description": "Desligamento híbrido que acelera o boot hibernando parcialmente o kernel."
+    },
+    "gameMode": {
+      "title": "Aplicar Preset de Jogo",
+      "description": "Ativa o plano Alto Desempenho e o Modo Jogo do Windows para máximo FPS.",
+      "apply": "Aplicar",
+      "applied": "Aplicado ✓"
+    },
+    "ultimatePerformance": {
+      "title": "Desbloquear Ultimate Performance",
+      "description": "Ativa o plano de energia Ultimate Performance oculto — elimina micro-latência impedindo que a CPU entre em estados de baixo consumo.",
+      "activate": "Ativar",
+      "active": "Ativo ✓"
+    },
+    "network": {
+      "title": "Desativar Throttling de Rede",
+      "description": "Remove o throttling de rede multimídia do Windows — reduz latência em jogos e apps em tempo real."
     },
     "activePlan": "Ativo: {{name}}",
     "expertWarning": {
@@ -232,10 +267,31 @@
       "showAria": "Mostrar configurações avançadas de serviços",
       "hide": "Ocultar serviços"
     },
+    "tasksWarning": {
+      "title": "Tarefas agendadas de telemetria",
+      "message": "Essas tarefas em segundo plano coletam dados de uso para a Microsoft. Seguro desativar para mais privacidade.",
+      "show": "Mostrar",
+      "hide": "Ocultar tarefas"
+    },
+    "task": {
+      "enabled": "ativo",
+      "disabled": "inativo"
+    },
+    "tasks": {
+      "disabledCount": "{{count}} desativadas",
+      "empty": "Nenhuma tarefa de telemetria encontrada"
+    },
+    "services": {
+      "empty": "Nenhum serviço gerenciado encontrado"
+    },
     "startup": {
       "user": "Usuário",
       "system": "Sistema",
-      "empty": "Nenhum programa de inicialização encontrado"
+      "empty": "Nenhum programa de inicialização encontrado",
+      "impactAria": "Impacto estimado no boot",
+      "impactSlow": "Lento",
+      "impactMedium": "Médio",
+      "impactFast": "Rápido"
     },
     "service": {
       "stop": "Parar",
@@ -265,7 +321,18 @@
       "powerPlanFailed": "Falha ao alterar plano de energia: {{msg}}",
       "visualPerformance": "Efeitos visuais: modo desempenho",
       "visualRestored": "Efeitos visuais restaurados",
-      "visualFailed": "Falha: {{msg}}"
+      "visualFailed": "Falha: {{msg}}",
+      "hibernateEnabled": "Hibernação ativada",
+      "hibernateDisabled": "Hibernação desativada",
+      "fastStartupEnabled": "Inicialização Rápida ativada",
+      "fastStartupDisabled": "Inicialização Rápida desativada",
+      "gameModeApplied": "Preset de Jogo aplicado",
+      "ultimatePerformanceApplied": "Plano Ultimate Performance ativado",
+      "networkOptimized": "Throttling de rede desativado",
+      "networkRestored": "Configurações de rede restauradas",
+      "taskEnabled": "Tarefa ativada",
+      "taskDisabled": "Tarefa desativada",
+      "tweakFailed": "Falha: {{msg}}"
     }
   },
   "settings": {
@@ -309,6 +376,23 @@
     "selected_one": "{{count}} selecionado",
     "selected_other": "{{count}} selecionados",
     "clearSelection": "Limpar seleção",
+    "searchPlaceholder": "Buscar por nome ou descrição…",
+    "clearSearch": "Limpar busca",
+    "noResults": "Nenhum app corresponde à sua busca",
+    "filter": {
+      "all": "Todos",
+      "safe": "Seguros",
+      "caution": "Atenção",
+      "count": "{{visible}} de {{total}} apps"
+    },
+    "categories": {
+      "security_trials": "Antivírus e Segurança (Trial)",
+      "oem": "Apps do Fabricante",
+      "microsoft": "Apps Microsoft",
+      "communication": "Comunicação",
+      "entertainment": "Entretenimento e Jogos",
+      "third_party": "Terceiros"
+    },
     "cautionBanner": {
       "title": "Contém apps com aviso",
       "message": "Alguns apps selecionados podem afetar recursos do sistema. Revise os avisos ⚠ acima antes de remover."

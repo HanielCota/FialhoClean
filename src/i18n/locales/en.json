@@ -212,17 +212,52 @@
   "optimizer": {
     "title": "Optimizer",
     "subtitle": "Tune your PC's speed settings",
+    "tabs": {
+      "performance": "Performance",
+      "boot": "Boot",
+      "privacy": "Network & Privacy",
+      "services": "Services"
+    },
     "sections": {
       "powerMode": "Power Mode",
       "visualEffects": "Visual Effects",
+      "sleepSettings": "Sleep & Boot",
+      "gameMode": "Game Mode",
+      "network": "Network",
       "startupPrograms": "Startup Programs",
       "startupCount": "{{count}} programs",
+      "scheduledTasks": "Scheduled Tasks",
+      "telemetry": "Telemetry",
       "backgroundServices": "Background Services",
       "expertMode": "Expert Mode"
     },
     "visualEffects": {
       "title": "Animations & Transparency",
       "description": "Turning off speeds up older PCs"
+    },
+    "hibernate": {
+      "title": "Hibernate",
+      "description": "Saves RAM to disk on shutdown so you can resume exactly where you left off."
+    },
+    "fastStartup": {
+      "title": "Fast Startup",
+      "description": "Hybrid shutdown that makes boot times faster by partially hibernating the kernel."
+    },
+    "gameMode": {
+      "title": "Apply Game Mode Preset",
+      "description": "Sets High Performance power plan and enables Windows Game Mode for maximum FPS.",
+      "apply": "Apply",
+      "applied": "Applied ✓"
+    },
+    "ultimatePerformance": {
+      "title": "Unlock Ultimate Performance",
+      "description": "Activates the hidden Ultimate Performance power plan — eliminates micro-latency by preventing the CPU from entering low-power states.",
+      "activate": "Activate",
+      "active": "Active ✓"
+    },
+    "network": {
+      "title": "Disable Network Throttling",
+      "description": "Removes Windows multimedia network throttling — reduces latency for games and real-time apps."
     },
     "activePlan": "Active: {{name}}",
     "expertWarning": {
@@ -232,10 +267,31 @@
       "showAria": "Show expert services settings",
       "hide": "Hide services"
     },
+    "tasksWarning": {
+      "title": "Telemetry scheduled tasks",
+      "message": "These background tasks collect usage data for Microsoft. Safe to disable for privacy.",
+      "show": "Show",
+      "hide": "Hide tasks"
+    },
+    "task": {
+      "enabled": "enabled",
+      "disabled": "disabled"
+    },
+    "tasks": {
+      "disabledCount": "{{count}} disabled",
+      "empty": "No telemetry tasks found"
+    },
+    "services": {
+      "empty": "No managed services found"
+    },
     "startup": {
       "user": "User",
       "system": "System",
-      "empty": "No startup programs found"
+      "empty": "No startup programs found",
+      "impactAria": "Estimated startup impact",
+      "impactSlow": "Slow",
+      "impactMedium": "Medium",
+      "impactFast": "Fast"
     },
     "service": {
       "stop": "Stop",
@@ -265,7 +321,18 @@
       "powerPlanFailed": "Failed to change power plan: {{msg}}",
       "visualPerformance": "Visual effects set to performance mode",
       "visualRestored": "Visual effects restored",
-      "visualFailed": "Failed: {{msg}}"
+      "visualFailed": "Failed: {{msg}}",
+      "hibernateEnabled": "Hibernate enabled",
+      "hibernateDisabled": "Hibernate disabled",
+      "fastStartupEnabled": "Fast Startup enabled",
+      "fastStartupDisabled": "Fast Startup disabled",
+      "gameModeApplied": "Game Mode preset applied",
+      "ultimatePerformanceApplied": "Ultimate Performance plan activated",
+      "networkOptimized": "Network throttling disabled",
+      "networkRestored": "Network settings restored",
+      "taskEnabled": "Task enabled",
+      "taskDisabled": "Task disabled",
+      "tweakFailed": "Failed: {{msg}}"
     }
   },
   "settings": {
@@ -309,6 +376,23 @@
     "selected_one": "{{count}} selected",
     "selected_other": "{{count}} selected",
     "clearSelection": "Clear selection",
+    "searchPlaceholder": "Search by name or description…",
+    "clearSearch": "Clear search",
+    "noResults": "No apps match your search",
+    "filter": {
+      "all": "All",
+      "safe": "Safe",
+      "caution": "Caution",
+      "count": "{{visible}} of {{total}} apps"
+    },
+    "categories": {
+      "security_trials": "Antivirus & Security Trials",
+      "oem": "Manufacturer Apps",
+      "microsoft": "Microsoft Apps",
+      "communication": "Communication",
+      "entertainment": "Entertainment & Games",
+      "third_party": "Third-Party"
+    },
     "cautionBanner": {
       "title": "Contains cautionary apps",
       "message": "Some selected apps may affect system features. Review the ⚠ Caution labels above before removing."

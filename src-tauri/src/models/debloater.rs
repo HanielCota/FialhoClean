@@ -9,6 +9,7 @@ pub struct AppInfo {
     pub version: String,
     pub safety_level: SafetyLevel,
     pub description: String,
+    pub category: BloatCategory,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -17,6 +18,19 @@ pub enum SafetyLevel {
     Safe,
     Caution,
     Dangerous,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum BloatCategory {
+    Microsoft,
+    Communication,
+    Entertainment,
+    ThirdParty,
+    /// OEM manufacturer pre-installs (Dell, HP, Lenovo, ASUS, Acer, MSI, Samsung…)
+    Oem,
+    /// Trial antivirus and security software bundled by OEMs
+    SecurityTrials,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -32,4 +46,5 @@ pub struct BloatwareEntry {
     pub friendly_name: String,
     pub safety_level: SafetyLevel,
     pub description: String,
+    pub category: BloatCategory,
 }

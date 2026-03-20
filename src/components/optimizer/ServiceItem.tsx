@@ -41,13 +41,22 @@ export function ServiceItem({ service, onAction }: ServiceItemProps) {
   return (
     <ItemRow
       title={
-        <div className="flex items-center gap-2">
-          <p className="text-[14px] font-medium text-text">{service.display_name}</p>
-          <Badge label={statusLabel} variant={statusColor} />
-          <Badge label={safetyLabel} variant={safetyVariant} />
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-[15px] font-medium text-text">{service.display_name}</p>
+            <Badge label={statusLabel} variant={statusColor} />
+            <Badge label={safetyLabel} variant={safetyVariant} />
+          </div>
+          {service.description ? (
+            <p className="text-[13px] text-text-muted leading-relaxed">
+              {service.description}
+            </p>
+          ) : (
+            <p className="text-[13px] text-text-muted/60">{service.name}</p>
+          )}
         </div>
       }
-      subtitle={service.name}
+      subtitle={undefined}
       trailing={
         <div className="flex gap-2">
           {service.status === "running" ? (

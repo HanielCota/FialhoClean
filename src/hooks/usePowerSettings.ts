@@ -58,5 +58,27 @@ export function usePowerSettings() {
     [addToast, t]
   );
 
-  return { powerPlans, visualEffectsPerformanceMode, isLoading, error, load, changePowerPlan, setVisualEffects };
+  const applyUltimatePerformance = useCallback(async () => {
+    try {
+      await optimizerService.applyUltimatePerformance();
+      addToast(t("optimizer.toast.ultimatePerformanceApplied"), "success");
+      await load(); // reload to reflect newly active plan
+    } catch (err) {
+      addToast(
+        t("optimizer.toast.powerPlanFailed", { msg: sanitizeError(err) }),
+        "error"
+      );
+    }
+  }, [addToast, load, t]);
+
+  return {
+    powerPlans,
+    visualEffectsPerformanceMode,
+    isLoading,
+    error,
+    load,
+    changePowerPlan,
+    setVisualEffects,
+    applyUltimatePerformance,
+  };
 }
