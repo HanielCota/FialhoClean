@@ -1,0 +1,344 @@
+{
+  "app": { "name": "FialhoClean" },
+  "titlebar": { "close": "Fechar", "minimize": "Minimizar", "maximize": "Maximizar" },
+  "nav": {
+    "label": "Navegação",
+    "dashboard": "Painel",
+    "cleaner": "Limpeza",
+    "optimizer": "Otimização",
+    "debloater": "Debloater"
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "error": "Erro",
+    "safe": "Seguro",
+    "caution": "Cuidado",
+    "dangerous": "Perigoso",
+    "unknownError": "Erro desconhecido",
+    "dismiss": "Fechar notificação",
+    "retry": "Tentar Novamente",
+    "refresh": "Atualizar",
+    "refreshing": "Atualizando…",
+    "saved": "Configurações salvas",
+    "safety": {
+      "safe": "Nível de segurança: Seguro",
+      "caution": "Nível de segurança: Cuidado",
+      "danger": "Nível de segurança: Perigoso"
+    }
+  },
+  "dashboard": {
+    "healthIntro": "Seu PC está",
+    "healthChecking": "Verificando…",
+    "health": {
+      "good": "Em Boa Forma",
+      "better": "Pode Melhorar",
+      "attention": "Precisa de Atenção"
+    },
+    "lastCleaned": "Última limpeza: {{size}} liberados",
+    "quickClean": {
+      "title": "Limpeza Rápida",
+      "description": "Libere espaço com um toque"
+    },
+    "quickActions": {
+      "scanButton": "Verificação Rápida",
+      "cleanAll": "Limpar Tudo ({{size}})",
+      "nothingToClean": "Nada para limpar",
+      "found": "{{size}} encontrado"
+    },
+    "sections": {
+      "systemStatus": "Status do Sistema",
+      "recentActivity": "Atividade Recente"
+    },
+    "stats": {
+      "storage": "Armazenamento",
+      "storageFree": "{{size}} livre",
+      "storageUsed": "{{pct}}% usado",
+      "memory": "Memória",
+      "memoryOf": "de {{total}}",
+      "cpu": "CPU",
+      "ram": "RAM",
+      "cpuUsage": "{{pct}}% de uso",
+      "cpuSub": "processador",
+      "uptime": "Tempo Ligado"
+    },
+    "activity": {
+      "cleaned": "Limpou {{size}} · {{files}} arquivos removidos",
+      "empty": "Nenhuma limpeza ainda. Execute Limpeza Rápida para começar."
+    },
+    "systemError": "Não foi possível carregar informações do sistema",
+    "refresh": "Atualizar estatísticas do sistema"
+  },
+  "cleaner": {
+    "title": "Limpar seu PC",
+    "subtitle": "Selecione o que remover e toque em Verificar",
+    "selectAll": "Selecionar tudo",
+    "deselectAll": "Limpar",
+    "needsAdmin": "Requer Admin",
+    "categories": {
+      "temp_files": {
+        "label": "Arquivos Temporários",
+        "description": "Arquivos criados por apps que não são mais necessários. Completamente seguro remover."
+      },
+      "browser_cache": {
+        "label": "Cache do Navegador",
+        "description": "Páginas salvas do Chrome, Edge e Firefox. Não afeta suas senhas."
+      },
+      "recycle_bin": {
+        "label": "Lixeira",
+        "description": "Itens aguardando exclusão permanente. Tamanho estimado."
+      },
+      "old_logs": {
+        "label": "Logs Antigos",
+        "description": "Registros de depuração de apps e do Windows. Seguro deletar."
+      },
+      "prefetch": {
+        "label": "Cache de Inicialização",
+        "description": "Dados de velocidade de inicialização do Windows. Recriado automaticamente após o primeiro reinício."
+      },
+      "windows_update_cache": {
+        "label": "Cache do Windows Update",
+        "description": "Pacotes de atualização baixados que não são mais necessários. Pode liberar vários gigabytes."
+      },
+      "delivery_optimization": {
+        "label": "Otimização de Entrega",
+        "description": "Cache P2P do Windows Update armazenado localmente. Seguro remover a qualquer momento."
+      },
+      "windows_error_reports": {
+        "label": "Relatórios de Erro",
+        "description": "Logs de falhas e relatórios de diagnóstico enviados à Microsoft. Seguro deletar."
+      },
+      "thumbnail_cache": {
+        "label": "Cache de Miniaturas",
+        "description": "Pré-visualizações de imagens armazenadas pelo Explorer. Recriado automaticamente na próxima visualização."
+      },
+      "icon_cache": {
+        "label": "Cache de Ícones",
+        "description": "Ícones de programas armazenados pelo Explorer. Seguro deletar — recriado ao reiniciar."
+      },
+      "memory_dumps": {
+        "label": "Dumps de Memória",
+        "description": "Arquivos de despejo criados após erros do sistema. Seguro remover após revisão."
+      },
+      "discord_cache": {
+        "label": "Cache do Discord",
+        "description": "Imagens, vídeos e dados armazenados pelo Discord. Não afeta suas mensagens ou configurações."
+      },
+      "spotify_cache": {
+        "label": "Cache do Spotify",
+        "description": "Dados de músicas offline armazenados pelo Spotify. As músicas serão recarregadas na próxima reprodução."
+      },
+      "steam_cache": {
+        "label": "Cache do Steam",
+        "description": "Manifestos de depósito e logs antigos deixados por atualizações do Steam. Seguro remover."
+      },
+      "recent_files": {
+        "label": "Arquivos Recentes",
+        "description": "Histórico do Windows de arquivos e pastas abertos recentemente. Limpar melhora a privacidade."
+      },
+      "dns_cache": {
+        "label": "Cache DNS",
+        "description": "Consultas de domínio armazenadas. Limpar corrige problemas de conexão e remove entradas antigas."
+      }
+    },
+    "step": "Etapa {{current}} de {{total}}",
+    "steps": {
+      "select": "Selecionar",
+      "scan": "Verificar",
+      "review": "Revisar",
+      "done": "Concluído"
+    },
+    "scan": {
+      "button_none": "Selecione ao menos uma categoria",
+      "button": "Verificar Selecionados ({{count}})",
+      "title": "Verificando seu PC…",
+      "subtitle": "Isso geralmente leva menos de 10 segundos",
+      "progress": "{{done}} de {{total}} verificados",
+      "progressAria": "{{done}} de {{total}} categorias verificadas",
+      "scanning": "Verificando…",
+      "cancel": "Cancelar",
+      "error": "Erro",
+      "retryScan": "Tentar Novamente"
+    },
+    "results": {
+      "found": "{{size}} encontrados para liberar",
+      "foundSub": "{{files}} arquivos em {{categories}} categorias",
+      "estimated": "· estimado",
+      "files": "· {{count}} arquivos",
+      "safeBadge": "Seguro",
+      "cleanButton": "Limpar {{size}} Agora",
+      "scanAgain": "Verificar Novamente",
+      "empty": {
+        "title": "Seu PC está impecável!",
+        "message": "Nada para limpar agora. Volte em alguns dias.",
+        "back": "Voltar às Categorias"
+      },
+      "modal": {
+        "title": "Pronto para limpar?",
+        "body": "Isso excluirá permanentemente {{size}} em {{files}} arquivos.",
+        "warning": "Esta ação não pode ser desfeita.",
+        "confirm": "Limpar {{size}} Agora"
+      }
+    },
+    "success": {
+      "title": "Concluído! {{size}} liberados",
+      "subtitle": "{{files}} arquivos removidos",
+      "freed": "{{size}} liberados",
+      "backToDashboard": "Voltar ao Painel",
+      "scanAgain": "Verificar Novamente",
+      "upsell": {
+        "sectionTitle": "Considere Também",
+        "title": "Remover apps indesejados?",
+        "description": "Apps pré-instalados que você não precisa"
+      }
+    },
+    "cleaning": {
+      "title": "Limpando…",
+      "subtitle": "Não feche o app"
+    },
+    "result": {
+      "complete": "Limpeza concluída — {{size}} liberados",
+      "deleted": "Excluídos",
+      "files": "{{count}} arquivos",
+      "skipped": "Ignorados (em uso)",
+      "errors": "{{count}} erro(s) encontrado(s)"
+    },
+    "toast": {
+      "scanFailed": "Falha na verificação: {{msg}}",
+      "cleaned": "Limpou {{count}} arquivos — liberou {{size}}",
+      "cleanFailed": "Falha na limpeza: {{msg}}"
+    }
+  },
+  "optimizer": {
+    "title": "Otimizador",
+    "subtitle": "Ajuste as configurações de velocidade do seu PC",
+    "sections": {
+      "powerMode": "Modo de Energia",
+      "visualEffects": "Efeitos Visuais",
+      "startupPrograms": "Programas de Inicialização",
+      "startupCount": "{{count}} programas",
+      "backgroundServices": "Serviços em Segundo Plano",
+      "expertMode": "Modo Avançado"
+    },
+    "visualEffects": {
+      "title": "Animações e Transparência",
+      "description": "Desativar acelera PCs mais antigos"
+    },
+    "activePlan": "Ativo: {{name}}",
+    "expertWarning": {
+      "title": "Essas configurações afetam o comportamento do sistema",
+      "message": "Só altere se souber o que está fazendo.",
+      "show": "Mostrar",
+      "showAria": "Mostrar configurações avançadas de serviços",
+      "hide": "Ocultar serviços"
+    },
+    "startup": {
+      "user": "Usuário",
+      "system": "Sistema",
+      "empty": "Nenhum programa de inicialização encontrado"
+    },
+    "service": {
+      "stop": "Parar",
+      "start": "Iniciar",
+      "disable": "Desativar",
+      "enable": "Ativar",
+      "notRecommended": "Não recomendado",
+      "stopAria": "Parar {{name}}",
+      "startAria": "Iniciar {{name}}",
+      "disableAria": "Desativar {{name}}",
+      "enableAria": "Ativar {{name}}",
+      "status": {
+        "running": "em execução",
+        "stopped": "parado",
+        "paused": "pausado",
+        "unknown": "desconhecido"
+      }
+    },
+    "toast": {
+      "loadFailed": "Falha ao carregar dados do otimizador: {{msg}}",
+      "startupEnabled": "{{name}} ativado",
+      "startupDisabled": "{{name}} desativado",
+      "startupFailed": "Falha ao atualizar item de inicialização: {{msg}}",
+      "serviceAction": "Serviço {{name}}: {{action}}",
+      "serviceFailed": "Falha: {{msg}}",
+      "powerPlanUpdated": "Plano de energia atualizado",
+      "powerPlanFailed": "Falha ao alterar plano de energia: {{msg}}",
+      "visualPerformance": "Efeitos visuais: modo desempenho",
+      "visualRestored": "Efeitos visuais restaurados",
+      "visualFailed": "Falha: {{msg}}"
+    }
+  },
+  "settings": {
+    "title": "Configurações",
+    "subtitle": "Ajuste as preferências do app",
+    "toast": {
+      "saved": "Configurações salvas",
+      "languageChanged": "Idioma atualizado"
+    },
+    "sections": {
+      "general": "Geral",
+      "cleaner": "Limpeza",
+      "about": "Sobre"
+    },
+    "language": {
+      "label": "Idioma",
+      "ptBR": "Português",
+      "en": "English"
+    },
+    "cleaner": {
+      "confirmBeforeCleaning": "Confirmar antes de limpar",
+      "confirmDescription": "Exibir confirmação antes de excluir arquivos",
+      "defaultCategories": "Categorias padrão",
+      "defaultCategoriesDescription": "Pré-selecionadas ao abrir Limpeza"
+    },
+    "about": {
+      "version": "Versão {{version}}",
+      "builtWith": "Desenvolvido com Tauri 2 + React"
+    }
+  },
+  "debloater": {
+    "title": "Remover Bloatware",
+    "subtitle": "Apps pré-instalados que você provavelmente não precisa",
+    "empty": {
+      "title": "Nenhum bloatware encontrado",
+      "message": "Seu PC veio limpo!"
+    },
+    "sectionTitle": "Apps Instalados",
+    "selectAll": "Selecionar todos",
+    "clearAll": "Limpar tudo",
+    "selected_one": "{{count}} selecionado",
+    "selected_other": "{{count}} selecionados",
+    "clearSelection": "Limpar seleção",
+    "cautionBanner": {
+      "title": "Contém apps com aviso",
+      "message": "Alguns apps selecionados podem afetar recursos do sistema. Revise os avisos ⚠ acima antes de remover."
+    },
+    "removeButton_one": "Remover {{count}} App",
+    "removeButton_other": "Remover {{count}} Apps",
+    "modal": {
+      "title_one": "Remover {{count}} app?",
+      "title_other": "Remover {{count}} apps?",
+      "confirm_one": "Remover {{count}} App",
+      "confirm_other": "Remover {{count}} Apps",
+      "andMore": "· · · e mais {{count}}",
+      "cautionWarning": "Alguns apps podem afetar recursos do Windows quando removidos.",
+      "disclaimer": "Isso não pode ser desfeito sem reinstalar da Microsoft Store."
+    },
+    "success": {
+      "title": "Tudo certo!",
+      "subtitle_one": "{{count}} app removido",
+      "subtitle_other": "{{count}} apps removidos",
+      "backToList": "Voltar para Apps",
+      "nextStep": "Próximo Passo",
+      "runCleaner": "Executar uma limpeza?",
+      "runCleanerDesc": "Remover arquivos desnecessários restantes"
+    },
+    "toast": {
+      "loadFailed": "Falha ao carregar apps: {{msg}}",
+      "removed_one": "{{count}} app removido com sucesso",
+      "removed_other": "{{count}} apps removidos com sucesso",
+      "removeFailed": "Falha ao remover {{name}}: {{error}}",
+      "removalFailed": "Falha na remoção: {{msg}}"
+    }
+  }
+}

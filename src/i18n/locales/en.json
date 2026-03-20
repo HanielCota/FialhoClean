@@ -1,0 +1,344 @@
+{
+  "app": { "name": "FialhoClean" },
+  "titlebar": { "close": "Close", "minimize": "Minimize", "maximize": "Maximize" },
+  "nav": {
+    "label": "Navigation",
+    "dashboard": "Dashboard",
+    "cleaner": "Cleaner",
+    "optimizer": "Optimizer",
+    "debloater": "Debloater"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "error": "Error",
+    "safe": "Safe",
+    "caution": "Caution",
+    "dangerous": "Dangerous",
+    "unknownError": "Unknown error",
+    "dismiss": "Dismiss notification",
+    "retry": "Try Again",
+    "refresh": "Refresh",
+    "refreshing": "Refreshing…",
+    "saved": "Settings saved",
+    "safety": {
+      "safe": "Safety level: Safe",
+      "caution": "Safety level: Caution",
+      "danger": "Safety level: Danger"
+    }
+  },
+  "dashboard": {
+    "healthIntro": "Your PC is in",
+    "healthChecking": "Checking…",
+    "health": {
+      "good": "Good Shape",
+      "better": "Could Be Better",
+      "attention": "Needs Attention"
+    },
+    "lastCleaned": "Last cleaned: {{size}} freed",
+    "quickClean": {
+      "title": "Quick Clean",
+      "description": "Free up space with one tap"
+    },
+    "quickActions": {
+      "scanButton": "Quick Scan",
+      "cleanAll": "Clean All ({{size}})",
+      "nothingToClean": "Nothing to clean",
+      "found": "{{size}} found"
+    },
+    "sections": {
+      "systemStatus": "System Status",
+      "recentActivity": "Recent Activity"
+    },
+    "stats": {
+      "storage": "Storage",
+      "storageFree": "{{size}} free",
+      "storageUsed": "{{pct}}% used",
+      "memory": "Memory",
+      "memoryOf": "of {{total}}",
+      "cpu": "CPU",
+      "ram": "RAM",
+      "cpuUsage": "{{pct}}% usage",
+      "cpuSub": "processor",
+      "uptime": "Uptime"
+    },
+    "activity": {
+      "cleaned": "Cleaned {{size}} · {{files}} files removed",
+      "empty": "No cleanups yet. Run Quick Clean to start."
+    },
+    "systemError": "Couldn't load system info",
+    "refresh": "Refresh system stats"
+  },
+  "cleaner": {
+    "title": "Clean Your PC",
+    "subtitle": "Select what to remove, then tap Scan",
+    "selectAll": "Select all",
+    "deselectAll": "Clear",
+    "needsAdmin": "Needs Admin",
+    "categories": {
+      "temp_files": {
+        "label": "Temporary Files",
+        "description": "Files apps created but no longer need. Completely safe to remove."
+      },
+      "browser_cache": {
+        "label": "Browser Cache",
+        "description": "Saved pages from Chrome, Edge, Firefox. Won't affect your passwords."
+      },
+      "recycle_bin": {
+        "label": "Recycle Bin",
+        "description": "Items waiting to be permanently deleted. Estimated size."
+      },
+      "old_logs": {
+        "label": "Old Log Files",
+        "description": "Debug records from apps and Windows. Safe to delete."
+      },
+      "prefetch": {
+        "label": "App Launch Cache",
+        "description": "Windows launch-speed data. Rebuilds automatically after first reboot."
+      },
+      "windows_update_cache": {
+        "label": "Windows Update Cache",
+        "description": "Downloaded update packages no longer needed. Can free several gigabytes."
+      },
+      "delivery_optimization": {
+        "label": "Delivery Optimization",
+        "description": "P2P Windows Update cache stored locally. Safe to remove at any time."
+      },
+      "windows_error_reports": {
+        "label": "Error Reports",
+        "description": "Crash logs and diagnostic reports sent to Microsoft. Safe to delete."
+      },
+      "thumbnail_cache": {
+        "label": "Thumbnail Cache",
+        "description": "Image previews cached by File Explorer. Rebuilds automatically on next view."
+      },
+      "icon_cache": {
+        "label": "Icon Cache",
+        "description": "Program icon images cached by Windows Explorer. Safe to delete — rebuilds on restart."
+      },
+      "memory_dumps": {
+        "label": "Memory Dumps",
+        "description": "Crash dump files created after system errors. Safe to remove once reviewed."
+      },
+      "discord_cache": {
+        "label": "Discord Cache",
+        "description": "Images, videos and data cached by Discord. Won't affect your messages or settings."
+      },
+      "spotify_cache": {
+        "label": "Spotify Cache",
+        "description": "Offline song data stored by Spotify. Songs will re-cache on next play."
+      },
+      "steam_cache": {
+        "label": "Steam Cache",
+        "description": "Old depot manifests and logs left by Steam updates. Safe to remove."
+      },
+      "recent_files": {
+        "label": "Recent Files List",
+        "description": "Windows history of recently opened files and folders. Clearing improves privacy."
+      },
+      "dns_cache": {
+        "label": "DNS Cache",
+        "description": "Stored domain lookups. Flushing fixes connectivity issues and removes stale entries."
+      }
+    },
+    "step": "Step {{current}} of {{total}}",
+    "steps": {
+      "select": "Select",
+      "scan": "Scan",
+      "review": "Review",
+      "done": "Done"
+    },
+    "scan": {
+      "button_none": "Select at least one category",
+      "button": "Scan Selected ({{count}})",
+      "title": "Scanning your PC…",
+      "subtitle": "This usually takes under 10 seconds",
+      "progress": "{{done}} of {{total}} scanned",
+      "progressAria": "{{done}} of {{total}} categories scanned",
+      "scanning": "Scanning…",
+      "cancel": "Cancel",
+      "error": "Error",
+      "retryScan": "Try Again"
+    },
+    "results": {
+      "found": "Found {{size}} to free up",
+      "foundSub": "Across {{files}} files in {{categories}} categories",
+      "estimated": "· estimated",
+      "files": "· {{count}} files",
+      "safeBadge": "Safe",
+      "cleanButton": "Clean {{size}} Now",
+      "scanAgain": "Scan Again",
+      "empty": {
+        "title": "Your PC is spotless!",
+        "message": "Nothing to clean right now. Come back in a few days.",
+        "back": "Back to Categories"
+      },
+      "modal": {
+        "title": "Ready to clean?",
+        "body": "This will permanently delete {{size}} across {{files}} files.",
+        "warning": "This action cannot be undone.",
+        "confirm": "Clean {{size}} Now"
+      }
+    },
+    "success": {
+      "title": "Done! {{size}} freed",
+      "subtitle": "{{files}} files removed",
+      "freed": "{{size}} freed",
+      "backToDashboard": "Back to Dashboard",
+      "scanAgain": "Scan Again",
+      "upsell": {
+        "sectionTitle": "Also Consider",
+        "title": "Remove bloatware apps?",
+        "description": "Pre-installed apps you don't need"
+      }
+    },
+    "cleaning": {
+      "title": "Cleaning…",
+      "subtitle": "Please don't close the app"
+    },
+    "result": {
+      "complete": "Clean complete — {{size}} freed",
+      "deleted": "Deleted",
+      "files": "{{count}} files",
+      "skipped": "Skipped (in use)",
+      "errors": "{{count}} error(s) encountered"
+    },
+    "toast": {
+      "scanFailed": "Scan failed: {{msg}}",
+      "cleaned": "Cleaned {{count}} files — freed {{size}}",
+      "cleanFailed": "Clean failed: {{msg}}"
+    }
+  },
+  "optimizer": {
+    "title": "Optimizer",
+    "subtitle": "Tune your PC's speed settings",
+    "sections": {
+      "powerMode": "Power Mode",
+      "visualEffects": "Visual Effects",
+      "startupPrograms": "Startup Programs",
+      "startupCount": "{{count}} programs",
+      "backgroundServices": "Background Services",
+      "expertMode": "Expert Mode"
+    },
+    "visualEffects": {
+      "title": "Animations & Transparency",
+      "description": "Turning off speeds up older PCs"
+    },
+    "activePlan": "Active: {{name}}",
+    "expertWarning": {
+      "title": "These settings affect system behavior",
+      "message": "Only change if you know what you're doing.",
+      "show": "Show",
+      "showAria": "Show expert services settings",
+      "hide": "Hide services"
+    },
+    "startup": {
+      "user": "User",
+      "system": "System",
+      "empty": "No startup programs found"
+    },
+    "service": {
+      "stop": "Stop",
+      "start": "Start",
+      "disable": "Disable",
+      "enable": "Enable",
+      "notRecommended": "Not recommended",
+      "stopAria": "Stop {{name}}",
+      "startAria": "Start {{name}}",
+      "disableAria": "Disable {{name}}",
+      "enableAria": "Enable {{name}}",
+      "status": {
+        "running": "running",
+        "stopped": "stopped",
+        "paused": "paused",
+        "unknown": "unknown"
+      }
+    },
+    "toast": {
+      "loadFailed": "Failed to load optimizer data: {{msg}}",
+      "startupEnabled": "{{name}} enabled",
+      "startupDisabled": "{{name}} disabled",
+      "startupFailed": "Failed to update startup item: {{msg}}",
+      "serviceAction": "Service {{name}}: {{action}}",
+      "serviceFailed": "Failed: {{msg}}",
+      "powerPlanUpdated": "Power plan updated",
+      "powerPlanFailed": "Failed to change power plan: {{msg}}",
+      "visualPerformance": "Visual effects set to performance mode",
+      "visualRestored": "Visual effects restored",
+      "visualFailed": "Failed: {{msg}}"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Adjust your app preferences",
+    "toast": {
+      "saved": "Settings saved",
+      "languageChanged": "Language updated"
+    },
+    "sections": {
+      "general": "General",
+      "cleaner": "Cleaner",
+      "about": "About"
+    },
+    "language": {
+      "label": "Language",
+      "ptBR": "Português",
+      "en": "English"
+    },
+    "cleaner": {
+      "confirmBeforeCleaning": "Confirm before cleaning",
+      "confirmDescription": "Show confirmation before deleting files",
+      "defaultCategories": "Default categories",
+      "defaultCategoriesDescription": "Pre-selected when opening Cleaner"
+    },
+    "about": {
+      "version": "Version {{version}}",
+      "builtWith": "Built with Tauri 2 + React"
+    }
+  },
+  "debloater": {
+    "title": "Remove Bloatware",
+    "subtitle": "Pre-installed apps you probably don't need",
+    "empty": {
+      "title": "No bloatware found",
+      "message": "Your PC came clean!"
+    },
+    "sectionTitle": "Installed Apps",
+    "selectAll": "Select all",
+    "clearAll": "Clear all",
+    "selected_one": "{{count}} selected",
+    "selected_other": "{{count}} selected",
+    "clearSelection": "Clear selection",
+    "cautionBanner": {
+      "title": "Contains cautionary apps",
+      "message": "Some selected apps may affect system features. Review the ⚠ Caution labels above before removing."
+    },
+    "removeButton_one": "Remove {{count}} App",
+    "removeButton_other": "Remove {{count}} Apps",
+    "modal": {
+      "title_one": "Remove {{count}} app?",
+      "title_other": "Remove {{count}} apps?",
+      "confirm_one": "Remove {{count}} App",
+      "confirm_other": "Remove {{count}} Apps",
+      "andMore": "· · · and {{count}} more",
+      "cautionWarning": "Some apps may affect Windows features when removed.",
+      "disclaimer": "This cannot be undone without reinstalling from the Microsoft Store."
+    },
+    "success": {
+      "title": "All done!",
+      "subtitle_one": "{{count}} app removed",
+      "subtitle_other": "{{count}} apps removed",
+      "backToList": "Back to Apps",
+      "nextStep": "What's Next",
+      "runCleaner": "Run a Cleaner scan?",
+      "runCleanerDesc": "Remove leftover junk files"
+    },
+    "toast": {
+      "loadFailed": "Failed to load apps: {{msg}}",
+      "removed_one": "{{count}} app removed successfully",
+      "removed_other": "{{count}} apps removed successfully",
+      "removeFailed": "Failed to remove {{name}}: {{error}}",
+      "removalFailed": "Removal failed: {{msg}}"
+    }
+  }
+}
