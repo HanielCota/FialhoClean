@@ -7,6 +7,22 @@ use commands::{cleaner, debloater, optimizer, repair, system};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Initialize structured logging (controlled via RUST_LOG env var).
+    // Default level: warn in release, debug in dev.
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+                if cfg!(debug_assertions) {
+                    "fialho_clean_lib=debug".into()
+                } else {
+                    "fialho_clean_lib=warn".into()
+                }
+            }),
+        )
+        .compact()
+        .try_init()
+        .ok();
+
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             // System

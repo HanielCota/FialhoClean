@@ -5,8 +5,9 @@ import { APP_VERSION } from "../../constants/app";
 import type { Language } from "../../i18n/config";
 import type { CleanCategory } from "../../types/cleaner";
 import { useSettingsStore } from "../../stores/settingsStore";
-import { useUiStore } from "../../stores/uiStore";
 import { ALL_CATEGORIES } from "../../constants/categories";
+import { toast } from "sonner";
+import { TOAST_DURATIONS } from "../../constants/ui";
 import { Card } from "../shared/Card";
 import { Checkbox } from "../shared/Checkbox";
 import { SectionHeading } from "../shared/SectionHeading";
@@ -23,18 +24,17 @@ export function SettingsView() {
     setConfirmBeforeCleaning,
     setDefaultCategories,
   } = useSettingsStore();
-  const { addToast } = useUiStore();
   const confirmLabelId = useId();
 
   const handleLanguageChange = (lang: Language) => {
     setLanguage(lang);
     i18n.changeLanguage(lang);
-    addToast(t('settings.toast.languageChanged'), 'success');
+    toast.success(t('settings.toast.languageChanged'), { duration: TOAST_DURATIONS.success });
   };
 
   const handleConfirmToggle = (v: boolean) => {
     setConfirmBeforeCleaning(v);
-    addToast(t('settings.toast.saved'), 'success');
+    toast.success(t('settings.toast.saved'), { duration: TOAST_DURATIONS.success });
   };
 
   const handleCategoryToggle = (cat: CleanCategory) => {
@@ -43,7 +43,7 @@ export function SettingsView() {
     } else {
       setDefaultCategories([...defaultCategories, cat]);
     }
-    addToast(t('settings.toast.saved'), 'success');
+    toast.success(t('settings.toast.saved'), { duration: TOAST_DURATIONS.success });
   };
 
   const categoryLabels: Record<CleanCategory, string> = {

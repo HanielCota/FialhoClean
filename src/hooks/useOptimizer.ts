@@ -1,13 +1,14 @@
 import { useCallback, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useQueryClient } from "@tanstack/react-query";
 import { sanitizeError } from "../lib/errors";
+import { formatBytes } from "../lib/format";
 import { optimizerService } from "../services/optimizerService";
-import { useUiStore } from "../stores/uiStore";
 import { useStartup } from "./useStartup";
 import { useServices } from "./useServices";
 import { usePowerSettings } from "./usePowerSettings";
 import { useSystemTweaks } from "./useSystemTweaks";
 import { useScheduledTasks } from "./useScheduledTasks";
+import { useNotify } from "./useNotify";
 
 export function useOptimizer() {
   const startup = useStartup();
@@ -15,52 +16,45 @@ export function useOptimizer() {
   const power = usePowerSettings();
   const tweaks = useSystemTweaks();
   const scheduledTasks = useScheduledTasks();
-  const { addToast } = useUiStore();
-  const { t } = useTranslation();
+  const notify = useNotify();
+  const queryClient = useQueryClient();
 
   const [isOptimizingRam, setIsOptimizingRam] = useState(false);
 
-  const loadAll = useCallback(async () => {
-    await Promise.all([
-      startup.load(),
-      services.load(),
-      power.load(),
-      tweaks.load(),
-      scheduledTasks.load(),
-    ]);
-  }, [startup.load, services.load, power.load, tweaks.load, scheduledTasks.load]);
+  const loadAll = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["startup-items"] });
+    queryClient.invalidateQueries({ queryKey: ["services"] });
+    queryClient.invalidateQueries({ queryKey: ["power-plans"] });
+    queryClient.invalidateQueries({ queryKey: ["system-tweaks"] });
+    queryClient.invalidateQueries({ queryKey: ["scheduled-tasks"] });
+  }, [queryClient]);
 
   const optimizeRam = useCallback(async () => {
     setIsOptimizingRam(true);
     try {
       const result = await optimizerService.optimizeRam();
-      const { formatBytes } = await import("../lib/format");
       if (result.freed_bytes > 0) {
-        addToast(t("optimizer.toast.ramOptimized", { size: formatBytes(result.freed_bytes) }), "success");
+        notify("optimizer.toast.ramOptimized", "success", { size: formatBytes(result.freed_bytes) });
       } else {
-        addToast(t("optimizer.toast.ramOptimizedNoChange"), "info");
+        notify("optimizer.toast.ramOptimizedNoChange", "info");
       }
     } catch (err) {
-      addToast(t("optimizer.toast.tweakFailed", { msg: sanitizeError(err) }), "error");
+      notify("optimizer.toast.tweakFailed", "error", { msg: sanitizeError(err) });
     } finally {
       setIsOptimizingRam(false);
     }
-  }, [addToast, t]);
+  }, [notify]);
 
   return {
-    // startup
     startupItems: startup.startupItems,
     toggleStartup: startup.toggleStartup,
-    // services
     services: services.services,
     changeServiceStatus: services.changeServiceStatus,
-    // power
     powerPlans: power.powerPlans,
     visualEffectsPerformanceMode: power.visualEffectsPerformanceMode,
     changePowerPlan: power.changePowerPlan,
     setVisualEffects: power.setVisualEffects,
     applyUltimatePerformance: power.applyUltimatePerformance,
-    // system tweaks
     hibernateSettings: tweaks.hibernateSettings,
     networkSettings: tweaks.networkSettings,
     gpuSettings: tweaks.gpuSettings,
@@ -71,13 +65,10 @@ export function useOptimizer() {
     setNetworkOptimized: tweaks.setNetworkOptimized,
     setGpuHags: tweaks.setGpuHags,
     setPrivacy: tweaks.setPrivacy,
-    // RAM
     optimizeRam,
     isOptimizingRam,
-    // scheduled tasks
     scheduledTasks: scheduledTasks.tasks,
     toggleScheduledTask: scheduledTasks.toggleTask,
-    // meta
     isLoading:
       startup.isLoading ||
       services.isLoading ||

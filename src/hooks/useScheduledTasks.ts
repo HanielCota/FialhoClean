@@ -1,53 +1,47 @@
-import { useCallback, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { sanitizeError } from "../lib/errors";
 import { optimizerService } from "../services/optimizerService";
 import { useOptimizerStore } from "../stores/optimizerStore";
-import { useUiStore } from "../stores/uiStore";
+import { useNotify } from "./useNotify";
 
 export function useScheduledTasks() {
-  const { scheduledTasks, setScheduledTasks } = useOptimizerStore();
-  const { addToast } = useUiStore();
-  const { t } = useTranslation();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { scheduledTasks } = useOptimizerStore();
+  const notify = useNotify();
 
-  const load = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
+  const { isLoading, error: rawError, refetch } = useQuery({
+    queryKey: ["scheduled-tasks"],
+    queryFn: async () => {
       const tasks = await optimizerService.getScheduledTasks();
-      setScheduledTasks(tasks);
-    } catch (err) {
-      setError(sanitizeError(err));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [setScheduledTasks]);
+      useOptimizerStore.getState().setScheduledTasks(tasks);
+      return tasks;
+    },
+  });
 
-  useEffect(() => { void load(); }, [load]);
+  const error = rawError ? sanitizeError(rawError) : null;
 
   const toggleTask = useCallback(
     async (taskPath: string, enabled: boolean) => {
       try {
         await optimizerService.setScheduledTaskEnabled(taskPath, enabled);
-        setScheduledTasks(
-          scheduledTasks.map((t) =>
-            t.task_path === taskPath
-              ? { ...t, state: enabled ? "Ready" : "Disabled" }
-              : t
+        const current = useOptimizerStore.getState().scheduledTasks;
+        useOptimizerStore.getState().setScheduledTasks(
+          current.map((task) =>
+            task.task_path === taskPath
+              ? { ...task, state: enabled ? "Ready" : "Disabled" }
+              : task
           )
         );
-        addToast(
-          enabled ? t("optimizer.toast.taskEnabled") : t("optimizer.toast.taskDisabled"),
+        notify(
+          enabled ? "optimizer.toast.taskEnabled" : "optimizer.toast.taskDisabled",
           "success"
         );
       } catch (err) {
-        addToast(t("optimizer.toast.tweakFailed", { msg: sanitizeError(err) }), "error");
+        notify("optimizer.toast.tweakFailed", "error", { msg: sanitizeError(err) });
       }
     },
-    [addToast, scheduledTasks, setScheduledTasks, t]
+    [notify]
   );
 
-  return { tasks: scheduledTasks, isLoading, error, load, toggleTask };
+  return { tasks: scheduledTasks, isLoading, error, load: refetch, toggleTask };
 }

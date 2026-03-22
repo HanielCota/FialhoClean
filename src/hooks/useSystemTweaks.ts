@@ -1,9 +1,9 @@
-import { useState, useCallback, useEffect } from "react";
-import { useTranslation } from "react-i18next";
+import { useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { sanitizeError } from "../lib/errors";
 import { optimizerService } from "../services/optimizerService";
 import { useOptimizerStore } from "../stores/optimizerStore";
-import { useUiStore } from "../stores/uiStore";
+import { useNotify } from "./useNotify";
 
 export function useSystemTweaks() {
   const {
@@ -11,112 +11,90 @@ export function useSystemTweaks() {
     networkSettings,
     gpuSettings,
     privacySettings,
-    setHibernateSettings,
-    setNetworkSettings,
-    setGpuSettings,
-    setPrivacySettings,
   } = useOptimizerStore();
-  const { addToast } = useUiStore();
-  const { t } = useTranslation();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const notify = useNotify();
 
-  const load = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
+  const { isLoading, error: rawError } = useQuery({
+    queryKey: ["system-tweaks"],
+    queryFn: async () => {
       const [hib, net, gpu, priv] = await Promise.all([
         optimizerService.getHibernateSettings(),
         optimizerService.getNetworkSettings(),
         optimizerService.getGpuSettings(),
         optimizerService.getPrivacySettings(),
       ]);
-      setHibernateSettings(hib);
-      setNetworkSettings(net);
-      setGpuSettings(gpu);
-      setPrivacySettings(priv);
-    } catch (err) {
-      setError(sanitizeError(err));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [setHibernateSettings, setNetworkSettings, setGpuSettings, setPrivacySettings]);
+      const state = useOptimizerStore.getState();
+      state.setHibernateSettings(hib);
+      state.setNetworkSettings(net);
+      state.setGpuSettings(gpu);
+      state.setPrivacySettings(priv);
+      return { hib, net, gpu, priv };
+    },
+  });
 
-  useEffect(() => { void load(); }, [load]);
+  const error = rawError ? sanitizeError(rawError) : null;
 
   const setHibernate = useCallback(async (enabled: boolean) => {
     try {
       await optimizerService.setHibernate(enabled);
-      setHibernateSettings({ ...hibernateSettings, hibernate_enabled: enabled });
-      addToast(
-        enabled ? t("optimizer.toast.hibernateEnabled") : t("optimizer.toast.hibernateDisabled"),
-        "success"
-      );
+      const current = useOptimizerStore.getState().hibernateSettings;
+      useOptimizerStore.getState().setHibernateSettings({ ...current, hibernate_enabled: enabled });
+      notify(enabled ? "optimizer.toast.hibernateEnabled" : "optimizer.toast.hibernateDisabled", "success");
     } catch (err) {
-      addToast(t("optimizer.toast.tweakFailed", { msg: sanitizeError(err) }), "error");
+      notify("optimizer.toast.tweakFailed", "error", { msg: sanitizeError(err) });
     }
-  }, [addToast, hibernateSettings, setHibernateSettings, t]);
+  }, [notify]);
 
   const setFastStartup = useCallback(async (enabled: boolean) => {
     try {
       await optimizerService.setFastStartup(enabled);
-      setHibernateSettings({ ...hibernateSettings, fast_startup_enabled: enabled });
-      addToast(
-        enabled ? t("optimizer.toast.fastStartupEnabled") : t("optimizer.toast.fastStartupDisabled"),
-        "success"
-      );
+      const current = useOptimizerStore.getState().hibernateSettings;
+      useOptimizerStore.getState().setHibernateSettings({ ...current, fast_startup_enabled: enabled });
+      notify(enabled ? "optimizer.toast.fastStartupEnabled" : "optimizer.toast.fastStartupDisabled", "success");
     } catch (err) {
-      addToast(t("optimizer.toast.tweakFailed", { msg: sanitizeError(err) }), "error");
+      notify("optimizer.toast.tweakFailed", "error", { msg: sanitizeError(err) });
     }
-  }, [addToast, hibernateSettings, setHibernateSettings, t]);
+  }, [notify]);
 
   const applyGameMode = useCallback(async () => {
     try {
       await optimizerService.applyGameModePreset();
-      addToast(t("optimizer.toast.gameModeApplied"), "success");
+      notify("optimizer.toast.gameModeApplied", "success");
     } catch (err) {
-      addToast(t("optimizer.toast.tweakFailed", { msg: sanitizeError(err) }), "error");
+      notify("optimizer.toast.tweakFailed", "error", { msg: sanitizeError(err) });
     }
-  }, [addToast, t]);
+  }, [notify]);
 
   const setNetworkOptimized = useCallback(async (enabled: boolean) => {
     try {
       await optimizerService.setNetworkOptimized(enabled);
-      setNetworkSettings({ network_throttling_disabled: enabled });
-      addToast(
-        enabled ? t("optimizer.toast.networkOptimized") : t("optimizer.toast.networkRestored"),
-        "success"
-      );
+      useOptimizerStore.getState().setNetworkSettings({ network_throttling_disabled: enabled });
+      notify(enabled ? "optimizer.toast.networkOptimized" : "optimizer.toast.networkRestored", "success");
     } catch (err) {
-      addToast(t("optimizer.toast.tweakFailed", { msg: sanitizeError(err) }), "error");
+      notify("optimizer.toast.tweakFailed", "error", { msg: sanitizeError(err) });
     }
-  }, [addToast, setNetworkSettings, t]);
+  }, [notify]);
 
   const setGpuHags = useCallback(async (enabled: boolean) => {
     try {
       await optimizerService.setGpuHags(enabled);
-      setGpuSettings({ hags_enabled: enabled });
-      addToast(
-        enabled ? t("optimizer.toast.hagsEnabled") : t("optimizer.toast.hagsDisabled"),
-        "success"
-      );
+      useOptimizerStore.getState().setGpuSettings({ hags_enabled: enabled });
+      notify(enabled ? "optimizer.toast.hagsEnabled" : "optimizer.toast.hagsDisabled", "success");
     } catch (err) {
-      addToast(t("optimizer.toast.tweakFailed", { msg: sanitizeError(err) }), "error");
+      notify("optimizer.toast.tweakFailed", "error", { msg: sanitizeError(err) });
     }
-  }, [addToast, setGpuSettings, t]);
+  }, [notify]);
 
   const setPrivacy = useCallback(async (key: string, disabled: boolean) => {
     try {
       await optimizerService.setPrivacySetting(key, disabled);
-      setPrivacySettings({ ...privacySettings, [`${key}_disabled`]: disabled });
-      addToast(
-        disabled ? t("optimizer.toast.privacyEnabled") : t("optimizer.toast.privacyDisabled"),
-        "success"
-      );
+      const current = useOptimizerStore.getState().privacySettings;
+      useOptimizerStore.getState().setPrivacySettings({ ...current, [`${key}_disabled`]: disabled });
+      notify(disabled ? "optimizer.toast.privacyEnabled" : "optimizer.toast.privacyDisabled", "success");
     } catch (err) {
-      addToast(t("optimizer.toast.tweakFailed", { msg: sanitizeError(err) }), "error");
+      notify("optimizer.toast.tweakFailed", "error", { msg: sanitizeError(err) });
     }
-  }, [addToast, privacySettings, setPrivacySettings, t]);
+  }, [notify]);
 
   return {
     hibernateSettings,
@@ -125,7 +103,6 @@ export function useSystemTweaks() {
     privacySettings,
     isLoading,
     error,
-    load,
     setHibernate,
     setFastStartup,
     applyGameMode,

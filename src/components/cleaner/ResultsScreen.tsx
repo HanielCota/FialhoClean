@@ -78,6 +78,7 @@ export function ResultsScreen({
                 }}
                 role={isExpandable ? "button" : undefined}
                 tabIndex={isExpandable ? 0 : undefined}
+                aria-expanded={isExpandable ? isExpanded : undefined}
                 onKeyDown={(e) => {
                   if (isExpandable && (e.key === "Enter" || e.key === " ")) {
                     e.preventDefault();
@@ -130,7 +131,7 @@ export function ResultsScreen({
                     })}
                     {cat.files.length > 10 && (
                       <p className="text-[11px] text-text-muted/50 px-1 pt-1">
-                        +{cat.files.length - 10} more files
+                        {t("cleaner.results.moreFiles", { count: cat.files.length - 10 })}
                       </p>
                     )}
                   </div>

@@ -3,8 +3,9 @@ use crate::models::optimizer::{
     HibernateSettings, NetworkSettings, PowerPlan, ScheduledTask, ServiceAction, ServiceInfo,
     ServiceSafety, ServiceStatus, StartType, StartupItem, StartupSource,
 };
+use crate::services::process_runner::ProcessRunner;
+use crate::services::registry::{hkcu, hklm, RegistryExt};
 use std::time::Duration;
-use tokio::time::timeout;
 use winreg::enums::*;
 use winreg::RegKey;
 
@@ -16,15 +17,13 @@ const REG_STARTUP_APPROVED_KEY: &str =
 const REG_VISUAL_EFFECTS_KEY: &str =
     r"Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects";
 const REG_POWER_KEY: &str = r"SYSTEM\CurrentControlSet\Control\Power";
-const REG_SESSION_POWER_KEY: &str =
-    r"SYSTEM\CurrentControlSet\Control\Session Manager\Power";
+const REG_SESSION_POWER_KEY: &str = r"SYSTEM\CurrentControlSet\Control\Session Manager\Power";
 const REG_MULTIMEDIA_PROFILE_KEY: &str =
     r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile";
 const REG_GAME_BAR_KEY: &str = r"Software\Microsoft\GameBar";
-const POWER_SCHEME_GUID_PREFIX: &str = "Power Scheme GUID:";
 
-/// Maximum time to wait for any external process.
-const PROCESS_TIMEOUT: Duration = Duration::from_secs(30);
+/// Shared runner for all optimizer subprocesses (30s timeout).
+const RUNNER: ProcessRunner = ProcessRunner::new("optimizer", Duration::from_secs(30));
 
 const SAFE_TO_DISABLE_SERVICES: &[&str] = &[
     "SysMain",            // Superfetch
@@ -100,6 +99,61 @@ fn is_valid_guid(s: &str) -> bool {
     })
 }
 
+fn extract_guid(text: &str) -> Option<String> {
+    let chars: Vec<char> = text.chars().collect();
+    if chars.len() < 36 {
+        return None;
+    }
+
+    for start in 0..=chars.len() - 36 {
+        let candidate: String = chars[start..start + 36].iter().collect();
+        if is_valid_guid(&candidate) {
+            return Some(candidate);
+        }
+    }
+
+    None
+}
+
+fn parse_power_plan_line(line: &str) -> Option<PowerPlan> {
+    let guid = extract_guid(line)?;
+    let name = line
+        .find('(')
+        .and_then(|start| line.rfind(')').map(|end| (start, end)))
+        .filter(|(start, end)| start < end)
+        .map(|(start, end)| line[start + 1..end].trim().to_string())
+        .filter(|name| !name.is_empty())
+        .unwrap_or_else(|| "Unknown".to_string());
+
+    Some(PowerPlan {
+        guid,
+        name,
+        is_active: line.trim_end().ends_with('*'),
+    })
+}
+
+fn startup_enabled_from_approved(root: &RegKey, name: &str) -> bool {
+    root.open_subkey(REG_STARTUP_APPROVED_KEY)
+        .ok()
+        .and_then(|k| k.get_raw_value(name).ok())
+        .and_then(|value| value.bytes.first().copied())
+        .map(|b| b == 2)
+        .unwrap_or(true)
+}
+
+fn startup_root_from_key_path(key_path: &str) -> Result<RegKey, AppError> {
+    if key_path.starts_with("HKEY_CURRENT_USER\\") {
+        Ok(RegKey::predef(HKEY_CURRENT_USER))
+    } else if key_path.starts_with("HKEY_LOCAL_MACHINE\\") {
+        Ok(RegKey::predef(HKEY_LOCAL_MACHINE))
+    } else {
+        Err(AppError::Custom(format!(
+            "unsupported startup key path: {}",
+            key_path
+        )))
+    }
+}
+
 pub async fn get_startup_items() -> Result<Vec<StartupItem>, AppError> {
     let mut items = Vec::new();
 
@@ -118,7 +172,7 @@ pub async fn get_startup_items() -> Result<Vec<StartupItem>, AppError> {
                 name: name.clone(),
                 command,
                 key_path: key_path_hkcu.clone(),
-                enabled: true,
+                enabled: startup_enabled_from_approved(&hkcu, &name),
                 source: StartupSource::HkeyCurrentUser,
             });
         }
@@ -139,19 +193,9 @@ pub async fn get_startup_items() -> Result<Vec<StartupItem>, AppError> {
                 name: name.clone(),
                 command,
                 key_path: key_path_hklm.clone(),
-                enabled: true,
+                enabled: startup_enabled_from_approved(&hklm, &name),
                 source: StartupSource::HkeyLocalMachine,
             });
-        }
-    }
-
-    // Check disabled items in HKCU\...\StartupApproved\Run
-    if let Ok(approved_key) = hkcu.open_subkey(REG_STARTUP_APPROVED_KEY) {
-        for item in &mut items {
-            if let Ok(value) = approved_key.get_raw_value(&item.name) {
-                // First byte: 02 = enabled, 03 = disabled
-                item.enabled = value.bytes.first().map(|&b| b == 2).unwrap_or(true);
-            }
         }
     }
 
@@ -163,29 +207,23 @@ pub async fn set_startup_enabled(
     key_path: String,
     enabled: bool,
 ) -> Result<(), AppError> {
-    // Verify the startup item actually exists in a known Run registry location
-    // before writing to StartupApproved. This prevents a manipulated frontend
-    // from creating arbitrary entries in the approved key.
-    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
-    let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
-
-    let in_hkcu = hkcu
-        .open_subkey(REG_RUN_KEY)
-        .map(|k| k.get_value::<String, _>(&name).is_ok())
-        .unwrap_or(false);
-    let in_hklm = hklm
+    tracing::info!(item = %name, enabled, "toggling startup item");
+    // Verify the startup item actually exists in the exact registry hive the
+    // frontend requested before writing to StartupApproved.
+    let root = startup_root_from_key_path(&key_path)?;
+    let exists = root
         .open_subkey(REG_RUN_KEY)
         .map(|k| k.get_value::<String, _>(&name).is_ok())
         .unwrap_or(false);
 
-    if !in_hkcu && !in_hklm {
+    if !exists {
         return Err(AppError::Custom(format!(
             "startup item not found in registry: {}",
             name
         )));
     }
 
-    let (approved_key, _) = hkcu
+    let (approved_key, _) = root
         .create_subkey(REG_STARTUP_APPROVED_KEY)
         .map_err(|e| AppError::Registry(e.to_string()))?;
 
@@ -210,36 +248,16 @@ pub async fn set_startup_enabled(
 }
 
 pub async fn get_services() -> Result<Vec<ServiceInfo>, AppError> {
-    let output = timeout(
-        PROCESS_TIMEOUT,
-        tokio::process::Command::new("powershell")
-            .args([
-                "-NoProfile",
-                "-Command",
-                "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; \
-                 $OutputEncoding = [System.Text.Encoding]::UTF8; \
-                 Get-Service | Select-Object Name, DisplayName, Status, StartType | ConvertTo-Json",
-            ])
-            .output(),
-    )
-    .await
-    .map_err(|_| AppError::Custom("get_services timed out".into()))?
-    .map_err(AppError::Io)?;
+    let out = RUNNER
+        .powershell_utf8(
+            "Get-Service | Select-Object Name, DisplayName, Status, StartType | ConvertTo-Json",
+        )
+        .await?;
 
-    if !output.status.success() {
-        return Err(AppError::PowerShell(
-            String::from_utf8_lossy(&output.stderr).to_string(),
-        ));
-    }
-
-    let json_str = String::from_utf8_lossy(&output.stdout);
     let raw: Vec<serde_json::Value> =
-        serde_json::from_str(&json_str).map_err(|e| AppError::Parse(e.to_string()))?;
+        serde_json::from_str(&out.stdout).map_err(|e| AppError::Parse(e.to_string()))?;
 
-    let services = raw
-        .into_iter()
-        .filter_map(parse_service_entry)
-        .collect();
+    let services = raw.into_iter().filter_map(parse_service_entry).collect();
 
     Ok(services)
 }
@@ -302,7 +320,6 @@ pub async fn set_service_status(name: String, action: ServiceAction) -> Result<(
     }
 
     let mut cmd = tokio::process::Command::new("sc.exe");
-
     match action {
         ServiceAction::Enable => {
             cmd.args(["config", &name, "start=", "auto"]);
@@ -318,62 +335,21 @@ pub async fn set_service_status(name: String, action: ServiceAction) -> Result<(
         }
     }
 
-    let output = timeout(PROCESS_TIMEOUT, cmd.output())
-        .await
-        .map_err(|_| AppError::Custom("set_service_status timed out".into()))?
-        .map_err(AppError::Io)?;
-
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(AppError::PowerShell(stderr.to_string()));
-    }
-
+    RUNNER.run(cmd).await?;
+    tracing::info!(service = %name, action = ?action, "service status changed");
     Ok(())
 }
 
 pub async fn get_power_plans() -> Result<Vec<PowerPlan>, AppError> {
-    let output = timeout(
-        PROCESS_TIMEOUT,
-        tokio::process::Command::new("powercfg")
-            .args(["/list"])
-            .output(),
-    )
-    .await
-    .map_err(|_| AppError::Custom("get_power_plans timed out".into()))?
-    .map_err(AppError::Io)?;
-
-    let text = String::from_utf8_lossy(&output.stdout);
-    let mut plans = Vec::new();
-
-    for line in text.lines() {
-        let line = line.trim();
-        if !line.starts_with(POWER_SCHEME_GUID_PREFIX) {
-            continue;
-        }
-
-        // Format: "Power Scheme GUID: <guid>  (<name>) *"
-        let is_active = line.ends_with('*');
-        let after_colon = line.trim_start_matches(POWER_SCHEME_GUID_PREFIX).trim();
-        let guid_end = after_colon.find(' ').unwrap_or(after_colon.len());
-        let guid = after_colon[..guid_end].to_string();
-
-        let name = after_colon
-            .find('(')
-            .and_then(|start| after_colon.find(')').map(|end| &after_colon[start + 1..end]))
-            .unwrap_or("Unknown")
-            .to_string();
-
-        plans.push(PowerPlan {
-            guid,
-            name,
-            is_active,
-        });
-    }
-
-    Ok(plans)
+    let mut cmd = tokio::process::Command::new("powercfg");
+    cmd.args(["/list"]);
+    let out = RUNNER.run(cmd).await?;
+    let text = out.stdout;
+    Ok(text.lines().filter_map(parse_power_plan_line).collect())
 }
 
 pub async fn set_power_plan(plan_guid: String) -> Result<(), AppError> {
+    tracing::info!(guid = %plan_guid, "switching power plan");
     // Validate GUID format before passing to powercfg to prevent unexpected
     // argument injection even though .args() already provides OS-level quoting.
     if !is_valid_guid(&plan_guid) {
@@ -383,22 +359,9 @@ pub async fn set_power_plan(plan_guid: String) -> Result<(), AppError> {
         )));
     }
 
-    let output = timeout(
-        PROCESS_TIMEOUT,
-        tokio::process::Command::new("powercfg")
-            .args(["/setactive", &plan_guid])
-            .output(),
-    )
-    .await
-    .map_err(|_| AppError::Custom("set_power_plan timed out".into()))?
-    .map_err(AppError::Io)?;
-
-    if !output.status.success() {
-        return Err(AppError::PowerShell(
-            String::from_utf8_lossy(&output.stderr).to_string(),
-        ));
-    }
-
+    let mut cmd = tokio::process::Command::new("powercfg");
+    cmd.args(["/setactive", &plan_guid]);
+    RUNNER.run(cmd).await?;
     Ok(())
 }
 
@@ -412,141 +375,64 @@ pub async fn set_power_plan(plan_guid: String) -> Result<(), AppError> {
 ///   3. If the edition doesn't support Ultimate Performance (e.g. Windows Home),
 ///      fall back silently to High Performance.
 pub async fn apply_ultimate_performance() -> Result<(), AppError> {
-    // ── Step 1: activate if already available ────────────────────────────
-    let direct = timeout(
-        PROCESS_TIMEOUT,
-        tokio::process::Command::new("powercfg")
-            .args(["/setactive", ULTIMATE_PERF_GUID])
-            .output(),
-    )
-    .await
-    .map_err(|_| AppError::Custom("apply_ultimate_performance timed out".into()))?
-    .map_err(AppError::Io)?;
-
-    if direct.status.success() {
+    tracing::info!("applying ultimate performance power plan");
+    // Step 1: activate if already available
+    let mut cmd1 = tokio::process::Command::new("powercfg");
+    cmd1.args(["/setactive", ULTIMATE_PERF_GUID]);
+    if RUNNER.run(cmd1).await.is_ok() {
         return Ok(());
     }
 
-    // ── Step 2: unlock by duplicating the built-in scheme ────────────────
-    let dup = timeout(
-        PROCESS_TIMEOUT,
-        tokio::process::Command::new("powercfg")
-            .args(["-duplicatescheme", ULTIMATE_PERF_GUID])
-            .output(),
-    )
-    .await
-    .map_err(|_| AppError::Custom("duplicatescheme timed out".into()))?
-    .map_err(AppError::Io)?;
-
-    if dup.status.success() {
-        // Output format: "Power Scheme GUID: <guid>  (Ultimate Performance)"
-        let out = String::from_utf8_lossy(&dup.stdout);
-        let new_guid = out.lines().find_map(|line| {
-            let line = line.trim();
-            if line.starts_with(POWER_SCHEME_GUID_PREFIX) {
-                let after = line.trim_start_matches(POWER_SCHEME_GUID_PREFIX).trim();
-                let end = after.find(' ').unwrap_or(after.len());
-                let guid = &after[..end];
-                if is_valid_guid(guid) {
-                    Some(guid.to_string())
-                } else {
-                    None
-                }
-            } else {
-                None
-            }
-        });
-
+    // Step 2: unlock by duplicating the built-in scheme
+    let mut cmd2 = tokio::process::Command::new("powercfg");
+    cmd2.args(["-duplicatescheme", ULTIMATE_PERF_GUID]);
+    if let Some(stdout) = RUNNER.run_best_effort(cmd2).await {
+        let new_guid = stdout.lines().find_map(extract_guid);
         if let Some(guid) = new_guid {
-            let _ = timeout(
-                PROCESS_TIMEOUT,
-                tokio::process::Command::new("powercfg")
-                    .args(["/setactive", &guid])
-                    .output(),
-            )
-            .await;
+            let mut cmd3 = tokio::process::Command::new("powercfg");
+            cmd3.args(["/setactive", &guid]);
+            let _ = RUNNER.run(cmd3).await;
             return Ok(());
         }
     }
 
-    // ── Step 3: edition doesn't support Ultimate — use High Performance ──
-    let _ = timeout(
-        PROCESS_TIMEOUT,
-        tokio::process::Command::new("powercfg")
-            .args(["/setactive", HIGH_PERF_GUID])
-            .output(),
-    )
-    .await;
+    // Step 3: fallback to High Performance
+    let mut cmd4 = tokio::process::Command::new("powercfg");
+    cmd4.args(["/setactive", HIGH_PERF_GUID]);
+    let _ = RUNNER.run(cmd4).await;
 
     Ok(())
 }
 
 pub async fn set_visual_effects(performance_mode: bool) -> Result<(), AppError> {
-    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
-
-    let (key, _) = hkcu
-        .create_subkey(REG_VISUAL_EFFECTS_KEY)
-        .map_err(|e| AppError::Registry(e.to_string()))?;
-
-    let value: u32 = if performance_mode { 2 } else { 1 };
-    key.set_value("VisualFXSetting", &value)
-        .map_err(|e| AppError::Registry(e.to_string()))?;
-
-    Ok(())
+    tracing::info!(performance_mode, "setting visual effects");
+    let val: u32 = if performance_mode { 2 } else { 1 };
+    hkcu().write_u32(REG_VISUAL_EFFECTS_KEY, "VisualFXSetting", val)
 }
 
 // ─── Hibernate / Fast Startup ──────────────────────────────────────────────
 
 pub async fn get_hibernate_settings() -> Result<HibernateSettings, AppError> {
-    let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
-
-    let hibernate_enabled = hklm
-        .open_subkey(REG_POWER_KEY)
-        .and_then(|k| k.get_value::<u32, _>("HibernateEnabled"))
-        .unwrap_or(1)
-        != 0;
-
-    let fast_startup_enabled = hklm
-        .open_subkey(REG_SESSION_POWER_KEY)
-        .and_then(|k| k.get_value::<u32, _>("HiberbootEnabled"))
-        .unwrap_or(0)
-        != 0;
-
+    let m = hklm();
     Ok(HibernateSettings {
-        hibernate_enabled,
-        fast_startup_enabled,
+        hibernate_enabled: m.read_bool(REG_POWER_KEY, "HibernateEnabled", true),
+        fast_startup_enabled: m.read_bool(REG_SESSION_POWER_KEY, "HiberbootEnabled", false),
     })
 }
 
 pub async fn set_hibernate(enabled: bool) -> Result<(), AppError> {
+    tracing::info!(enabled, "toggling hibernate");
     let arg = if enabled { "on" } else { "off" };
-    let output = timeout(
-        PROCESS_TIMEOUT,
-        tokio::process::Command::new("powercfg")
-            .args(["/hibernate", arg])
-            .output(),
-    )
-    .await
-    .map_err(|_| AppError::Custom("set_hibernate timed out".into()))?
-    .map_err(AppError::Io)?;
-
-    if !output.status.success() {
-        return Err(AppError::PowerShell(
-            String::from_utf8_lossy(&output.stderr).to_string(),
-        ));
-    }
+    let mut cmd = tokio::process::Command::new("powercfg");
+    cmd.args(["/hibernate", arg]);
+    RUNNER.run(cmd).await?;
     Ok(())
 }
 
 pub async fn set_fast_startup(enabled: bool) -> Result<(), AppError> {
-    let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
-    let (key, _) = hklm
-        .create_subkey(REG_SESSION_POWER_KEY)
-        .map_err(|e| AppError::Registry(e.to_string()))?;
-    let value: u32 = if enabled { 1 } else { 0 };
-    key.set_value("HiberbootEnabled", &value)
-        .map_err(|e| AppError::Registry(e.to_string()))?;
-    Ok(())
+    tracing::info!(enabled, "toggling fast startup");
+    let val: u32 = if enabled { 1 } else { 0 };
+    hklm().write_u32(REG_SESSION_POWER_KEY, "HiberbootEnabled", val)
 }
 
 // ─── Game Mode Preset ──────────────────────────────────────────────────────
@@ -554,20 +440,14 @@ pub async fn set_fast_startup(enabled: bool) -> Result<(), AppError> {
 /// Applies the Game Mode preset: High Performance power plan + Windows Game Mode.
 /// This is a one-shot action, not a toggle.
 pub async fn apply_game_mode_preset() -> Result<(), AppError> {
+    tracing::info!("applying game mode preset");
     // 1. Switch to High Performance power plan
-    let _ = timeout(
-        PROCESS_TIMEOUT,
-        tokio::process::Command::new("powercfg")
-            .args(["/setactive", HIGH_PERF_GUID])
-            .output(),
-    )
-    .await;
+    let mut cmd = tokio::process::Command::new("powercfg");
+    cmd.args(["/setactive", HIGH_PERF_GUID]);
+    let _ = RUNNER.run(cmd).await;
 
     // 2. Enable Windows Game Mode via registry
-    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
-    if let Ok((game_bar_key, _)) = hkcu.create_subkey(REG_GAME_BAR_KEY) {
-        let _ = game_bar_key.set_value("AutoGameModeEnabled", &1u32);
-    }
+    let _ = hkcu().write_u32(REG_GAME_BAR_KEY, "AutoGameModeEnabled", 1);
 
     Ok(())
 }
@@ -575,13 +455,8 @@ pub async fn apply_game_mode_preset() -> Result<(), AppError> {
 // ─── Network Optimizer ────────────────────────────────────────────────────
 
 pub async fn get_network_settings() -> Result<NetworkSettings, AppError> {
-    let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
-
-    let network_throttling_disabled = hklm
-        .open_subkey(REG_MULTIMEDIA_PROFILE_KEY)
-        .and_then(|k| k.get_value::<u32, _>("NetworkThrottlingIndex"))
-        .map(|v| v == 0xFFFF_FFFFu32)
-        .unwrap_or(false);
+    let network_throttling_disabled =
+        hklm().read_u32(REG_MULTIMEDIA_PROFILE_KEY, "NetworkThrottlingIndex", 10) == 0xFFFF_FFFF;
 
     Ok(NetworkSettings {
         network_throttling_disabled,
@@ -589,25 +464,19 @@ pub async fn get_network_settings() -> Result<NetworkSettings, AppError> {
 }
 
 pub async fn set_network_optimized(enabled: bool) -> Result<(), AppError> {
-    let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
-    let (key, _) = hklm
-        .create_subkey(REG_MULTIMEDIA_PROFILE_KEY)
-        .map_err(|e| AppError::Registry(e.to_string()))?;
-
+    tracing::info!(enabled, "toggling network optimization");
+    let lm = hklm();
     if enabled {
-        // Disable network throttling and prioritize applications
-        key.set_value("NetworkThrottlingIndex", &0xFFFF_FFFFu32)
-            .map_err(|e| AppError::Registry(e.to_string()))?;
-        key.set_value("SystemResponsiveness", &0u32)
-            .map_err(|e| AppError::Registry(e.to_string()))?;
+        lm.write_u32(
+            REG_MULTIMEDIA_PROFILE_KEY,
+            "NetworkThrottlingIndex",
+            0xFFFF_FFFF,
+        )?;
+        lm.write_u32(REG_MULTIMEDIA_PROFILE_KEY, "SystemResponsiveness", 0)?;
     } else {
-        // Restore Windows defaults
-        key.set_value("NetworkThrottlingIndex", &10u32)
-            .map_err(|e| AppError::Registry(e.to_string()))?;
-        key.set_value("SystemResponsiveness", &20u32)
-            .map_err(|e| AppError::Registry(e.to_string()))?;
+        lm.write_u32(REG_MULTIMEDIA_PROFILE_KEY, "NetworkThrottlingIndex", 10)?;
+        lm.write_u32(REG_MULTIMEDIA_PROFILE_KEY, "SystemResponsiveness", 20)?;
     }
-
     Ok(())
 }
 
@@ -664,18 +533,8 @@ pub async fn get_scheduled_tasks() -> Result<Vec<ScheduledTask>, AppError> {
         $results | Select-Object TaskName, TaskPath, @{N='State';E={$_.State.ToString()}} \
             | ConvertTo-Json -Compress";
 
-    let output = timeout(
-        PROCESS_TIMEOUT,
-        tokio::process::Command::new("powershell")
-            .args(["-NoProfile", "-Command", ps_command])
-            .output(),
-    )
-    .await
-    .map_err(|_| AppError::Custom("get_scheduled_tasks timed out".into()))?
-    .map_err(AppError::Io)?;
-
-    let json_str = String::from_utf8_lossy(&output.stdout);
-    let json_str = json_str.trim();
+    let output = RUNNER.powershell(ps_command).await?;
+    let json_str = output.stdout.trim();
 
     if json_str.is_empty() {
         return Ok(Vec::new());
@@ -700,11 +559,7 @@ pub async fn get_scheduled_tasks() -> Result<Vec<ScheduledTask>, AppError> {
         let state = v["State"].as_str().unwrap_or("Unknown").to_string();
 
         // Build the full path the same way we store in MANAGED_TASKS (no trailing slash on name)
-        let full_path = format!(
-            "{}{}",
-            task_path_raw.trim_end_matches('\\'),
-            task_name
-        );
+        let full_path = format!("{}{}", task_path_raw.trim_end_matches('\\'), task_name);
         let full_path_norm = full_path.to_lowercase();
 
         // Find the description in our curated list
@@ -726,10 +581,8 @@ pub async fn get_scheduled_tasks() -> Result<Vec<ScheduledTask>, AppError> {
     Ok(tasks)
 }
 
-pub async fn set_scheduled_task_enabled(
-    task_path: String,
-    enabled: bool,
-) -> Result<(), AppError> {
+pub async fn set_scheduled_task_enabled(task_path: String, enabled: bool) -> Result<(), AppError> {
+    tracing::info!(task = %task_path, enabled, "toggling scheduled task");
     // Validate the task path against our whitelist before executing
     let is_managed = MANAGED_TASKS
         .iter()
@@ -755,53 +608,23 @@ pub async fn set_scheduled_task_enabled(
         action, folder, name
     );
 
-    let output = timeout(
-        PROCESS_TIMEOUT,
-        tokio::process::Command::new("powershell")
-            .args(["-NoProfile", "-Command", &ps_command])
-            .output(),
-    )
-    .await
-    .map_err(|_| AppError::Custom("set_scheduled_task_enabled timed out".into()))?
-    .map_err(AppError::Io)?;
-
-    if !output.status.success() {
-        return Err(AppError::PowerShell(
-            String::from_utf8_lossy(&output.stderr).to_string(),
-        ));
-    }
-
+    RUNNER.powershell(&ps_command).await?;
     Ok(())
 }
 
 // ── GPU Hardware-Accelerated GPU Scheduling (HAGS) ──────────────────────────
 
+const REG_GRAPHICS_DRIVERS_KEY: &str = r"SYSTEM\CurrentControlSet\Control\GraphicsDrivers";
+
 pub async fn get_gpu_settings() -> Result<crate::models::optimizer::GpuSettings, AppError> {
-    use winreg::enums::*;
-    let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
-    let result = hklm.open_subkey(r"SYSTEM\CurrentControlSet\Control\GraphicsDrivers");
-    let hags_enabled = match result {
-        Ok(key) => {
-            let val: u32 = key.get_value("HwSchMode").unwrap_or(1);
-            val == 2
-        }
-        Err(_) => false,
-    };
+    let hags_enabled = hklm().read_u32(REG_GRAPHICS_DRIVERS_KEY, "HwSchMode", 1) == 2;
     Ok(crate::models::optimizer::GpuSettings { hags_enabled })
 }
 
 pub async fn set_gpu_hags(enabled: bool) -> Result<(), AppError> {
-    use winreg::enums::*;
-    let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
-    let key = hklm
-        .open_subkey_with_flags(
-            r"SYSTEM\CurrentControlSet\Control\GraphicsDrivers",
-            KEY_SET_VALUE,
-        )
-        .map_err(|e| AppError::Registry(e.to_string()))?;
+    tracing::info!(enabled, "toggling GPU hardware-accelerated scheduling");
     let val: u32 = if enabled { 2 } else { 1 };
-    key.set_value("HwSchMode", &val)
-        .map_err(|e| AppError::Registry(e.to_string()))
+    hklm().write_u32(REG_GRAPHICS_DRIVERS_KEY, "HwSchMode", val)
 }
 
 // ── Privacy Settings ──────────────────────────────────────────────────────────
@@ -809,123 +632,63 @@ pub async fn set_gpu_hags(enabled: bool) -> Result<(), AppError> {
 const REG_TELEMETRY_KEY: &str =
     r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection";
 const REG_SEARCH_KEY: &str = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Search";
-const REG_ADVERTISING_KEY: &str =
-    r"SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo";
+const REG_ADVERTISING_KEY: &str = r"SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo";
 const REG_ACTIVITY_KEY: &str = r"SOFTWARE\Policies\Microsoft\Windows\System";
 const REG_LOCATION_KEY: &str =
     r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location";
 
 pub async fn get_privacy_settings() -> Result<crate::models::optimizer::PrivacySettings, AppError> {
-    use winreg::enums::*;
-
-    let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
-    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
-
-    // Telemetry disabled: AllowTelemetry == 0
-    let telemetry_disabled = hklm
-        .open_subkey(REG_TELEMETRY_KEY)
-        .ok()
-        .and_then(|k| k.get_value::<u32, _>("AllowTelemetry").ok())
-        .map(|v| v == 0)
-        .unwrap_or(false);
-
-    // Bing search disabled: BingSearchEnabled == 0
-    let bing_search_disabled = hkcu
-        .open_subkey(REG_SEARCH_KEY)
-        .ok()
-        .and_then(|k| k.get_value::<u32, _>("BingSearchEnabled").ok())
-        .map(|v| v == 0)
-        .unwrap_or(false);
-
-    // Advertising ID disabled: Enabled == 0
-    let advertising_id_disabled = hkcu
-        .open_subkey(REG_ADVERTISING_KEY)
-        .ok()
-        .and_then(|k| k.get_value::<u32, _>("Enabled").ok())
-        .map(|v| v == 0)
-        .unwrap_or(false);
-
-    // Activity history disabled: EnableActivityFeed == 0
-    let activity_history_disabled = hklm
-        .open_subkey(REG_ACTIVITY_KEY)
-        .ok()
-        .and_then(|k| k.get_value::<u32, _>("EnableActivityFeed").ok())
-        .map(|v| v == 0)
-        .unwrap_or(false);
-
-    // Location disabled: Value == "Deny"
-    let location_disabled = hkcu
-        .open_subkey(REG_LOCATION_KEY)
-        .ok()
-        .and_then(|k| k.get_value::<String, _>("Value").ok())
-        .map(|v| v.to_lowercase() == "deny")
-        .unwrap_or(false);
+    let lm = hklm();
+    let cu = hkcu();
 
     Ok(crate::models::optimizer::PrivacySettings {
-        telemetry_disabled,
-        bing_search_disabled,
-        advertising_id_disabled,
-        activity_history_disabled,
-        location_disabled,
+        telemetry_disabled: lm.read_u32(REG_TELEMETRY_KEY, "AllowTelemetry", 1) == 0,
+        bing_search_disabled: cu.read_u32(REG_SEARCH_KEY, "BingSearchEnabled", 1) == 0,
+        advertising_id_disabled: cu.read_u32(REG_ADVERTISING_KEY, "Enabled", 1) == 0,
+        activity_history_disabled: lm.read_u32(REG_ACTIVITY_KEY, "EnableActivityFeed", 1) == 0,
+        location_disabled: cu
+            .read_string(REG_LOCATION_KEY, "Value", "Allow")
+            .to_lowercase()
+            == "deny",
     })
 }
 
 pub async fn set_privacy_setting(setting_key: String, disabled: bool) -> Result<(), AppError> {
-    use winreg::enums::*;
-
-    let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
-    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    tracing::info!(setting = %setting_key, disabled, "toggling privacy setting");
+    let lm = hklm();
+    let cu = hkcu();
+    let val: u32 = if disabled { 0 } else { 1 };
 
     match setting_key.as_str() {
         "telemetry" => {
-            let (key, _) = hklm
-                .create_subkey(REG_TELEMETRY_KEY)
-                .map_err(|e| AppError::Registry(e.to_string()))?;
-            let val: u32 = if disabled { 0 } else { 1 };
-            key.set_value("AllowTelemetry", &val)
-                .map_err(|e| AppError::Registry(e.to_string()))?;
-
+            lm.write_u32(REG_TELEMETRY_KEY, "AllowTelemetry", val)?;
             // Also set in the policies key for belt-and-suspenders
-            let policies_key = r"SOFTWARE\Policies\Microsoft\Windows\DataCollection";
-            if let Ok((pk, _)) = hklm.create_subkey(policies_key) {
-                let _ = pk.set_value("AllowTelemetry", &val);
-            }
+            let _ = lm.write_u32(
+                r"SOFTWARE\Policies\Microsoft\Windows\DataCollection",
+                "AllowTelemetry",
+                val,
+            );
         }
         "bing_search" => {
-            let (key, _) = hkcu
-                .create_subkey(REG_SEARCH_KEY)
-                .map_err(|e| AppError::Registry(e.to_string()))?;
-            let val: u32 = if disabled { 0 } else { 1 };
-            key.set_value("BingSearchEnabled", &val)
-                .map_err(|e| AppError::Registry(e.to_string()))?;
+            cu.write_u32(REG_SEARCH_KEY, "BingSearchEnabled", val)?;
         }
         "advertising_id" => {
-            let (key, _) = hkcu
-                .create_subkey(REG_ADVERTISING_KEY)
-                .map_err(|e| AppError::Registry(e.to_string()))?;
-            let val: u32 = if disabled { 0 } else { 1 };
-            key.set_value("Enabled", &val)
-                .map_err(|e| AppError::Registry(e.to_string()))?;
+            cu.write_u32(REG_ADVERTISING_KEY, "Enabled", val)?;
         }
         "activity_history" => {
-            let (key, _) = hklm
-                .create_subkey(REG_ACTIVITY_KEY)
-                .map_err(|e| AppError::Registry(e.to_string()))?;
-            let val: u32 = if disabled { 0 } else { 1 };
-            key.set_value("EnableActivityFeed", &val)
-                .map_err(|e| AppError::Registry(e.to_string()))?;
-            key.set_value("PublishUserActivities", &val)
-                .map_err(|e| AppError::Registry(e.to_string()))?;
+            lm.write_u32(REG_ACTIVITY_KEY, "EnableActivityFeed", val)?;
+            lm.write_u32(REG_ACTIVITY_KEY, "PublishUserActivities", val)?;
         }
         "location" => {
-            let (key, _) = hkcu
-                .create_subkey(REG_LOCATION_KEY)
-                .map_err(|e| AppError::Registry(e.to_string()))?;
-            let val = if disabled { "Deny" } else { "Allow" };
-            key.set_value("Value", &val)
-                .map_err(|e| AppError::Registry(e.to_string()))?;
+            let str_val = if disabled { "Deny" } else { "Allow" };
+            cu.write_string(REG_LOCATION_KEY, "Value", str_val)?;
         }
-        _ => return Err(AppError::Custom(format!("Unknown privacy setting: {}", setting_key))),
+        _ => {
+            return Err(AppError::Custom(format!(
+                "Unknown privacy setting: {}",
+                setting_key
+            )))
+        }
     }
 
     Ok(())
@@ -934,6 +697,7 @@ pub async fn set_privacy_setting(setting_key: String, disabled: bool) -> Result<
 // ── RAM Optimization ─────────────────────────────────────────────────────────
 
 pub async fn optimize_ram() -> Result<crate::models::optimizer::RamOptimizationResult, AppError> {
+    tracing::info!("starting RAM optimization");
     let script = r#"
 $before = [long](Get-WmiObject Win32_OperatingSystem).FreePhysicalMemory * 1024
 Add-Type -TypeDefinition @"
@@ -957,28 +721,10 @@ if ($freed -lt 0) { $freed = 0 }
 Write-Output $freed
 "#;
 
-    let output = timeout(
-        PROCESS_TIMEOUT,
-        tokio::process::Command::new("powershell")
-            .args(&[
-                "-NoProfile",
-                "-NonInteractive",
-                "-ExecutionPolicy",
-                "Bypass",
-                "-Command",
-                script,
-            ])
-            .output(),
-    )
-    .await
-    .map_err(|_| AppError::Custom("RAM optimization timed out".to_string()))?
-    .map_err(AppError::Io)?;
-
-    if !output.status.success() {
-        return Ok(crate::models::optimizer::RamOptimizationResult { freed_bytes: 0 });
-    }
-
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let freed_bytes: i64 = stdout.trim().parse().unwrap_or(0);
+    let result = RUNNER.powershell(script).await;
+    let freed_bytes: i64 = match result {
+        Ok(output) => output.stdout.trim().parse().unwrap_or(0),
+        Err(_) => 0,
+    };
     Ok(crate::models::optimizer::RamOptimizationResult { freed_bytes })
 }

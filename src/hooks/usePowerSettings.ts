@@ -1,43 +1,36 @@
-import { useState, useCallback, useEffect } from "react";
-import { useTranslation } from "react-i18next";
+import { useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { sanitizeError } from "../lib/errors";
 import { optimizerService } from "../services/optimizerService";
 import { useOptimizerStore } from "../stores/optimizerStore";
-import { useUiStore } from "../stores/uiStore";
+import { useNotify } from "./useNotify";
 
 export function usePowerSettings() {
   const { powerPlans, visualEffectsPerformanceMode } = useOptimizerStore();
-  const { addToast } = useUiStore();
-  const { t } = useTranslation();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const notify = useNotify();
 
-  const load = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
+  const { isLoading, error: rawError, refetch } = useQuery({
+    queryKey: ["power-plans"],
+    queryFn: async () => {
       const plans = await optimizerService.getPowerPlans();
       useOptimizerStore.getState().setPowerPlans(plans);
-    } catch (err) {
-      setError(sanitizeError(err));
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      return plans;
+    },
+  });
 
-  useEffect(() => { load(); }, [load]);
+  const error = rawError ? sanitizeError(rawError) : null;
 
   const changePowerPlan = useCallback(
     async (planGuid: string) => {
       try {
         await optimizerService.setPowerPlan(planGuid);
-        addToast(t('optimizer.toast.powerPlanUpdated'), "success");
-        await load();
+        notify("optimizer.toast.powerPlanUpdated", "success");
+        await refetch();
       } catch (err) {
-        addToast(t('optimizer.toast.powerPlanFailed', { msg: sanitizeError(err) }), "error");
+        notify("optimizer.toast.powerPlanFailed", "error", { msg: sanitizeError(err) });
       }
     },
-    [addToast, load, t]
+    [refetch, notify]
   );
 
   const setVisualEffects = useCallback(
@@ -45,38 +38,33 @@ export function usePowerSettings() {
       try {
         await optimizerService.setVisualEffects(performanceMode);
         useOptimizerStore.getState().setVisualEffectsPerformanceMode(performanceMode);
-        addToast(
-          performanceMode
-            ? t('optimizer.toast.visualPerformance')
-            : t('optimizer.toast.visualRestored'),
+        notify(
+          performanceMode ? "optimizer.toast.visualPerformance" : "optimizer.toast.visualRestored",
           "success"
         );
       } catch (err) {
-        addToast(t('optimizer.toast.visualFailed', { msg: sanitizeError(err) }), "error");
+        notify("optimizer.toast.visualFailed", "error", { msg: sanitizeError(err) });
       }
     },
-    [addToast, t]
+    [notify]
   );
 
   const applyUltimatePerformance = useCallback(async () => {
     try {
       await optimizerService.applyUltimatePerformance();
-      addToast(t("optimizer.toast.ultimatePerformanceApplied"), "success");
-      await load(); // reload to reflect newly active plan
+      notify("optimizer.toast.ultimatePerformanceApplied", "success");
+      await refetch();
     } catch (err) {
-      addToast(
-        t("optimizer.toast.powerPlanFailed", { msg: sanitizeError(err) }),
-        "error"
-      );
+      notify("optimizer.toast.powerPlanFailed", "error", { msg: sanitizeError(err) });
     }
-  }, [addToast, load, t]);
+  }, [refetch, notify]);
 
   return {
     powerPlans,
     visualEffectsPerformanceMode,
     isLoading,
     error,
-    load,
+    load: refetch,
     changePowerPlan,
     setVisualEffects,
     applyUltimatePerformance,

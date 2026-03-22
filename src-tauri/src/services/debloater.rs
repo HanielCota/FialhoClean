@@ -1,5 +1,6 @@
 use crate::errors::AppError;
 use crate::models::debloater::{AppInfo, BloatCategory, BloatwareEntry, RemoveResult, SafetyLevel};
+use std::collections::HashSet;
 use std::time::Duration;
 use tokio::time::timeout;
 
@@ -854,9 +855,15 @@ pub async fn get_installed_apps() -> Result<Vec<AppInfo>, AppError> {
     }
 
     let json_str = String::from_utf8_lossy(&output.stdout);
+    let raw_json = json_str.trim();
 
-    let raw: Vec<serde_json::Value> =
-        serde_json::from_str(&json_str).map_err(|e| AppError::Parse(e.to_string()))?;
+    let raw: Vec<serde_json::Value> = if raw_json.is_empty() {
+        Vec::new()
+    } else if raw_json.starts_with('[') {
+        serde_json::from_str(raw_json).map_err(|e| AppError::Parse(e.to_string()))?
+    } else {
+        vec![serde_json::from_str(raw_json).map_err(|e| AppError::Parse(e.to_string()))?]
+    };
 
     let db = get_bloatware_database();
 
@@ -903,9 +910,24 @@ fn parse_app_entry(v: serde_json::Value, db: &[BloatwareEntry]) -> Option<AppInf
 }
 
 pub async fn remove_apps(package_full_names: Vec<String>) -> Result<Vec<RemoveResult>, AppError> {
+    tracing::info!(count = package_full_names.len(), "removing apps");
+    let allowed_packages: HashSet<String> = get_installed_apps()
+        .await?
+        .into_iter()
+        .map(|app| app.package_full_name)
+        .collect();
     let mut results = Vec::new();
 
     for pkg in package_full_names {
+        if !allowed_packages.contains(&pkg) {
+            results.push(RemoveResult {
+                package_full_name: pkg,
+                success: false,
+                error: Some("package is not in the removable apps list".to_string()),
+            });
+            continue;
+        }
+
         let result = remove_single_app(&pkg).await;
         results.push(result);
     }

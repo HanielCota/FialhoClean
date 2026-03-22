@@ -18,12 +18,13 @@ import { Card } from "../shared/Card";
 import { SectionHeading } from "../shared/SectionHeading";
 
 function StatusBadge({ status }: { status: RepairStatus }) {
+  const { t } = useTranslation();
   if (status === "idle") return null;
   if (status === "running") {
     return (
       <span className="flex items-center gap-1.5 text-[12px] font-medium text-accent">
         <span className="w-3.5 h-3.5 border-2 border-accent/40 border-t-accent rounded-full animate-spin" />
-        Running…
+        {t("repair.status.running")}
       </span>
     );
   }
@@ -31,19 +32,20 @@ function StatusBadge({ status }: { status: RepairStatus }) {
     return (
       <span className="flex items-center gap-1.5 text-[12px] font-medium text-green">
         <CheckCircle2 className="w-3.5 h-3.5" />
-        Done
+        {t("repair.status.done")}
       </span>
     );
   }
   return (
     <span className="flex items-center gap-1.5 text-[12px] font-medium text-red">
       <XCircle className="w-3.5 h-3.5" />
-      Failed
+      {t("repair.status.failed")}
     </span>
   );
 }
 
 function OutputPanel({ output }: { output: string }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   if (!output) return null;
   const lines = output.split("\n").filter(Boolean);
@@ -63,9 +65,9 @@ function OutputPanel({ output }: { output: string }) {
           className="w-full flex items-center justify-center gap-1 py-1.5 border-t border-white/[0.06] text-[11px] text-text-muted hover:text-text transition-colors"
         >
           {expanded ? (
-            <><ChevronUp className="w-3 h-3" /> Show less</>
+            <><ChevronUp className="w-3 h-3" /> {t("repair.output.showLess")}</>
           ) : (
-            <><ChevronDown className="w-3 h-3" /> Show full output ({lines.length} lines)</>
+            <><ChevronDown className="w-3 h-3" /> {t("repair.output.showFull", { count: lines.length })}</>
           )}
         </button>
       )}

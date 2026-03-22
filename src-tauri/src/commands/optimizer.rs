@@ -84,10 +84,7 @@ pub async fn get_scheduled_tasks() -> Result<Vec<ScheduledTask>, AppError> {
 }
 
 #[tauri::command]
-pub async fn set_scheduled_task_enabled(
-    task_path: String,
-    enabled: bool,
-) -> Result<(), AppError> {
+pub async fn set_scheduled_task_enabled(task_path: String, enabled: bool) -> Result<(), AppError> {
     crate::services::optimizer::set_scheduled_task_enabled(task_path, enabled).await
 }
 

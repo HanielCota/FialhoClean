@@ -1,45 +1,38 @@
-import { useState, useCallback, useEffect } from "react";
-import { useTranslation } from "react-i18next";
+import { useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { sanitizeError } from "../lib/errors";
 import { optimizerService } from "../services/optimizerService";
 import { useOptimizerStore } from "../stores/optimizerStore";
-import { useUiStore } from "../stores/uiStore";
+import { useNotify } from "./useNotify";
 import type { ServiceAction } from "../types/optimizer";
 
 export function useServices() {
   const { services } = useOptimizerStore();
-  const { addToast } = useUiStore();
-  const { t } = useTranslation();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const notify = useNotify();
 
-  const load = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
+  const { isLoading, error: rawError, refetch } = useQuery({
+    queryKey: ["services"],
+    queryFn: async () => {
       const svcs = await optimizerService.getServices();
       useOptimizerStore.getState().setServices(svcs);
-    } catch (err) {
-      setError(sanitizeError(err));
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      return svcs;
+    },
+  });
 
-  useEffect(() => { load(); }, [load]);
+  const error = rawError ? sanitizeError(rawError) : null;
 
   const changeServiceStatus = useCallback(
     async (name: string, action: ServiceAction) => {
       try {
         await optimizerService.setServiceStatus(name, action);
-        addToast(t('optimizer.toast.serviceAction', { name, action }), "success");
-        await load();
+        notify("optimizer.toast.serviceAction", "success", { name, action });
+        await refetch();
       } catch (err) {
-        addToast(t('optimizer.toast.serviceFailed', { msg: sanitizeError(err) }), "error");
+        notify("optimizer.toast.serviceFailed", "error", { msg: sanitizeError(err) });
       }
     },
-    [addToast, load, t]
+    [refetch, notify]
   );
 
-  return { services, isLoading, error, load, changeServiceStatus };
+  return { services, isLoading, error, load: refetch, changeServiceStatus };
 }

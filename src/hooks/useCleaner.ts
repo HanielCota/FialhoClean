@@ -1,25 +1,21 @@
 import { useCallback, useRef } from "react";
-import { useTranslation } from "react-i18next";
 import { sanitizeError } from "../lib/errors";
 import { formatBytes } from "../lib/format";
 import { cleanerService } from "../services/cleanerService";
 import { useCleanerStore } from "../stores/cleanerStore";
-import { useUiStore } from "../stores/uiStore";
 import type { CleanCategory, FileGroup, ScanSummary } from "../types/cleaner";
 import type { ScanProgressStatus } from "../stores/cleanerStore";
+import { useNotify } from "./useNotify";
 
 export function useCleaner() {
   const store = useCleanerStore();
-  const { addToast } = useUiStore();
-  const { t } = useTranslation();
+  const notify = useNotify();
 
-  // Ref shared between scan() and cancelScan() — no state needed.
   const cancelledRef = useRef(false);
 
   const scan = useCallback(async () => {
     cancelledRef.current = false;
 
-    // Always read current state — avoids stale closure issues
     const s = useCleanerStore.getState();
     const categories = [...s.selectedCategories] as CleanCategory[];
 
@@ -28,7 +24,6 @@ export function useCleaner() {
     s.setScanSummary(null);
     s.setCleanResult(null);
 
-    // Initialise per-category progress
     const initialProgress = Object.fromEntries(
       categories.map((c) => [c, "pending" as const])
     ) as Record<CleanCategory, ScanProgressStatus>;
@@ -43,7 +38,6 @@ export function useCleaner() {
         useCleanerStore.getState().updateCategoryProgress(category, "scanning");
         try {
           const result = await cleanerService.scan([category]);
-
           if (cancelledRef.current) break;
 
           const catResult = result.categories[0];
@@ -55,10 +49,7 @@ export function useCleaner() {
       }
 
       if (!cancelledRef.current) {
-        const totalSize = allCategoryResults.reduce(
-          (sum, c) => sum + c.total_size_bytes,
-          0
-        );
+        const totalSize = allCategoryResults.reduce((sum, c) => sum + c.total_size_bytes, 0);
         useCleanerStore.getState().setScanSummary({
           categories: allCategoryResults,
           total_size_bytes: totalSize,
@@ -68,14 +59,13 @@ export function useCleaner() {
       if (!cancelledRef.current) {
         const msg = sanitizeError(err);
         useCleanerStore.getState().setError(msg);
-        addToast(t('cleaner.toast.scanFailed', { msg }), "error");
+        notify("cleaner.toast.scanFailed", "error", { msg });
       }
     } finally {
       useCleanerStore.getState().setIsScanning(false);
     }
-  }, [addToast, t]);
+  }, [notify]);
 
-  // Cancels an in-progress scan and resets all scan state.
   const cancelScan = useCallback(() => {
     cancelledRef.current = true;
     useCleanerStore.getState().reset();
@@ -98,27 +88,26 @@ export function useCleaner() {
     try {
       const result = await cleanerService.clean(fileGroups);
       useCleanerStore.getState().setCleanResult(result);
-      // Keep scanSummary — success screen uses it for per-category breakdown
       useCleanerStore.getState().addCleanHistory({
         freed_bytes: result.freed_bytes,
         deleted_count: result.deleted_count,
         categories: fileGroups.map((g) => g.category),
       });
-      addToast(
-        t('cleaner.toast.cleaned', {
-          count: result.deleted_count,
-          size: formatBytes(result.freed_bytes),
-        }),
-        "success"
-      );
+      const hasIssues = result.skipped_count > 0 || result.errors.length > 0;
+      notify(hasIssues ? "cleaner.toast.cleanedPartial" : "cleaner.toast.cleaned", hasIssues ? "warning" : "success", {
+        count: result.deleted_count,
+        size: formatBytes(result.freed_bytes),
+        skipped: result.skipped_count,
+        errors: result.errors.length,
+      });
     } catch (err) {
       const msg = sanitizeError(err);
       useCleanerStore.getState().setError(msg);
-      addToast(t('cleaner.toast.cleanFailed', { msg }), "error");
+      notify("cleaner.toast.cleanFailed", "error", { msg });
     } finally {
       useCleanerStore.getState().setIsCleaning(false);
     }
-  }, [addToast, t]);
+  }, [notify]);
 
   return { scan, clean, cancelScan, ...store };
 }

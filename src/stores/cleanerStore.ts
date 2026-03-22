@@ -15,13 +15,26 @@ export interface CleanHistoryEntry {
   categories: string[];
 }
 
+function isValidHistoryEntry(item: unknown): item is CleanHistoryEntry {
+  if (typeof item !== "object" || item === null) return false;
+  const obj = item as Record<string, unknown>;
+  return (
+    typeof obj.id === "string" &&
+    typeof obj.date === "string" &&
+    typeof obj.freed_bytes === "number" &&
+    typeof obj.deleted_count === "number" &&
+    Array.isArray(obj.categories) &&
+    obj.categories.every((c: unknown) => typeof c === "string")
+  );
+}
+
 function loadHistory(): CleanHistoryEntry[] {
   try {
     const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) return [];
-    return parsed as CleanHistoryEntry[];
+    return parsed.filter(isValidHistoryEntry);
   } catch {
     return [];
   }

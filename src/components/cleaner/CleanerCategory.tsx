@@ -48,8 +48,8 @@ export function CleanerCategory({
           </p>
           <p className="text-[12px] text-text-muted">
             {category === "recycle_bin"
-              ? t('cleaner.results.estimated').replace('· ', '')
-              : `${scanResult.files.length} ${t('cleaner.results.files', { count: scanResult.files.length }).replace('· ', '')}`}
+              ? t('cleaner.results.estimatedShort')
+              : t('cleaner.results.fileCount', { count: scanResult.files.length })}
           </p>
         </div>
       )}

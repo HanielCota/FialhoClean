@@ -2,10 +2,11 @@ use crate::errors::AppError;
 use crate::models::cleaner::{
     CategoryScanResult, CleanCategory, CleanResult, FileEntry, FileGroup, ScanSummary,
 };
-use std::path::Path;
+use crate::services::process_runner::ProcessRunner;
+use crate::services::scan_helper::{empty_result, scan_paths, scan_single_path};
+use std::path::{Path, PathBuf};
 use std::time::{Duration, UNIX_EPOCH};
 use tokio::fs;
-use tokio::time::timeout;
 
 const WINDOWS_TEMP_FALLBACK: &str = r"C:\Windows\Temp";
 const WINDOWS_LOGS_PATH: &str = r"C:\Windows\Logs";
@@ -22,8 +23,32 @@ const CHROME_CODE_CACHE_SUBPATH: &str = r"Google\Chrome\User Data\Default\Code C
 const EDGE_CACHE_SUBPATH: &str = r"Microsoft\Edge\User Data\Default\Cache";
 const EDGE_CODE_CACHE_SUBPATH: &str = r"Microsoft\Edge\User Data\Default\Code Cache";
 
-/// Maximum time to wait for any external process (powershell, etc.).
-const PROCESS_TIMEOUT: Duration = Duration::from_secs(30);
+/// Shared runner for all cleaner subprocesses (30s timeout).
+const RUNNER: ProcessRunner = ProcessRunner::new("cleaner", Duration::from_secs(30));
+
+#[cfg(windows)]
+const FILE_ATTRIBUTE_REPARSE_POINT: u32 = 0x0400;
+
+#[cfg(windows)]
+fn is_reparse_point(metadata: &std::fs::Metadata) -> bool {
+    use std::os::windows::fs::MetadataExt;
+
+    metadata.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT != 0
+}
+
+#[cfg(not(windows))]
+fn is_reparse_point(_metadata: &std::fs::Metadata) -> bool {
+    false
+}
+
+fn canonicalize_for_scope(path: &Path) -> Option<PathBuf> {
+    std::fs::canonicalize(path).ok().or_else(|| {
+        let file_name = path.file_name()?.to_os_string();
+        let parent = path.parent()?;
+        let resolved_parent = std::fs::canonicalize(parent).ok()?;
+        Some(resolved_parent.join(file_name))
+    })
+}
 
 /// Returns true if `path` is within a directory legitimately scanned for
 /// `category`. Rejects null bytes, parent-directory traversal (..), and
@@ -37,8 +62,12 @@ fn is_path_allowed(path: &str, category: &CleanCategory) -> bool {
     if path.contains('\0') {
         return false;
     }
+    let path_obj = Path::new(path);
+    if !path_obj.is_absolute() {
+        return false;
+    }
     // Reject parent-directory traversal regardless of how it is encoded.
-    if Path::new(path)
+    if path_obj
         .components()
         .any(|c| matches!(c, std::path::Component::ParentDir))
     {
@@ -58,14 +87,9 @@ fn is_path_allowed(path: &str, category: &CleanCategory) -> bool {
             v
         }
         CleanCategory::BrowserCache => {
-            let mut v = Vec::new();
-            if let Ok(t) = std::env::var("LOCALAPPDATA") {
-                v.push(t);
-            }
-            if let Ok(t) = std::env::var("APPDATA") {
-                v.push(t);
-            }
-            v
+            let local_app_data = std::env::var("LOCALAPPDATA").unwrap_or_default();
+            let app_data = std::env::var("APPDATA").unwrap_or_default();
+            browser_cache_paths(&local_app_data, &app_data)
         }
         CleanCategory::OldLogs => {
             let mut v = vec![WINDOWS_LOGS_PATH.to_string()];
@@ -142,26 +166,65 @@ fn is_path_allowed(path: &str, category: &CleanCategory) -> bool {
         CleanCategory::RecycleBin | CleanCategory::DnsCache => return false,
     };
 
+    let Some(resolved_path) = canonicalize_for_scope(path_obj) else {
+        return false;
+    };
+
     // Special exact-path check for MEMORY.DMP.
-    if *category == CleanCategory::MemoryDumps
-        && path.to_lowercase() == WINDOWS_MEMORY_DMP.to_lowercase()
-    {
-        return true;
+    if *category == CleanCategory::MemoryDumps {
+        if let Some(memory_dump_path) = canonicalize_for_scope(Path::new(WINDOWS_MEMORY_DMP)) {
+            if resolved_path == memory_dump_path {
+                return true;
+            }
+        }
     }
 
-    // Case-insensitive prefix match (Windows paths are case-insensitive).
-    // The trailing separator ensures "C:\Temp" never matches "C:\TempFoo\file".
-    let path_lower = path.to_lowercase();
-    allowed_prefixes.iter().any(|prefix| {
-        if prefix.is_empty() {
-            return false;
-        }
-        let mut p = prefix.to_lowercase();
-        if !p.ends_with('\\') {
-            p.push('\\');
-        }
-        path_lower.starts_with(&p)
-    })
+    allowed_prefixes
+        .iter()
+        .filter(|prefix| !prefix.is_empty())
+        .filter_map(|prefix| canonicalize_for_scope(Path::new(prefix)))
+        .any(|prefix| resolved_path.starts_with(prefix))
+        && category_path_shape_matches(path, category)
+}
+
+fn browser_cache_paths(local_app_data: &str, app_data: &str) -> Vec<String> {
+    let mut cache_paths = vec![
+        format!(r"{}\{}", local_app_data, CHROME_CACHE_SUBPATH),
+        format!(r"{}\{}", local_app_data, CHROME_CODE_CACHE_SUBPATH),
+        format!(r"{}\{}", local_app_data, EDGE_CACHE_SUBPATH),
+        format!(r"{}\{}", local_app_data, EDGE_CODE_CACHE_SUBPATH),
+    ];
+    if let Some(ff) = find_firefox_cache(app_data) {
+        cache_paths.push(ff);
+    }
+    cache_paths
+}
+
+fn category_path_shape_matches(path: &str, category: &CleanCategory) -> bool {
+    match category {
+        CleanCategory::OldLogs => has_extension(path, "log"),
+        CleanCategory::ThumbnailCache => file_name_starts_with(path, "thumbcache_"),
+        CleanCategory::IconCache => file_name_starts_with(path, "iconcache_"),
+        _ => true,
+    }
+}
+
+fn has_extension(path: &str, ext: &str) -> bool {
+    Path::new(path)
+        .extension()
+        .map(|e| e.to_string_lossy().eq_ignore_ascii_case(ext))
+        .unwrap_or(false)
+}
+
+fn file_name_starts_with(path: &str, prefix: &str) -> bool {
+    Path::new(path)
+        .file_name()
+        .map(|n| {
+            n.to_string_lossy()
+                .to_ascii_lowercase()
+                .starts_with(&prefix.to_ascii_lowercase())
+        })
+        .unwrap_or(false)
 }
 
 pub async fn scan_categories(categories: Vec<CleanCategory>) -> Result<ScanSummary, AppError> {
@@ -211,64 +274,24 @@ async fn scan_single_category(category: &CleanCategory) -> Result<CategoryScanRe
 
 async fn scan_temp_files(category: &CleanCategory) -> Result<CategoryScanResult, AppError> {
     let user_temp = std::env::var("TEMP").unwrap_or_else(|_| WINDOWS_TEMP_FALLBACK.to_string());
-    let paths = vec![user_temp];
-
-    let mut all_files = Vec::new();
-    let mut needs_elevation = false;
-
-    for path_str in &paths {
-        let path = Path::new(path_str);
-        match collect_files(path).await {
-            Ok(mut files) => all_files.append(&mut files),
-            Err(AppError::PermissionDenied { .. }) => {
-                needs_elevation = true;
-            }
-            Err(_) => {}
-        }
-    }
-
-    let total_size_bytes = all_files.iter().map(|f| f.size_bytes).sum();
-
-    Ok(CategoryScanResult {
-        category: category.clone(),
-        files: all_files,
-        total_size_bytes,
-        needs_elevation,
-        error: None,
+    scan_paths(category, &[&user_temp], |p| {
+        let owned = p.to_path_buf();
+        Box::pin(async move { collect_files(&owned).await })
     })
+    .await
 }
 
 async fn scan_browser_cache(category: &CleanCategory) -> Result<CategoryScanResult, AppError> {
     let local_app_data = std::env::var("LOCALAPPDATA").unwrap_or_default();
     let app_data = std::env::var("APPDATA").unwrap_or_default();
 
-    let mut cache_paths = vec![
-        format!(r"{}\{}", local_app_data, CHROME_CACHE_SUBPATH),
-        format!(r"{}\{}", local_app_data, CHROME_CODE_CACHE_SUBPATH),
-        format!(r"{}\{}", local_app_data, EDGE_CACHE_SUBPATH),
-        format!(r"{}\{}", local_app_data, EDGE_CODE_CACHE_SUBPATH),
-    ];
-    if let Some(ff) = find_firefox_cache(&app_data) {
-        cache_paths.push(ff);
-    }
-
-    let mut all_files = Vec::new();
-    for path_str in &cache_paths {
-        let path = Path::new(path_str);
-        if let Ok(mut files) = collect_files(path).await {
-            all_files.append(&mut files);
-        }
-    }
-
-    let total_size_bytes = all_files.iter().map(|f| f.size_bytes).sum();
-
-    Ok(CategoryScanResult {
-        category: category.clone(),
-        files: all_files,
-        total_size_bytes,
-        needs_elevation: false,
-        error: None,
+    let cache_paths = browser_cache_paths(&local_app_data, &app_data);
+    let refs: Vec<&str> = cache_paths.iter().map(|s| s.as_str()).collect();
+    scan_paths(category, &refs, |p| {
+        let owned = p.to_path_buf();
+        Box::pin(async move { collect_files(&owned).await })
     })
+    .await
 }
 
 fn find_firefox_cache(app_data: &str) -> Option<String> {
@@ -288,164 +311,52 @@ fn find_firefox_cache(app_data: &str) -> Option<String> {
 }
 
 async fn scan_recycle_bin(category: &CleanCategory) -> Result<CategoryScanResult, AppError> {
-    // We can't directly enumerate $Recycle.Bin safely, so we return a placeholder.
-    // Actual deletion uses SHEmptyRecycleBin via PowerShell.
-    Ok(CategoryScanResult {
-        category: category.clone(),
-        files: vec![],
-        total_size_bytes: estimate_recycle_bin_size().await,
-        needs_elevation: false,
-        error: None,
-    })
+    let mut result = empty_result(category);
+    result.total_size_bytes = estimate_recycle_bin_size().await;
+    Ok(result)
 }
 
 /// Estimates the recycle bin size via PowerShell.
-/// Uses tokio::process::Command (non-blocking) with a hard timeout.
 async fn estimate_recycle_bin_size() -> u64 {
-    let result = timeout(
-        PROCESS_TIMEOUT,
-        tokio::process::Command::new("powershell")
-            .args([
-                "-NoProfile",
-                "-Command",
-                "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; \
-                 $OutputEncoding = [System.Text.Encoding]::UTF8; \
-                 (New-Object -ComObject Shell.Application).NameSpace(0xA).Items() \
-                 | Measure-Object -Property Size -Sum \
-                 | Select-Object -ExpandProperty Sum",
-            ])
-            .output(),
-    )
-    .await;
-
-    result
+    let ps = "(New-Object -ComObject Shell.Application).NameSpace(0xA).Items() \
+              | Measure-Object -Property Size -Sum \
+              | Select-Object -ExpandProperty Sum";
+    RUNNER
+        .powershell_utf8(ps)
+        .await
         .ok()
-        .and_then(|r| r.ok())
-        .and_then(|o| String::from_utf8(o.stdout).ok())
-        .and_then(|s| s.trim().parse::<u64>().ok())
+        .and_then(|o| o.stdout.trim().parse::<u64>().ok())
         .unwrap_or(0)
 }
 
 async fn scan_old_logs(category: &CleanCategory) -> Result<CategoryScanResult, AppError> {
     let temp = std::env::var("TEMP").unwrap_or_default();
-    let log_paths = vec![temp, WINDOWS_LOGS_PATH.to_string()];
-
-    let mut all_files = Vec::new();
-    let mut needs_elevation = false;
-
-    for path_str in &log_paths {
-        let path = Path::new(path_str);
-        match collect_files_by_extension(path, "log").await {
-            Ok(mut files) => all_files.append(&mut files),
-            Err(AppError::PermissionDenied { .. }) => needs_elevation = true,
-            Err(_) => {}
-        }
-    }
-
-    let total_size_bytes = all_files.iter().map(|f| f.size_bytes).sum();
-
-    Ok(CategoryScanResult {
-        category: category.clone(),
-        files: all_files,
-        total_size_bytes,
-        needs_elevation,
-        error: None,
+    let logs_path = WINDOWS_LOGS_PATH.to_string();
+    let refs: Vec<&str> = vec![&temp, &logs_path];
+    scan_paths(category, &refs, |p| {
+        let owned = p.to_path_buf();
+        Box::pin(async move { collect_files_by_extension(&owned, "log").await })
     })
+    .await
 }
 
 async fn scan_prefetch(category: &CleanCategory) -> Result<CategoryScanResult, AppError> {
     let path = Path::new(WINDOWS_PREFETCH_PATH);
-
-    match collect_files(path).await {
-        Ok(files) => {
-            let total_size_bytes = files.iter().map(|f| f.size_bytes).sum();
-            Ok(CategoryScanResult {
-                category: category.clone(),
-                files,
-                total_size_bytes,
-                needs_elevation: false,
-                error: None,
-            })
-        }
-        Err(AppError::PermissionDenied { .. }) => Ok(CategoryScanResult {
-            category: category.clone(),
-            files: vec![],
-            total_size_bytes: 0,
-            needs_elevation: true,
-            error: None,
-        }),
-        Err(e) => Ok(CategoryScanResult {
-            category: category.clone(),
-            files: vec![],
-            total_size_bytes: 0,
-            needs_elevation: false,
-            error: Some(e.to_string()),
-        }),
-    }
+    scan_single_path(category, path, collect_files(path)).await
 }
 
 async fn scan_windows_update_cache(
     category: &CleanCategory,
 ) -> Result<CategoryScanResult, AppError> {
     let path = Path::new(WINDOWS_UPDATE_DOWNLOAD_PATH);
-    match collect_files(path).await {
-        Ok(files) => {
-            let total_size_bytes = files.iter().map(|f| f.size_bytes).sum();
-            Ok(CategoryScanResult {
-                category: category.clone(),
-                files,
-                total_size_bytes,
-                needs_elevation: false,
-                error: None,
-            })
-        }
-        Err(AppError::PermissionDenied { .. }) => Ok(CategoryScanResult {
-            category: category.clone(),
-            files: vec![],
-            total_size_bytes: 0,
-            needs_elevation: true,
-            error: None,
-        }),
-        Err(e) => Ok(CategoryScanResult {
-            category: category.clone(),
-            files: vec![],
-            total_size_bytes: 0,
-            needs_elevation: false,
-            error: Some(e.to_string()),
-        }),
-    }
+    scan_single_path(category, path, collect_files(path)).await
 }
 
 async fn scan_delivery_optimization(
     category: &CleanCategory,
 ) -> Result<CategoryScanResult, AppError> {
     let path = Path::new(WINDOWS_DELIVERY_OPT_PATH);
-    match collect_files(path).await {
-        Ok(files) => {
-            let total_size_bytes = files.iter().map(|f| f.size_bytes).sum();
-            Ok(CategoryScanResult {
-                category: category.clone(),
-                files,
-                total_size_bytes,
-                needs_elevation: false,
-                error: None,
-            })
-        }
-        Err(AppError::PermissionDenied { .. }) => Ok(CategoryScanResult {
-            category: category.clone(),
-            files: vec![],
-            total_size_bytes: 0,
-            needs_elevation: true,
-            error: None,
-        }),
-        Err(e) => Ok(CategoryScanResult {
-            category: category.clone(),
-            files: vec![],
-            total_size_bytes: 0,
-            needs_elevation: false,
-            error: Some(e.to_string()),
-        }),
-    }
+    scan_single_path(category, path, collect_files(path)).await
 }
 
 async fn scan_windows_error_reports(
@@ -461,94 +372,36 @@ async fn scan_windows_error_reports(
         format!(r"{}\Microsoft\Windows\WER\ReportQueue", program_data),
     ];
 
-    let mut all_files = Vec::new();
-    let mut needs_elevation = false;
-
-    for path_str in &wer_paths {
-        let path = Path::new(path_str);
-        match collect_files(path).await {
-            Ok(mut files) => all_files.append(&mut files),
-            Err(AppError::PermissionDenied { .. }) => needs_elevation = true,
-            Err(_) => {}
-        }
-    }
-
-    let total_size_bytes = all_files.iter().map(|f| f.size_bytes).sum();
-
-    Ok(CategoryScanResult {
-        category: category.clone(),
-        files: all_files,
-        total_size_bytes,
-        needs_elevation,
-        error: None,
+    let refs: Vec<&str> = wer_paths.iter().map(|s| s.as_str()).collect();
+    scan_paths(category, &refs, |p| {
+        let owned = p.to_path_buf();
+        Box::pin(async move { collect_files(&owned).await })
     })
+    .await
 }
 
 async fn scan_thumbnail_cache(category: &CleanCategory) -> Result<CategoryScanResult, AppError> {
     let local_app_data = std::env::var("LOCALAPPDATA").unwrap_or_default();
     let explorer_path = format!(r"{}\Microsoft\Windows\Explorer", local_app_data);
     let path = Path::new(&explorer_path);
-
-    // Only thumbcache_*.db — icon cache uses iconcache_*.db (separate category).
-    match collect_files_by_name_prefix(path, "thumbcache_").await {
-        Ok(files) => {
-            let total_size_bytes = files.iter().map(|f| f.size_bytes).sum();
-            Ok(CategoryScanResult {
-                category: category.clone(),
-                files,
-                total_size_bytes,
-                needs_elevation: false,
-                error: None,
-            })
-        }
-        Err(AppError::PermissionDenied { .. }) => Ok(CategoryScanResult {
-            category: category.clone(),
-            files: vec![],
-            total_size_bytes: 0,
-            needs_elevation: true,
-            error: None,
-        }),
-        Err(e) => Ok(CategoryScanResult {
-            category: category.clone(),
-            files: vec![],
-            total_size_bytes: 0,
-            needs_elevation: false,
-            error: Some(e.to_string()),
-        }),
-    }
+    scan_single_path(
+        category,
+        path,
+        collect_files_by_name_prefix(path, "thumbcache_"),
+    )
+    .await
 }
 
 async fn scan_icon_cache(category: &CleanCategory) -> Result<CategoryScanResult, AppError> {
     let local_app_data = std::env::var("LOCALAPPDATA").unwrap_or_default();
     let explorer_path = format!(r"{}\Microsoft\Windows\Explorer", local_app_data);
     let path = Path::new(&explorer_path);
-
-    match collect_files_by_name_prefix(path, "iconcache_").await {
-        Ok(files) => {
-            let total_size_bytes = files.iter().map(|f| f.size_bytes).sum();
-            Ok(CategoryScanResult {
-                category: category.clone(),
-                files,
-                total_size_bytes,
-                needs_elevation: false,
-                error: None,
-            })
-        }
-        Err(AppError::PermissionDenied { .. }) => Ok(CategoryScanResult {
-            category: category.clone(),
-            files: vec![],
-            total_size_bytes: 0,
-            needs_elevation: true,
-            error: None,
-        }),
-        Err(e) => Ok(CategoryScanResult {
-            category: category.clone(),
-            files: vec![],
-            total_size_bytes: 0,
-            needs_elevation: false,
-            error: Some(e.to_string()),
-        }),
-    }
+    scan_single_path(
+        category,
+        path,
+        collect_files_by_name_prefix(path, "iconcache_"),
+    )
+    .await
 }
 
 async fn scan_memory_dumps(category: &CleanCategory) -> Result<CategoryScanResult, AppError> {
@@ -599,120 +452,59 @@ async fn scan_discord_cache(category: &CleanCategory) -> Result<CategoryScanResu
         format!(r"{}\discord\GPUCache", app_data),
     ];
 
-    let mut all_files = Vec::new();
-    for path_str in &cache_paths {
-        let path = Path::new(path_str);
-        if let Ok(mut files) = collect_files(path).await {
-            all_files.append(&mut files);
-        }
-    }
-
-    // Deduplicate by path in case subdirectories overlapped.
-    all_files.dedup_by(|a, b| a.path == b.path);
-
-    let total_size_bytes = all_files.iter().map(|f| f.size_bytes).sum();
-    Ok(CategoryScanResult {
-        category: category.clone(),
-        files: all_files,
-        total_size_bytes,
-        needs_elevation: false,
-        error: None,
+    let refs: Vec<&str> = cache_paths.iter().map(|s| s.as_str()).collect();
+    let mut result = scan_paths(category, &refs, |p| {
+        let owned = p.to_path_buf();
+        Box::pin(async move { collect_files(&owned).await })
     })
+    .await?;
+
+    // Sort then deduplicate by path in case subdirectories overlapped.
+    result.files.sort_by(|a, b| a.path.cmp(&b.path));
+    result.files.dedup_by(|a, b| a.path == b.path);
+    result.total_size_bytes = result.files.iter().map(|f| f.size_bytes).sum();
+
+    Ok(result)
 }
 
 async fn scan_spotify_cache(category: &CleanCategory) -> Result<CategoryScanResult, AppError> {
     let local_app_data = std::env::var("LOCALAPPDATA").unwrap_or_default();
     let storage_path = format!(r"{}\Spotify\Storage", local_app_data);
     let path = Path::new(&storage_path);
-
-    match collect_files(path).await {
-        Ok(files) => {
-            let total_size_bytes = files.iter().map(|f| f.size_bytes).sum();
-            Ok(CategoryScanResult {
-                category: category.clone(),
-                files,
-                total_size_bytes,
-                needs_elevation: false,
-                error: None,
-            })
-        }
-        Err(_) => Ok(CategoryScanResult {
-            category: category.clone(),
-            files: vec![],
-            total_size_bytes: 0,
-            needs_elevation: false,
-            error: None,
-        }),
-    }
+    scan_single_path(category, path, collect_files(path)).await
 }
 
 async fn scan_steam_cache(category: &CleanCategory) -> Result<CategoryScanResult, AppError> {
     let local_app_data = std::env::var("LOCALAPPDATA").unwrap_or_default();
-    let steam_bases = vec![
+    let steam_bases = [
         STEAM_PATH_X86.to_string(),
         STEAM_PATH_X64.to_string(),
         format!(r"{}\Steam", local_app_data),
     ];
 
     let sub_dirs = ["depotcache", "logs", "dumps"];
-    let mut all_files = Vec::new();
+    let all_paths: Vec<String> = steam_bases
+        .iter()
+        .flat_map(|base| sub_dirs.iter().map(move |sub| format!(r"{}\{}", base, sub)))
+        .collect();
 
-    for base in &steam_bases {
-        for sub in &sub_dirs {
-            let full_path = format!(r"{}\{}", base, sub);
-            let path = Path::new(&full_path);
-            if let Ok(mut files) = collect_files(path).await {
-                all_files.append(&mut files);
-            }
-        }
-    }
-
-    let total_size_bytes = all_files.iter().map(|f| f.size_bytes).sum();
-    Ok(CategoryScanResult {
-        category: category.clone(),
-        files: all_files,
-        total_size_bytes,
-        needs_elevation: false,
-        error: None,
+    let refs: Vec<&str> = all_paths.iter().map(|s| s.as_str()).collect();
+    scan_paths(category, &refs, |p| {
+        let owned = p.to_path_buf();
+        Box::pin(async move { collect_files(&owned).await })
     })
+    .await
 }
 
 async fn scan_recent_files(category: &CleanCategory) -> Result<CategoryScanResult, AppError> {
     let app_data = std::env::var("APPDATA").unwrap_or_default();
     let recent_path = format!(r"{}\Microsoft\Windows\Recent", app_data);
     let path = Path::new(&recent_path);
-
-    match collect_files(path).await {
-        Ok(files) => {
-            let total_size_bytes = files.iter().map(|f| f.size_bytes).sum();
-            Ok(CategoryScanResult {
-                category: category.clone(),
-                files,
-                total_size_bytes,
-                needs_elevation: false,
-                error: None,
-            })
-        }
-        Err(_) => Ok(CategoryScanResult {
-            category: category.clone(),
-            files: vec![],
-            total_size_bytes: 0,
-            needs_elevation: false,
-            error: None,
-        }),
-    }
+    scan_single_path(category, path, collect_files(path)).await
 }
 
 async fn scan_dns_cache(category: &CleanCategory) -> Result<CategoryScanResult, AppError> {
-    // DNS cache is command-based — no individual files to enumerate.
-    // Return an empty placeholder; cleaning runs ipconfig /flushdns.
-    Ok(CategoryScanResult {
-        category: category.clone(),
-        files: vec![],
-        total_size_bytes: 0,
-        needs_elevation: false,
-        error: None,
-    })
+    Ok(empty_result(category))
 }
 
 async fn collect_files(dir: &Path) -> Result<Vec<FileEntry>, AppError> {
@@ -736,14 +528,18 @@ async fn collect_files(dir: &Path) -> Result<Vec<FileEntry>, AppError> {
 
         while let Ok(Some(entry)) = read_dir.next_entry().await {
             let path = entry.path();
-            if path.is_dir() {
-                stack.push(path);
+            let Ok(meta) = fs::symlink_metadata(&path).await else {
+                continue;
+            };
+
+            if is_reparse_point(&meta) {
                 continue;
             }
 
-            let Ok(meta) = entry.metadata().await else {
+            if meta.is_dir() {
+                stack.push(path);
                 continue;
-            };
+            }
 
             let modified_timestamp = meta
                 .modified()
@@ -791,7 +587,11 @@ async fn collect_files_by_name_prefix(
         .filter(|f| {
             Path::new(&f.path)
                 .file_name()
-                .map(|n| n.to_string_lossy().to_lowercase().starts_with(&prefix_lower))
+                .map(|n| {
+                    n.to_string_lossy()
+                        .to_lowercase()
+                        .starts_with(&prefix_lower)
+                })
                 .unwrap_or(false)
         })
         .collect();
@@ -799,6 +599,7 @@ async fn collect_files_by_name_prefix(
 }
 
 pub async fn clean_files(file_groups: Vec<FileGroup>) -> Result<CleanResult, AppError> {
+    tracing::info!(groups = file_groups.len(), "starting file cleanup");
     let mut deleted_count = 0usize;
     let mut skipped_count = 0usize;
     let mut freed_bytes = 0u64;
@@ -880,45 +681,18 @@ pub async fn clean_files(file_groups: Vec<FileGroup>) -> Result<CleanResult, App
 }
 
 async fn empty_recycle_bin() -> Result<u64, AppError> {
+    tracing::info!("emptying recycle bin");
     let size_before = estimate_recycle_bin_size().await;
-
-    let output = timeout(
-        PROCESS_TIMEOUT,
-        tokio::process::Command::new("powershell")
-            .args([
-                "-NoProfile",
-                "-Command",
-                "Clear-RecycleBin -Force -ErrorAction SilentlyContinue",
-            ])
-            .output(),
-    )
-    .await
-    .map_err(|_| AppError::Custom("clear recycle bin timed out".into()))?
-    .map_err(AppError::Io)?;
-
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(AppError::PowerShell(stderr.to_string()));
-    }
-
+    RUNNER
+        .powershell("Clear-RecycleBin -Force -ErrorAction SilentlyContinue")
+        .await?;
     Ok(size_before)
 }
 
 async fn flush_dns() -> Result<(), AppError> {
-    let output = timeout(
-        PROCESS_TIMEOUT,
-        tokio::process::Command::new("ipconfig")
-            .arg("/flushdns")
-            .output(),
-    )
-    .await
-    .map_err(|_| AppError::Custom("flush DNS timed out".into()))?
-    .map_err(AppError::Io)?;
-
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(AppError::Custom(format!("ipconfig /flushdns failed: {stderr}")));
-    }
-
+    tracing::info!("flushing DNS cache");
+    let mut cmd = tokio::process::Command::new("ipconfig");
+    cmd.arg("/flushdns");
+    RUNNER.run(cmd).await?;
     Ok(())
 }

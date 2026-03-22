@@ -39,7 +39,7 @@
     "lastCleaned": "Last cleaned: {{size}} freed",
     "quickClean": {
       "title": "Quick Clean",
-      "description": "Free up space with one tap"
+      "description": "Free up space in one tap"
     },
     "quickActions": {
       "scanButton": "Quick Scan",
@@ -79,11 +79,11 @@
     "categories": {
       "temp_files": {
         "label": "Temporary Files",
-        "description": "Files apps created but no longer need. Completely safe to remove."
+        "description": "Leftover files from apps that no longer need them. Usually the biggest win."
       },
       "browser_cache": {
         "label": "Browser Cache",
-        "description": "Saved pages from Chrome, Edge, Firefox. Won't affect your passwords."
+        "description": "Saved pages from Chrome, Edge, Firefox. Your passwords and bookmarks stay."
       },
       "recycle_bin": {
         "label": "Recycle Bin",
@@ -91,55 +91,55 @@
       },
       "old_logs": {
         "label": "Old Log Files",
-        "description": "Debug records from apps and Windows. Safe to delete."
+        "description": "Debug records from apps and Windows. Nobody reads these."
       },
       "prefetch": {
         "label": "App Launch Cache",
-        "description": "Windows launch-speed data. Rebuilds automatically after first reboot."
+        "description": "Windows launch-speed data. Rebuilds itself after a reboot, no harm done."
       },
       "windows_update_cache": {
         "label": "Windows Update Cache",
-        "description": "Downloaded update packages no longer needed. Can free several gigabytes."
+        "description": "Old update packages. Often a few gigabytes sitting there for no reason."
       },
       "delivery_optimization": {
         "label": "Delivery Optimization",
-        "description": "P2P Windows Update cache stored locally. Safe to remove at any time."
+        "description": "Local cache Windows uses to share updates with other PCs on your network."
       },
       "windows_error_reports": {
         "label": "Error Reports",
-        "description": "Crash logs and diagnostic reports sent to Microsoft. Safe to delete."
+        "description": "Crash logs Windows sends to Microsoft. You won't miss them."
       },
       "thumbnail_cache": {
         "label": "Thumbnail Cache",
-        "description": "Image previews cached by File Explorer. Rebuilds automatically on next view."
+        "description": "Image previews from File Explorer. They get rebuilt the next time you browse a folder."
       },
       "icon_cache": {
         "label": "Icon Cache",
-        "description": "Program icon images cached by Windows Explorer. Safe to delete — rebuilds on restart."
+        "description": "Cached program icons. Windows recreates them on next restart."
       },
       "memory_dumps": {
         "label": "Memory Dumps",
-        "description": "Crash dump files created after system errors. Safe to remove once reviewed."
+        "description": "Created after system crashes. Only useful if you're debugging a blue screen."
       },
       "discord_cache": {
         "label": "Discord Cache",
-        "description": "Images, videos and data cached by Discord. Won't affect your messages or settings."
+        "description": "Images, videos and data Discord stored locally. Your messages and settings stay."
       },
       "spotify_cache": {
         "label": "Spotify Cache",
-        "description": "Offline song data stored by Spotify. Songs will re-cache on next play."
+        "description": "Offline song data. Songs re-download on next play."
       },
       "steam_cache": {
         "label": "Steam Cache",
-        "description": "Old depot manifests and logs left by Steam updates. Safe to remove."
+        "description": "Old manifests and logs from Steam updates. Won't affect your games."
       },
       "recent_files": {
         "label": "Recent Files List",
-        "description": "Windows history of recently opened files and folders. Clearing improves privacy."
+        "description": "History of files and folders you opened recently. Good to clear for privacy."
       },
       "dns_cache": {
         "label": "DNS Cache",
-        "description": "Stored domain lookups. Flushing fixes connectivity issues and removes stale entries."
+        "description": "Stored domain lookups. Clearing this can fix weird connectivity issues."
       }
     },
     "step": "Step {{current}} of {{total}}",
@@ -165,7 +165,10 @@
       "found": "Found {{size}} to free up",
       "foundSub": "Across {{files}} files in {{categories}} categories",
       "estimated": "· estimated",
+      "estimatedShort": "estimated",
       "files": "· {{count}} files",
+      "fileCount": "{{count}} files",
+      "moreFiles": "+{{count}} more files",
       "safeBadge": "Safe",
       "cleanButton": "Clean {{size}} Now",
       "scanAgain": "Scan Again",
@@ -184,6 +187,16 @@
     "success": {
       "title": "Done! {{size}} freed",
       "subtitle": "{{files}} files removed",
+      "partialTitle": "Cleaned with warnings",
+      "partialSubtitle": "{{deleted}} removed, {{skipped}} skipped, {{errors}} errors",
+      "partialNotice": "Some items could not be removed, so this was only a partial cleanup.",
+      "summary": {
+        "deleted": "{{count}} removed",
+        "skipped": "{{count}} skipped",
+        "errors": "{{count}} errors"
+      },
+      "issueHeading": "Reported issues",
+      "moreIssues": "+{{count}} more issues",
       "freed": "{{size}} freed",
       "backToDashboard": "Back to Dashboard",
       "scanAgain": "Scan Again",
@@ -206,13 +219,14 @@
     },
     "toast": {
       "scanFailed": "Scan failed: {{msg}}",
+      "cleanedPartial": "Partial cleanup: {{count}} removed, {{skipped}} skipped, {{errors}} issues",
       "cleaned": "Cleaned {{count}} files — freed {{size}}",
       "cleanFailed": "Clean failed: {{msg}}"
     }
   },
   "optimizer": {
     "title": "Optimizer",
-    "subtitle": "Tune your PC's speed settings",
+    "subtitle": "Speed and power settings",
     "tabs": {
       "performance": "Performance",
       "boot": "Boot",
@@ -265,7 +279,7 @@
     },
     "ramOptimizer": {
       "title": "Free Up RAM",
-      "description": "Clears working sets of background processes to free up system memory immediately.",
+      "description": "Clears working sets of background processes to reclaim memory.",
       "button": "Optimize"
     },
     "gpuHags": {
@@ -304,7 +318,7 @@
     },
     "tasksWarning": {
       "title": "Telemetry scheduled tasks",
-      "message": "These background tasks collect usage data for Microsoft. Safe to disable for privacy.",
+      "message": "These background tasks collect usage data for Microsoft. Disabling won't break anything.",
       "show": "Show",
       "hide": "Hide tasks"
     },
@@ -382,6 +396,15 @@
     "adminWarning": "These tools require administrator privileges to run. If the app is not elevated, tools will report an error.",
     "reset": "Reset",
     "runAgain": "Run Again",
+    "status": {
+      "running": "Running…",
+      "done": "Done",
+      "failed": "Failed"
+    },
+    "output": {
+      "showLess": "Show less",
+      "showFull": "Show full output ({{count}} lines)"
+    },
     "sections": {
       "restorePoint": "System Restore Point",
       "systemFiles": "System File Checker",

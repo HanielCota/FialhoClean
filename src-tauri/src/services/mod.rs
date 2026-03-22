@@ -1,5 +1,8 @@
 pub mod cleaner;
 pub mod debloater;
 pub mod optimizer;
+pub mod process_runner;
+pub mod registry;
 pub mod repair;
+pub mod scan_helper;
 pub mod system_info;
