@@ -18,10 +18,10 @@ export function StepDots({
           key={i}
           className={`rounded-full transition-all duration-300 ${
             i + 1 === current
-              ? "w-4 h-1.5 bg-accent"
+              ? "h-1.5 w-4 bg-accent"
               : i + 1 < current
-              ? "w-1.5 h-1.5 bg-accent/40"
-              : "w-1.5 h-1.5 bg-white/15"
+                ? "h-1.5 w-1.5 bg-accent/40"
+                : "h-1.5 w-1.5 bg-white/15"
           }`}
         />
       ))}

@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
-import { DashboardView } from "./components/dashboard/DashboardView";
 import { CleanerView } from "./components/cleaner/CleanerView";
-import { OptimizerView } from "./components/optimizer/OptimizerView";
+import { DashboardView } from "./components/dashboard/DashboardView";
 import { DebloaterView } from "./components/debloater/DebloaterView";
+import { PageContainer } from "./components/layout/PageContainer";
+import { Sidebar } from "./components/layout/Sidebar";
+import { TitleBar } from "./components/layout/TitleBar";
+import { OptimizerView } from "./components/optimizer/OptimizerView";
 import { RepairView } from "./components/repair/RepairView";
 import { SettingsView } from "./components/settings/SettingsView";
-import { Sidebar } from "./components/layout/Sidebar";
-import { PageContainer } from "./components/layout/PageContainer";
-import { TitleBar } from "./components/layout/TitleBar";
-import { ToastContainer } from "./components/shared/ToastContainer";
 import { ErrorBoundary } from "./components/shared/ErrorBoundary";
+import { ToastContainer } from "./components/shared/ToastContainer";
 import { useUiStore } from "./stores/uiStore";
 
 // Keeps each view mounted after its first visit so that navigating away and
@@ -17,9 +17,7 @@ import { useUiStore } from "./stores/uiStore";
 // (display:none) keeps unmounted-looking views alive in the background.
 export default function App() {
   const { activeView } = useUiStore();
-  const [everVisited, setEverVisited] = useState(
-    () => new Set([activeView])
-  );
+  const [everVisited, setEverVisited] = useState(() => new Set([activeView]));
 
   useEffect(() => {
     setEverVisited((prev) => {
@@ -30,11 +28,10 @@ export default function App() {
     });
   }, [activeView]);
 
-  const hide = (view: string) =>
-    activeView !== view ? "hidden" : undefined;
+  const hide = (view: string) => (activeView !== view ? "hidden" : undefined);
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-background">
+    <div className="flex h-screen flex-col overflow-hidden bg-background">
       <TitleBar />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />

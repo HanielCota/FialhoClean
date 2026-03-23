@@ -9,8 +9,13 @@ function IconMinimize() {
   return (
     <svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true">
       <line
-        x1="1" y1="6" x2="7" y2="6"
-        stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"
+        x1="1"
+        y1="6"
+        x2="7"
+        y2="6"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
       />
     </svg>
   );
@@ -19,11 +24,7 @@ function IconMinimize() {
 function IconMaximize() {
   return (
     <svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true">
-      <rect
-        x="1" y="1" width="6" height="6"
-        rx="1"
-        stroke="currentColor" strokeWidth="1.5"
-      />
+      <rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   );
 }
@@ -32,12 +33,22 @@ function IconClose() {
   return (
     <svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true">
       <line
-        x1="1.5" y1="1.5" x2="6.5" y2="6.5"
-        stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"
+        x1="1.5"
+        y1="1.5"
+        x2="6.5"
+        y2="6.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
       />
       <line
-        x1="6.5" y1="1.5" x2="1.5" y2="6.5"
-        stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"
+        x1="6.5"
+        y1="1.5"
+        x2="1.5"
+        y2="6.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
       />
     </svg>
   );
@@ -47,22 +58,22 @@ function IconClose() {
 
 const TRAFFIC_LIGHTS = [
   {
-    key:       "minimize" as const,
-    bg:        "#febc2e",
+    key: "minimize" as const,
+    bg: "#febc2e",
     iconColor: "#7a5c00",
-    Icon:      IconMinimize,
+    Icon: IconMinimize,
   },
   {
-    key:       "maximize" as const,
-    bg:        "#28c840",
+    key: "maximize" as const,
+    bg: "#28c840",
     iconColor: "#0f5217",
-    Icon:      IconMaximize,
+    Icon: IconMaximize,
   },
   {
-    key:       "close" as const,
-    bg:        "#ff5f57",
+    key: "close" as const,
+    bg: "#ff5f57",
     iconColor: "#7a1a15",
-    Icon:      IconClose,
+    Icon: IconClose,
   },
 ];
 
@@ -73,18 +84,24 @@ export function TitleBar() {
   const { t } = useTranslation();
 
   const handleAction = async (key: (typeof TRAFFIC_LIGHTS)[number]["key"]) => {
-    if (key === "close")    { await win.close();          return; }
-    if (key === "minimize") { await win.minimize();       return; }
+    if (key === "close") {
+      await win.close();
+      return;
+    }
+    if (key === "minimize") {
+      await win.minimize();
+      return;
+    }
     await win.toggleMaximize();
   };
 
   return (
     <div
       data-tauri-drag-region
-      className="relative h-10 flex-shrink-0 border-b border-white/[0.06] bg-sidebar flex items-center justify-end px-4"
+      className="relative flex h-10 flex-shrink-0 items-center justify-end border-white/[0.06] border-b bg-sidebar px-4"
     >
       {/* Título à esquerda */}
-      <span className="pointer-events-none absolute left-4 text-[11px] font-medium uppercase tracking-[0.18em] text-text-tertiary select-none">
+      <span className="pointer-events-none absolute left-4 select-none font-medium text-[11px] text-text-tertiary uppercase tracking-[0.18em]">
         {t("app.name")}
       </span>
 
@@ -101,7 +118,7 @@ export function TitleBar() {
             aria-label={t(`titlebar.${key}`)}
           >
             <span
-              className="opacity-0 transition-opacity duration-100 group-hover:opacity-100 flex items-center justify-center"
+              className="flex items-center justify-center opacity-0 transition-opacity duration-100 group-hover:opacity-100"
               style={{ color: iconColor }}
             >
               <Icon />

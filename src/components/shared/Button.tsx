@@ -1,6 +1,6 @@
 import { Loader2 } from "lucide-react";
-import { forwardRef } from "react";
 import type { ButtonHTMLAttributes } from "react";
+import { forwardRef } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "danger" | "ghost";
@@ -19,7 +19,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     type,
     ...props
   },
-  ref
+  ref,
 ) {
   const base =
     "inline-flex items-center justify-center gap-2 rounded-[10px] font-semibold transition-all duration-150 select-none disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background";
@@ -31,8 +31,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       "border border-white/[0.08] bg-white/[0.06] text-text hover:border-white/[0.12] hover:bg-white/[0.09] active:scale-[0.98]",
     danger:
       "border border-red/25 bg-red/[0.16] text-red hover:bg-red/[0.24] hover:border-red/35 active:scale-[0.98]",
-    ghost:
-      "text-text-muted hover:bg-white/[0.05] hover:text-text active:scale-[0.98]",
+    ghost: "text-text-muted hover:bg-white/[0.05] hover:text-text active:scale-[0.98]",
   };
 
   const sizes = {
@@ -49,7 +48,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       disabled={disabled ?? loading}
       {...props}
     >
-      {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+      {loading && <Loader2 className="h-4 w-4 animate-spin" />}
       {children}
     </button>
   );

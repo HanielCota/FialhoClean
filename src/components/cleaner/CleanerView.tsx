@@ -3,12 +3,12 @@ import { useCleanerFlow } from "../../hooks/useCleanerFlow";
 import { useUiStore } from "../../stores/uiStore";
 import { Button } from "../shared/Button";
 import { ErrorMessage } from "../shared/ErrorMessage";
-import { StepDots } from "./StepDots";
-import { SelectScreen } from "./SelectScreen";
-import { ScanningScreen } from "./ScanningScreen";
-import { ResultsScreen } from "./ResultsScreen";
-import { SuccessScreen } from "./SuccessScreen";
 import { CleaningOverlay } from "./CleaningOverlay";
+import { ResultsScreen } from "./ResultsScreen";
+import { ScanningScreen } from "./ScanningScreen";
+import { SelectScreen } from "./SelectScreen";
+import { StepDots } from "./StepDots";
+import { SuccessScreen } from "./SuccessScreen";
 
 export function CleanerView() {
   const { t } = useTranslation();
@@ -42,7 +42,7 @@ export function CleanerView() {
       />
 
       {error && (
-        <div className="px-8 pt-2 space-y-2">
+        <div className="space-y-2 px-8 pt-2">
           <ErrorMessage message={error} />
           {phase === "select" && (
             <Button variant="ghost" size="sm" onClick={scan}>

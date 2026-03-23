@@ -1,5 +1,6 @@
-import { Component, type ErrorInfo, type ReactNode } from "react";
+import i18next from "i18next";
 import { AlertTriangle, RefreshCw } from "lucide-react";
+import { Component, type ErrorInfo, type ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
@@ -21,9 +22,7 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("[FialhoClean] Unhandled render error:", error, info);
-  }
+  componentDidCatch(_error: Error, _info: ErrorInfo) {}
 
   reset = () => this.setState({ hasError: false, error: null });
 
@@ -31,23 +30,25 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
       return (
-        <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center">
-          <div className="w-14 h-14 rounded-full bg-red/[0.12] flex items-center justify-center">
-            <AlertTriangle className="w-7 h-7 text-red" />
+        <div className="flex h-full flex-col items-center justify-center gap-4 p-8 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red/[0.12]">
+            <AlertTriangle className="h-7 w-7 text-red" />
           </div>
           <div>
-            <p className="text-[16px] font-semibold text-text mb-1">Something went wrong</p>
-            <p className="text-[13px] text-text-muted max-w-sm">
-              {this.state.error?.message ?? "An unexpected error occurred in this view."}
+            <p className="mb-1 font-semibold text-[16px] text-text">
+              {i18next.t("errorBoundary.title")}
+            </p>
+            <p className="max-w-sm text-[13px] text-text-muted">
+              {this.state.error?.message ?? i18next.t("errorBoundary.message")}
             </p>
           </div>
           <button
             type="button"
             onClick={this.reset}
-            className="flex items-center gap-2 rounded-[10px] border border-white/[0.08] bg-white/[0.04] px-4 h-9 text-[13px] font-semibold text-text-muted hover:text-text hover:bg-white/[0.07] transition-all duration-150"
+            className="flex h-9 items-center gap-2 rounded-[10px] border border-white/[0.08] bg-white/[0.04] px-4 font-semibold text-[13px] text-text-muted transition-all duration-150 hover:bg-white/[0.07] hover:text-text"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
-            Try again
+            <RefreshCw className="h-3.5 w-3.5" />
+            {i18next.t("common.retry")}
           </button>
         </div>
       );

@@ -1,5 +1,5 @@
-import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { sanitizeError } from "../lib/errors";
 import { optimizerService } from "../services/optimizerService";
 import { useOptimizerStore } from "../stores/optimizerStore";
@@ -9,7 +9,11 @@ export function useStartup() {
   const { startupItems } = useOptimizerStore();
   const notify = useNotify();
 
-  const { isLoading, error: rawError, refetch } = useQuery({
+  const {
+    isLoading,
+    error: rawError,
+    refetch,
+  } = useQuery({
     queryKey: ["startup-items"],
     queryFn: async () => {
       const items = await optimizerService.getStartupItems();
@@ -28,13 +32,13 @@ export function useStartup() {
         notify(
           enabled ? "optimizer.toast.startupEnabled" : "optimizer.toast.startupDisabled",
           "success",
-          { name }
+          { name },
         );
       } catch (err) {
         notify("optimizer.toast.startupFailed", "error", { msg: sanitizeError(err) });
       }
     },
-    [notify]
+    [notify],
   );
 
   return { startupItems, isLoading, error, load: refetch, toggleStartup };

@@ -26,8 +26,7 @@ export const optimizerService = {
   // Power plans
   getPowerPlans: () => invoke<PowerPlan[]>("get_power_plans"),
   setPowerPlan: (planGuid: string) => invoke("set_power_plan", { planGuid }),
-  setVisualEffects: (performanceMode: boolean) =>
-    invoke("set_visual_effects", { performanceMode }),
+  setVisualEffects: (performanceMode: boolean) => invoke("set_visual_effects", { performanceMode }),
 
   // Hibernate / fast startup
   getHibernateSettings: () => invoke<HibernateSettings>("get_hibernate_settings"),
@@ -42,8 +41,7 @@ export const optimizerService = {
 
   // Network optimizer
   getNetworkSettings: () => invoke<NetworkSettings>("get_network_settings"),
-  setNetworkOptimized: (enabled: boolean) =>
-    invoke("set_network_optimized", { enabled }),
+  setNetworkOptimized: (enabled: boolean) => invoke("set_network_optimized", { enabled }),
 
   // Scheduled tasks
   getScheduledTasks: () => invoke<ScheduledTask[]>("get_scheduled_tasks"),

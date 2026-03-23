@@ -1,16 +1,20 @@
-import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { sanitizeError } from "../lib/errors";
 import { optimizerService } from "../services/optimizerService";
 import { useOptimizerStore } from "../stores/optimizerStore";
-import { useNotify } from "./useNotify";
 import type { ServiceAction } from "../types/optimizer";
+import { useNotify } from "./useNotify";
 
 export function useServices() {
   const { services } = useOptimizerStore();
   const notify = useNotify();
 
-  const { isLoading, error: rawError, refetch } = useQuery({
+  const {
+    isLoading,
+    error: rawError,
+    refetch,
+  } = useQuery({
     queryKey: ["services"],
     queryFn: async () => {
       const svcs = await optimizerService.getServices();
@@ -31,7 +35,7 @@ export function useServices() {
         notify("optimizer.toast.serviceFailed", "error", { msg: sanitizeError(err) });
       }
     },
-    [refetch, notify]
+    [refetch, notify],
   );
 
   return { services, isLoading, error, load: refetch, changeServiceStatus };

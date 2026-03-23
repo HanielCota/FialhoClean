@@ -69,25 +69,19 @@ export function ItemRow({
         as === "button" ? "focus-ring w-full text-left disabled:cursor-not-allowed" : ""
       } ${className}`}
     >
-      {leading !== undefined && (
-        <div className="flex-shrink-0 flex items-center">{leading}</div>
-      )}
+      {leading !== undefined && <div className="flex flex-shrink-0 items-center">{leading}</div>}
 
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         {typeof title === "string" ? (
-          <p className={`text-[14px] font-medium truncate ${titleClass ?? "text-text"}`}>
-            {title}
-          </p>
+          <p className={`truncate font-medium text-[14px] ${titleClass ?? "text-text"}`}>{title}</p>
         ) : (
           title
         )}
-        {subtitle && (
-          <p className="text-[12px] text-text-muted truncate mt-0.5">{subtitle}</p>
-        )}
+        {subtitle && <p className="mt-0.5 truncate text-[12px] text-text-muted">{subtitle}</p>}
       </div>
 
       {trailing !== undefined && (
-        <div className="flex-shrink-0 flex items-center gap-2">{trailing}</div>
+        <div className="flex flex-shrink-0 items-center gap-2">{trailing}</div>
       )}
     </Component>
   );

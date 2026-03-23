@@ -20,7 +20,7 @@ export const CLEANER_STEP_MAP = {
 export function derivePhase(
   hasCleanResult: boolean,
   isScanning: boolean,
-  hasScanSummary: boolean
+  hasScanSummary: boolean,
 ): CleanerPhase {
   if (hasCleanResult) return "success";
   if (isScanning) return "scanning";
@@ -56,11 +56,7 @@ export function useCleanerFlow() {
     cleaner.scan();
   }, [pendingQuickScan, setPendingQuickScan, cleaner.scan]);
 
-  const phase = derivePhase(
-    !!cleaner.cleanResult,
-    cleaner.isScanning,
-    !!cleaner.scanSummary
-  );
+  const phase = derivePhase(!!cleaner.cleanResult, cleaner.isScanning, !!cleaner.scanSummary);
 
   return { ...cleaner, phase, stepMap: CLEANER_STEP_MAP, confirmBeforeCleaning };
 }

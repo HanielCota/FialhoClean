@@ -14,7 +14,10 @@ export function Sidebar() {
   const { activeView, setActiveView } = useUiStore();
   const { t } = useTranslation();
 
-  const navLabels: Record<"dashboard" | "cleaner" | "optimizer" | "debloater" | "repair" | "settings", string> = {
+  const navLabels: Record<
+    "dashboard" | "cleaner" | "optimizer" | "debloater" | "repair" | "settings",
+    string
+  > = {
     dashboard: t("nav.dashboard"),
     cleaner: t("nav.cleaner"),
     optimizer: t("nav.optimizer"),
@@ -24,11 +27,10 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-56 flex-shrink-0 border-r border-white/[0.06] bg-sidebar">
-      <div className="flex h-full flex-col px-3 pb-4 pt-4">
-
+    <aside className="w-56 flex-shrink-0 border-white/[0.06] border-r bg-sidebar">
+      <div className="flex h-full flex-col px-3 pt-4 pb-4">
         {/* Nav label */}
-        <p className="mb-1.5 px-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-text-tertiary">
+        <p className="mb-1.5 px-2 font-semibold text-[11px] text-text-tertiary uppercase tracking-[0.18em]">
           {t("nav.label")}
         </p>
 
@@ -55,11 +57,14 @@ export function Sidebar() {
                       isActive ? "text-accent" : "text-text-tertiary group-hover:text-text-muted"
                     }`}
                   />
-                  <span className="truncate text-[15px] font-medium tracking-[-0.01em]">
+                  <span className="truncate font-medium text-[15px] tracking-[-0.01em]">
                     {navLabels[id]}
                   </span>
                   {isActive && (
-                    <span className="ml-auto h-1.5 w-1.5 rounded-full bg-accent/70" aria-hidden="true" />
+                    <span
+                      className="ml-auto h-1.5 w-1.5 rounded-full bg-accent/70"
+                      aria-hidden="true"
+                    />
                   )}
                 </button>
               );
@@ -68,7 +73,7 @@ export function Sidebar() {
         </nav>
 
         {/* Settings footer */}
-        <div className="border-t border-white/[0.06] pt-3">
+        <div className="border-white/[0.06] border-t pt-3">
           <button
             type="button"
             onClick={() => setActiveView("settings")}
@@ -88,7 +93,7 @@ export function Sidebar() {
                   : "text-text-tertiary group-hover:text-text-muted"
               }`}
             />
-            <span className="truncate text-[13px] font-medium tracking-[-0.01em]">
+            <span className="truncate font-medium text-[13px] tracking-[-0.01em]">
               {t("settings.title")}
             </span>
             {activeView === "settings" && (

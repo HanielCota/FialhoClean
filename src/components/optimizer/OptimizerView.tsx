@@ -2,8 +2,8 @@ import { Flame, Power, Settings2, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useOptimizer } from "../../hooks/useOptimizer";
-import { ErrorMessage } from "../shared/ErrorMessage";
 import { Header } from "../layout/Header";
+import { ErrorMessage } from "../shared/ErrorMessage";
 import { TabBar, type TabDef } from "../shared/TabBar";
 import { BootTab } from "./tabs/BootTab";
 import { PerformanceTab } from "./tabs/PerformanceTab";
@@ -47,15 +47,15 @@ export function OptimizerView() {
 
   const TABS: TabDef<OptimizerTab>[] = [
     { id: "performance", label: t("optimizer.tabs.performance"), Icon: Flame },
-    { id: "boot",        label: t("optimizer.tabs.boot"),        Icon: Power },
-    { id: "privacy",     label: t("optimizer.tabs.privacy"),     Icon: ShieldCheck },
-    { id: "services",    label: t("optimizer.tabs.services"),    Icon: Settings2 },
+    { id: "boot", label: t("optimizer.tabs.boot"), Icon: Power },
+    { id: "privacy", label: t("optimizer.tabs.privacy"), Icon: ShieldCheck },
+    { id: "services", label: t("optimizer.tabs.services"), Icon: Settings2 },
   ];
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       {/* Fixed header */}
-      <div className="px-6 xl:px-8 pt-6 xl:pt-8 flex-shrink-0">
+      <div className="flex-shrink-0 px-6 pt-6 xl:px-8 xl:pt-8">
         <Header
           title={t("optimizer.title")}
           subtitle={t("optimizer.subtitle")}
@@ -70,16 +70,11 @@ export function OptimizerView() {
         )}
 
         {/* Tab bar */}
-        <TabBar
-          tabs={TABS}
-          active={activeTab}
-          onChange={setActiveTab}
-          className="mt-2"
-        />
+        <TabBar tabs={TABS} active={activeTab} onChange={setActiveTab} className="mt-2" />
       </div>
 
       {/* Scrollable tab content */}
-      <div className="flex-1 overflow-y-auto px-6 xl:px-8 py-6">
+      <div className="flex-1 overflow-y-auto px-6 py-6 xl:px-8">
         {activeTab === "performance" && (
           <PerformanceTab
             powerPlans={powerPlans}
@@ -118,10 +113,7 @@ export function OptimizerView() {
         )}
 
         {activeTab === "services" && (
-          <ServicesTab
-            services={services}
-            onAction={changeServiceStatus}
-          />
+          <ServicesTab services={services} onAction={changeServiceStatus} />
         )}
       </div>
     </div>

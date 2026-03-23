@@ -1,5 +1,4 @@
 import type { SafetyLevel } from "./common";
-export type { SafetyLevel };
 
 export type BloatCategory =
   | "microsoft"
@@ -12,9 +11,9 @@ export type BloatCategory =
 export interface AppInfo {
   name: string;
   package_full_name: string;
-  package_family_name: string;
-  publisher: string;
-  version: string;
+  package_family_name: string; // backend-only
+  publisher: string; // backend-only
+  version: string; // backend-only
   safety_level: SafetyLevel;
   description: string;
   category: BloatCategory;
@@ -24,12 +23,4 @@ export interface RemoveResult {
   package_full_name: string;
   success: boolean;
   error: string | null;
-}
-
-export interface BloatwareEntry {
-  family_name_prefix: string;
-  friendly_name: string;
-  safety_level: SafetyLevel;
-  description: string;
-  category: BloatCategory;
 }

@@ -1,5 +1,5 @@
-import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { sanitizeError } from "../lib/errors";
 import { optimizerService } from "../services/optimizerService";
 import { useOptimizerStore } from "../stores/optimizerStore";
@@ -9,7 +9,11 @@ export function usePowerSettings() {
   const { powerPlans, visualEffectsPerformanceMode } = useOptimizerStore();
   const notify = useNotify();
 
-  const { isLoading, error: rawError, refetch } = useQuery({
+  const {
+    isLoading,
+    error: rawError,
+    refetch,
+  } = useQuery({
     queryKey: ["power-plans"],
     queryFn: async () => {
       const plans = await optimizerService.getPowerPlans();
@@ -30,7 +34,7 @@ export function usePowerSettings() {
         notify("optimizer.toast.powerPlanFailed", "error", { msg: sanitizeError(err) });
       }
     },
-    [refetch, notify]
+    [refetch, notify],
   );
 
   const setVisualEffects = useCallback(
@@ -40,13 +44,13 @@ export function usePowerSettings() {
         useOptimizerStore.getState().setVisualEffectsPerformanceMode(performanceMode);
         notify(
           performanceMode ? "optimizer.toast.visualPerformance" : "optimizer.toast.visualRestored",
-          "success"
+          "success",
         );
       } catch (err) {
         notify("optimizer.toast.visualFailed", "error", { msg: sanitizeError(err) });
       }
     },
-    [notify]
+    [notify],
   );
 
   const applyUltimatePerformance = useCallback(async () => {

@@ -1,6 +1,6 @@
 export interface SystemInfo {
   hostname: string;
-  os_version: string;
+  os_version: string; // backend-only
   cpu_usage: number;
   ram_used_bytes: number;
   ram_total_bytes: number;
@@ -8,10 +8,10 @@ export interface SystemInfo {
 }
 
 export interface DiskUsage {
-  name: string;
-  mount_point: string;
+  name: string; // backend-only
+  mount_point: string; // backend-only
   total_bytes: number;
   used_bytes: number;
-  available_bytes: number;
-  filesystem: string;
+  available_bytes: number; // backend-only
+  filesystem: string; // backend-only
 }

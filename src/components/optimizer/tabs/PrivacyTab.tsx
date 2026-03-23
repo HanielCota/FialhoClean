@@ -27,9 +27,7 @@ export function PrivacyTab({
   const networkLabelId = useId();
   const [showTasks, setShowTasks] = useState(false);
 
-  const disabledCount = scheduledTasks.filter(
-    (task) => task.state === "Disabled"
-  ).length;
+  const disabledCount = scheduledTasks.filter((task) => task.state === "Disabled").length;
 
   return (
     <div className="space-y-7">
@@ -37,21 +35,23 @@ export function PrivacyTab({
       <section>
         <SectionHeading>{t("optimizer.sections.network")}</SectionHeading>
         <Card>
-          <div className="flex items-center gap-4">
-            <Network className="w-5 h-5 text-text-muted flex-shrink-0" />
-            <div className="flex-1">
-              <p id={networkLabelId} className="text-[15px] font-semibold text-text">
+          <div className="flex items-start gap-4">
+            <Network className="h-5 w-5 flex-shrink-0 text-text-muted" />
+            <div className="min-w-0 flex-1">
+              <p id={networkLabelId} className="font-semibold text-[15px] text-text">
                 {t("optimizer.network.title")}
               </p>
-              <p className="text-[13px] text-text-muted mt-1">
+              <p className="mt-1 text-[13px] text-text-muted">
                 {t("optimizer.network.description")}
               </p>
             </div>
-            <Toggle
-              checked={networkSettings.network_throttling_disabled}
-              onChange={onSetNetworkOptimized}
-              aria-labelledby={networkLabelId}
-            />
+            <div className="mt-0.5 flex-shrink-0">
+              <Toggle
+                checked={networkSettings.network_throttling_disabled}
+                onChange={onSetNetworkOptimized}
+                aria-labelledby={networkLabelId}
+              />
+            </div>
           </div>
         </Card>
       </section>
@@ -62,24 +62,51 @@ export function PrivacyTab({
         <div className="space-y-2">
           {(
             [
-              { key: "telemetry",        title: t("optimizer.privacy.telemetry.title"),       desc: t("optimizer.privacy.telemetry.description"),       value: privacySettings.telemetry_disabled },
-              { key: "bing_search",      title: t("optimizer.privacy.bingSearch.title"),      desc: t("optimizer.privacy.bingSearch.description"),      value: privacySettings.bing_search_disabled },
-              { key: "advertising_id",   title: t("optimizer.privacy.advertisingId.title"),   desc: t("optimizer.privacy.advertisingId.description"),   value: privacySettings.advertising_id_disabled },
-              { key: "activity_history", title: t("optimizer.privacy.activityHistory.title"), desc: t("optimizer.privacy.activityHistory.description"), value: privacySettings.activity_history_disabled },
-              { key: "location",         title: t("optimizer.privacy.location.title"),        desc: t("optimizer.privacy.location.description"),        value: privacySettings.location_disabled },
+              {
+                key: "telemetry",
+                title: t("optimizer.privacy.telemetry.title"),
+                desc: t("optimizer.privacy.telemetry.description"),
+                value: privacySettings.telemetry_disabled,
+              },
+              {
+                key: "bing_search",
+                title: t("optimizer.privacy.bingSearch.title"),
+                desc: t("optimizer.privacy.bingSearch.description"),
+                value: privacySettings.bing_search_disabled,
+              },
+              {
+                key: "advertising_id",
+                title: t("optimizer.privacy.advertisingId.title"),
+                desc: t("optimizer.privacy.advertisingId.description"),
+                value: privacySettings.advertising_id_disabled,
+              },
+              {
+                key: "activity_history",
+                title: t("optimizer.privacy.activityHistory.title"),
+                desc: t("optimizer.privacy.activityHistory.description"),
+                value: privacySettings.activity_history_disabled,
+              },
+              {
+                key: "location",
+                title: t("optimizer.privacy.location.title"),
+                desc: t("optimizer.privacy.location.description"),
+                value: privacySettings.location_disabled,
+              },
             ] as const
           ).map(({ key, title, desc, value }) => (
             <Card key={key}>
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <p className="text-[15px] font-semibold text-text">{title}</p>
-                  <p className="text-[13px] text-text-muted mt-1">{desc}</p>
+              <div className="flex items-start gap-4">
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-[15px] text-text">{title}</p>
+                  <p className="mt-1 text-[13px] text-text-muted">{desc}</p>
                 </div>
-                <Toggle
-                  checked={value}
-                  onChange={(v) => onSetPrivacy(key, v)}
-                  aria-label={title}
-                />
+                <div className="mt-0.5 flex-shrink-0">
+                  <Toggle
+                    checked={value}
+                    onChange={(v) => onSetPrivacy(key, v)}
+                    aria-label={title}
+                  />
+                </div>
               </div>
             </Card>
           ))}
@@ -89,39 +116,39 @@ export function PrivacyTab({
       {/* Scheduled Tasks */}
       {scheduledTasks.length > 0 && (
         <section>
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <SectionHeading className="mb-0">
               {t("optimizer.sections.scheduledTasks")}
               {disabledCount > 0 && (
                 <span className="text-text-muted normal-case tracking-normal">
-                  {" "}—{" "}
-                  {t("optimizer.tasks.disabledCount", { count: disabledCount })}
+                  {" "}
+                  — {t("optimizer.tasks.disabledCount", { count: disabledCount })}
                 </span>
               )}
             </SectionHeading>
-            <span className="text-[12px] font-semibold text-text-muted uppercase tracking-widest">
+            <span className="font-semibold text-[12px] text-text-muted uppercase tracking-widest">
               {t("optimizer.sections.telemetry")}
             </span>
           </div>
 
           {!showTasks ? (
-            <div className="flex items-start gap-4 p-5 bg-white/[0.03] border border-white/[0.06] rounded-xl">
-              <Info className="w-5 h-5 text-text-muted flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-[14px] font-semibold text-text">
+            <div className="flex items-start gap-4 rounded-xl border border-white/[0.06] bg-white/[0.03] p-5">
+              <Info className="mt-0.5 h-5 w-5 flex-shrink-0 text-text-muted" />
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-[14px] text-text">
                   {t("optimizer.tasksWarning.title")}
                 </p>
-                <p className="text-[13px] text-text-muted mt-1">
+                <p className="mt-1 text-[13px] text-text-muted">
                   {t("optimizer.tasksWarning.message")}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setShowTasks(true)}
-                className="focus-ring mt-0.5 flex flex-shrink-0 items-center gap-1.5 rounded-md text-[13px] font-semibold text-accent transition-colors hover:text-accent-hover"
+                className="focus-ring mt-0.5 flex flex-shrink-0 items-center gap-1.5 rounded-md font-semibold text-[13px] text-accent transition-colors hover:text-accent-hover"
               >
                 {t("optimizer.tasksWarning.show")}
-                <ChevronDown className="w-4 h-4" />
+                <ChevronDown className="h-4 w-4" />
               </button>
             </div>
           ) : (
@@ -134,31 +161,25 @@ export function PrivacyTab({
                       key={task.task_path}
                       className="flex items-start gap-4 rounded-xl border border-white/[0.06] bg-card px-5 py-4"
                     >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[14px] font-medium text-text truncate">
-                          {task.name}
-                        </p>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium text-[14px] text-text">{task.name}</p>
                         {task.description && (
-                          <p className="text-[13px] text-text-muted mt-1 leading-relaxed">
+                          <p className="mt-1 text-[13px] text-text-muted leading-relaxed">
                             {task.description}
                           </p>
                         )}
                       </div>
-                      <div className="flex items-center gap-2.5 flex-shrink-0 mt-0.5">
+                      <div className="mt-0.5 flex flex-shrink-0 items-center gap-2.5">
                         <span
-                          className={`text-[12px] font-medium ${
+                          className={`font-medium text-[12px] ${
                             isEnabled ? "text-emerald-400" : "text-text-muted/50"
                           }`}
                         >
-                          {isEnabled
-                            ? t("optimizer.task.enabled")
-                            : t("optimizer.task.disabled")}
+                          {isEnabled ? t("optimizer.task.enabled") : t("optimizer.task.disabled")}
                         </span>
                         <Toggle
                           checked={isEnabled}
-                          onChange={(v) =>
-                            onToggleScheduledTask(task.task_path, v)
-                          }
+                          onChange={(v) => onToggleScheduledTask(task.task_path, v)}
                           aria-label={task.name}
                         />
                       </div>
@@ -171,7 +192,7 @@ export function PrivacyTab({
                 onClick={() => setShowTasks(false)}
                 className="focus-ring mt-3 flex items-center gap-1.5 rounded-md text-[13px] text-text-muted transition-colors hover:text-text"
               >
-                <ChevronUp className="w-4 h-4" />
+                <ChevronUp className="h-4 w-4" />
                 {t("optimizer.tasksWarning.hide")}
               </button>
             </>
@@ -182,10 +203,8 @@ export function PrivacyTab({
       {/* Empty state if tasks haven't loaded yet */}
       {scheduledTasks.length === 0 && (
         <div className="flex flex-col items-center gap-3 py-10 text-center">
-          <CalendarClock className="w-10 h-10 text-text-tertiary" />
-          <p className="text-[14px] text-text-muted">
-            {t("optimizer.tasks.empty")}
-          </p>
+          <CalendarClock className="h-10 w-10 text-text-tertiary" />
+          <p className="text-[14px] text-text-muted">{t("optimizer.tasks.empty")}</p>
         </div>
       )}
     </div>

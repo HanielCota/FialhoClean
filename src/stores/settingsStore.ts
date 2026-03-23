@@ -1,12 +1,12 @@
-import { create } from 'zustand';
-import type { CleanCategory } from '../types/cleaner';
-import type { Language } from '../i18n/config';
+import { create } from "zustand";
+import type { Language } from "../i18n/config";
 import {
   loadSettings,
-  saveLanguage,
   saveConfirmBeforeCleaning,
   saveDefaultCategories,
-} from '../lib/settingsPersistence';
+  saveLanguage,
+} from "../lib/settingsPersistence";
+import type { CleanCategory } from "../types/cleaner";
 
 interface SettingsState {
   language: Language;

@@ -20,36 +20,31 @@ export function CleanerCategory({
   const { t } = useTranslation();
 
   return (
-    <div className="flex items-start gap-4 p-4 bg-card border border-white/5 rounded-xl">
-      <Toggle
-        checked={selected}
-        onChange={() => onToggle(category)}
-      />
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[14px] font-medium text-text">
+    <div className="flex items-start gap-4 rounded-xl border border-white/5 bg-card p-4">
+      <Toggle checked={selected} onChange={() => onToggle(category)} />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-medium text-[14px] text-text">
             {t(`cleaner.categories.${category}.label` as const)}
           </span>
           {scanResult?.needs_elevation && (
-            <Badge label={t('cleaner.needsAdmin')} variant="caution" />
+            <Badge label={t("cleaner.needsAdmin")} variant="caution" />
           )}
-          {scanResult?.error && (
-            <Badge label={t('common.error')} variant="error" />
-          )}
+          {scanResult?.error && <Badge label={t("common.error")} variant="error" />}
         </div>
         <p className="mt-0.5 text-[12px] text-text-muted">
           {t(`cleaner.categories.${category}.description` as const)}
         </p>
       </div>
       {scanResult && (
-        <div className="text-right flex-shrink-0">
-          <p className="text-[14px] font-medium text-text">
+        <div className="flex-shrink-0 text-right">
+          <p className="font-medium text-[14px] text-text">
             {formatBytes(scanResult.total_size_bytes)}
           </p>
           <p className="text-[12px] text-text-muted">
             {category === "recycle_bin"
-              ? t('cleaner.results.estimatedShort')
-              : t('cleaner.results.fileCount', { count: scanResult.files.length })}
+              ? t("cleaner.results.estimatedShort")
+              : t("cleaner.results.fileCount", { count: scanResult.files.length })}
           </p>
         </div>
       )}

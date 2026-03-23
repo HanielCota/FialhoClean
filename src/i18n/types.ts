@@ -1,8 +1,8 @@
-import type ptBR from './locales/pt-BR.json';
+import type ptBR from "./locales/pt-BR.json";
 
-declare module 'i18next' {
+declare module "i18next" {
   interface CustomTypeOptions {
-    defaultNS: 'translation';
+    defaultNS: "translation";
     resources: { translation: typeof ptBR };
   }
 }

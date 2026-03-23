@@ -16,10 +16,8 @@ export function ServicesTab({ services, onAction }: ServicesTabProps) {
   if (services.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-10 text-center">
-        <Settings2 className="w-10 h-10 text-text-tertiary" />
-        <p className="text-[14px] text-text-muted">
-          {t("optimizer.services.empty")}
-        </p>
+        <Settings2 className="h-10 w-10 text-text-tertiary" />
+        <p className="text-[14px] text-text-muted">{t("optimizer.services.empty")}</p>
       </div>
     );
   }
@@ -28,24 +26,24 @@ export function ServicesTab({ services, onAction }: ServicesTabProps) {
     <div className="space-y-3">
       {/* Expert warning banner */}
       {!showExpert ? (
-        <div className="flex items-start gap-4 p-5 bg-white/[0.03] border border-white/[0.06] rounded-xl">
-          <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <p className="text-[14px] font-semibold text-text">
+        <div className="flex items-start gap-4 rounded-xl border border-white/[0.06] bg-white/[0.03] p-5">
+          <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-400" />
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-[14px] text-text">
               {t("optimizer.expertWarning.title")}
             </p>
-            <p className="text-[13px] text-text-muted mt-1">
+            <p className="mt-1 text-[13px] text-text-muted">
               {t("optimizer.expertWarning.message")}
             </p>
           </div>
           <button
             type="button"
             onClick={() => setShowExpert(true)}
-            className="focus-ring mt-0.5 flex flex-shrink-0 items-center gap-1.5 rounded-md text-[13px] font-semibold text-accent transition-colors hover:text-accent-hover"
+            className="focus-ring mt-0.5 flex flex-shrink-0 items-center gap-1.5 rounded-md font-semibold text-[13px] text-accent transition-colors hover:text-accent-hover"
             aria-label={t("optimizer.expertWarning.showAria")}
           >
             {t("optimizer.expertWarning.show")}
-            <ChevronDown className="w-4 h-4" />
+            <ChevronDown className="h-4 w-4" />
           </button>
         </div>
       ) : (
@@ -60,7 +58,7 @@ export function ServicesTab({ services, onAction }: ServicesTabProps) {
             onClick={() => setShowExpert(false)}
             className="focus-ring mt-1 flex items-center gap-1.5 rounded-md text-[13px] text-text-muted transition-colors hover:text-text"
           >
-            <ChevronUp className="w-4 h-4" />
+            <ChevronUp className="h-4 w-4" />
             {t("optimizer.expertWarning.hide")}
           </button>
         </>

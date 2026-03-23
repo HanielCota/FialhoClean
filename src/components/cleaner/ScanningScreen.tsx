@@ -1,11 +1,11 @@
 import { CheckCircle2 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import type { CleanCategory } from "../../types/cleaner";
+import { CATEGORY_ICONS } from "../../constants/categoryIcons";
 import type { ScanProgressStatus } from "../../stores/cleanerStore";
+import type { CleanCategory } from "../../types/cleaner";
 import { Button } from "../shared/Button";
 import { ItemRow } from "../shared/ItemRow";
-import { CATEGORY_ICONS } from "../../constants/categoryIcons";
 
 interface StatusConfig {
   indicator: ReactNode;
@@ -16,24 +16,25 @@ interface StatusConfig {
 
 const STATUS_CONFIG: Record<ScanProgressStatus, StatusConfig> = {
   done: {
-    indicator: <CheckCircle2 className="w-5 h-5 text-green" />,
+    indicator: <CheckCircle2 className="h-5 w-5 text-green" />,
     labelClass: "text-text",
   },
   scanning: {
-    indicator: <div className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse-dot" />,
+    indicator: <div className="h-2.5 w-2.5 animate-pulse-dot rounded-full bg-accent" />,
     labelClass: "text-text",
     trailingKey: "scanning",
     trailingClass: "text-[12px] text-text-muted animate-pulse-dot",
   },
   pending: {
-    indicator: <div className="w-2.5 h-2.5 rounded-full bg-white/20" />,
+    indicator: <div className="h-2.5 w-2.5 rounded-full bg-white/20" />,
     labelClass: "text-text-muted",
   },
   error: {
-    indicator: <div className="w-2.5 h-2.5 rounded-full bg-white/20" />,
+    indicator: <div className="h-2.5 w-2.5 rounded-full bg-white/20" />,
     labelClass: "text-text-muted",
     trailingKey: "error",
-    trailingClass: "inline-flex items-center h-5 px-2 rounded text-[11px] font-semibold bg-red/[0.15] text-red",
+    trailingClass:
+      "inline-flex items-center h-5 px-2 rounded text-[11px] font-semibold bg-red/[0.15] text-red",
   },
 };
 
@@ -55,35 +56,33 @@ export function ScanningScreen({
   const progress = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
 
   return (
-    <div className="p-6 xl:p-8 flex flex-col items-center">
-      <h1 className="text-[22px] font-bold text-text mb-1 text-center">
+    <div className="flex flex-col items-center p-6 xl:p-8">
+      <h1 className="mb-1 text-center font-bold text-[22px] text-text">
         {t("cleaner.scan.title")}
       </h1>
-      <p className="text-[12px] text-text-muted mb-6 text-center">
-        {t("cleaner.scan.subtitle")}
-      </p>
+      <p className="mb-6 text-center text-[12px] text-text-muted">{t("cleaner.scan.subtitle")}</p>
 
-      <div className="w-full max-w-sm lg:max-w-md mb-6">
-        <div className="flex justify-between text-[12px] text-text-muted mb-1.5">
+      <div className="mb-6 w-full max-w-sm lg:max-w-md">
+        <div className="mb-1.5 flex justify-between text-[12px] text-text-muted">
           <span aria-live="polite">
             {t("cleaner.scan.progress", { done: doneCount, total: totalCount })}
           </span>
           <span>{progress}%</span>
         </div>
         <div
-          className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden"
+          className="h-1.5 overflow-hidden rounded-full bg-white/[0.06]"
           role="progressbar"
           aria-valuenow={progress}
           aria-valuetext={t("cleaner.scan.progressAria", { done: doneCount, total: totalCount })}
         >
           <div
-            className="h-full bg-accent rounded-full transition-all duration-500"
+            className="h-full rounded-full bg-accent transition-all duration-500"
             style={{ width: `${progress}%` }}
           />
         </div>
       </div>
 
-      <div className="w-full space-y-2 mb-6" aria-live="polite">
+      <div className="mb-6 w-full space-y-2" aria-live="polite">
         {categories.map((cat) => {
           const status = scanProgress?.[cat] ?? "pending";
           const Icon = CATEGORY_ICONS[cat];
@@ -92,13 +91,11 @@ export function ScanningScreen({
           return (
             <ItemRow
               key={cat}
-              className="bg-card border border-white/[0.06]"
+              className="border border-white/[0.06] bg-card"
               leading={
                 <div className="flex items-center gap-4">
-                  <div className="w-5 h-5 flex items-center justify-center">
-                    {config.indicator}
-                  </div>
-                  <Icon className="w-4 h-4 text-text-muted" />
+                  <div className="flex h-5 w-5 items-center justify-center">{config.indicator}</div>
+                  <Icon className="h-4 w-4 text-text-muted" />
                 </div>
               }
               title={t(`cleaner.categories.${cat}.label` as const)}

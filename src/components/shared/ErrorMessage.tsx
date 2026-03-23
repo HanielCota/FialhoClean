@@ -11,7 +11,7 @@ export function ErrorMessage({ message }: ErrorMessageProps) {
       aria-live="assertive"
       className="flex items-start gap-3 rounded-xl border border-error/20 bg-error/5 p-3"
     >
-      <AlertCircle className="w-4 h-4 text-error mt-0.5 flex-shrink-0" />
+      <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-error" />
       <p className="text-[14px] text-error">{message}</p>
     </div>
   );

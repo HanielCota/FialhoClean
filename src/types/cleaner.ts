@@ -19,7 +19,7 @@ export type CleanCategory =
 export interface FileEntry {
   path: string;
   size_bytes: number;
-  modified_timestamp: number;
+  modified_timestamp: number; // backend-only
 }
 
 export interface CategoryScanResult {
@@ -46,4 +46,3 @@ export interface FileGroup {
   category: CleanCategory;
   paths: string[];
 }
-

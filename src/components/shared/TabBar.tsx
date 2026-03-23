@@ -22,7 +22,7 @@ export function TabBar<T extends string>({
   return (
     <div
       role="tablist"
-      className={`flex items-end gap-1 border-b border-white/[0.06] ${className}`}
+      className={`flex items-end gap-1 border-white/[0.06] border-b ${className}`}
     >
       {tabs.map(({ id, label, Icon }) => {
         const isActive = id === active;
@@ -33,21 +33,18 @@ export function TabBar<T extends string>({
             type="button"
             aria-selected={isActive}
             onClick={() => onChange(id)}
-            className={`
-              focus-ring group relative flex items-center gap-2 px-4 pb-4 pt-2
-              text-[14px] font-semibold transition-colors duration-150
-              ${isActive ? "text-text" : "text-text-muted hover:text-text/80"}
+            className={`focus-ring group relative flex items-center gap-2 px-4 pt-2 pb-4 font-semibold text-[14px] transition-colors duration-150 ${isActive ? "text-text" : "text-text-muted hover:text-text/80"}
             `}
           >
             <Icon
-              className={`w-4 h-4 flex-shrink-0 transition-colors duration-150 ${
+              className={`h-4 w-4 flex-shrink-0 transition-colors duration-150 ${
                 isActive ? "text-accent" : "text-text-muted group-hover:text-text/60"
               }`}
             />
             {label}
             {/* Active indicator bar */}
             <span
-              className={`absolute bottom-0 left-0 right-0 h-[2px] rounded-full transition-all duration-200 ${
+              className={`absolute right-0 bottom-0 left-0 h-[2px] rounded-full transition-all duration-200 ${
                 isActive ? "bg-accent opacity-100" : "opacity-0"
               }`}
             />

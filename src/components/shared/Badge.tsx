@@ -19,16 +19,16 @@ export function Badge({ label, variant = "default" }: BadgeProps) {
 
   const ariaLabel =
     variant === "success"
-      ? t('common.safety.safe')
+      ? t("common.safety.safe")
       : variant === "caution"
-      ? t('common.safety.caution')
-      : variant === "error"
-      ? t('common.safety.danger')
-      : label;
+        ? t("common.safety.caution")
+        : variant === "error"
+          ? t("common.safety.danger")
+          : label;
 
   return (
     <span
-      className={`inline-flex items-center h-5 px-2 rounded text-[11px] font-semibold ${variants[variant]}`}
+      className={`inline-flex h-5 items-center rounded px-2 font-semibold text-[11px] ${variants[variant]}`}
       aria-label={ariaLabel}
     >
       {label}

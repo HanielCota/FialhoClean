@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { CleanCategory, CleanResult, ScanSummary } from "../types/cleaner";
 import { ALL_CATEGORIES } from "../constants/categories";
+import type { CleanCategory, CleanResult, ScanSummary } from "../types/cleaner";
 
 export type ScanProgressStatus = "pending" | "scanning" | "done" | "error";
 
@@ -67,13 +67,8 @@ interface CleanerState {
   setIsScanning: (v: boolean) => void;
   setIsCleaning: (v: boolean) => void;
   setError: (err: string | null) => void;
-  setScanProgress: (
-    progress: Record<CleanCategory, ScanProgressStatus> | null
-  ) => void;
-  updateCategoryProgress: (
-    category: CleanCategory,
-    status: ScanProgressStatus
-  ) => void;
+  setScanProgress: (progress: Record<CleanCategory, ScanProgressStatus> | null) => void;
+  updateCategoryProgress: (category: CleanCategory, status: ScanProgressStatus) => void;
   addCleanHistory: (entry: Omit<CleanHistoryEntry, "id" | "date">) => void;
   reset: () => void;
 }
@@ -95,14 +90,11 @@ export const useCleanerStore = create<CleanerState>((set) => ({
       return { selectedCategories: next };
     }),
 
-  selectAllCategories: () =>
-    set({ selectedCategories: new Set(ALL_CATEGORIES) }),
+  selectAllCategories: () => set({ selectedCategories: new Set(ALL_CATEGORIES) }),
 
-  deselectAllCategories: () =>
-    set({ selectedCategories: new Set<CleanCategory>() }),
+  deselectAllCategories: () => set({ selectedCategories: new Set<CleanCategory>() }),
 
-  setSelectedCategories: (cats) =>
-    set({ selectedCategories: new Set(cats) }),
+  setSelectedCategories: (cats) => set({ selectedCategories: new Set(cats) }),
 
   setScanSummary: (summary) => set({ scanSummary: summary }),
   setCleanResult: (result) => set({ cleanResult: result }),
@@ -113,9 +105,7 @@ export const useCleanerStore = create<CleanerState>((set) => ({
 
   updateCategoryProgress: (category, status) =>
     set((s) => ({
-      scanProgress: s.scanProgress
-        ? { ...s.scanProgress, [category]: status }
-        : null,
+      scanProgress: s.scanProgress ? { ...s.scanProgress, [category]: status } : null,
     })),
 
   addCleanHistory: (entry) =>

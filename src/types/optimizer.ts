@@ -37,7 +37,7 @@ export interface NetworkSettings {
 export interface ScheduledTask {
   name: string;
   task_path: string;
-  state: string;
+  state: "Ready" | "Running" | "Disabled" | "Queued" | "Unknown";
   description: string;
 }
 

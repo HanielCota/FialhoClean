@@ -1,5 +1,5 @@
-import type { ComponentType } from "react";
 import { ChevronRight } from "lucide-react";
+import type { ComponentType } from "react";
 
 interface ActionCardProps {
   icon: ComponentType<{ className?: string }>;
@@ -35,10 +35,12 @@ export function ActionCard({
           isAccent ? "bg-on-accent/10" : "bg-accent/10"
         }`}
       >
-        <Icon className={`w-4 h-4 ${isAccent ? "text-on-accent" : "text-accent"}`} />
+        <Icon className={`h-4 w-4 ${isAccent ? "text-on-accent" : "text-accent"}`} />
       </div>
-      <div className="flex-1">
-        <p className={`text-[14px] font-semibold ${isAccent ? "text-on-accent" : "text-text"}`}>
+      <div className="min-w-0 flex-1">
+        <p
+          className={`truncate font-semibold text-[14px] ${isAccent ? "text-on-accent" : "text-text"}`}
+        >
           {title}
         </p>
         <p className={`text-[13px] ${isAccent ? "text-on-accent/72" : "text-text-muted"}`}>
@@ -46,7 +48,7 @@ export function ActionCard({
         </p>
       </div>
       <ChevronRight
-        className={`w-4 h-4 transition-colors ${
+        className={`h-4 w-4 flex-shrink-0 transition-colors ${
           isAccent
             ? "text-on-accent/65 group-hover:text-on-accent"
             : "text-text-muted group-hover:text-text"

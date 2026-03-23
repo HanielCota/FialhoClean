@@ -25,7 +25,7 @@ export function useRepair() {
       setSfc({ status: result.success ? "success" : "error", result });
       notify(
         result.success ? "repair.toast.sfcSuccess" : "repair.toast.sfcFailed",
-        result.success ? "success" : "error"
+        result.success ? "success" : "error",
       );
     } catch (err) {
       const msg = sanitizeError(err);
@@ -41,7 +41,7 @@ export function useRepair() {
       setDism({ status: result.success ? "success" : "error", result });
       notify(
         result.success ? "repair.toast.dismSuccess" : "repair.toast.dismFailed",
-        result.success ? "success" : "error"
+        result.success ? "success" : "error",
       );
     } catch (err) {
       const msg = sanitizeError(err);
@@ -50,17 +50,20 @@ export function useRepair() {
     }
   }, [notify]);
 
-  const createRestorePoint = useCallback(async (description: string) => {
-    setRestorePoint("running");
-    try {
-      await repairService.createRestorePoint(description);
-      setRestorePoint("success");
-      notify("repair.toast.restorePointCreated", "success");
-    } catch (err) {
-      setRestorePoint("error");
-      notify("repair.toast.restorePointFailed", "error", { msg: sanitizeError(err) });
-    }
-  }, [notify]);
+  const createRestorePoint = useCallback(
+    async (description: string) => {
+      setRestorePoint("running");
+      try {
+        await repairService.createRestorePoint(description);
+        setRestorePoint("success");
+        notify("repair.toast.restorePointCreated", "success");
+      } catch (err) {
+        setRestorePoint("error");
+        notify("repair.toast.restorePointFailed", "error", { msg: sanitizeError(err) });
+      }
+    },
+    [notify],
+  );
 
   const resetTool = useCallback((tool: RepairToolId) => {
     if (tool === "sfc") setSfc(initialState);

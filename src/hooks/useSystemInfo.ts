@@ -12,7 +12,12 @@ interface SystemInfoState {
 }
 
 export function useSystemInfo(autoRefresh = true): SystemInfoState {
-  const { data, isLoading, error: rawError, refetch } = useQuery({
+  const {
+    data,
+    isLoading,
+    error: rawError,
+    refetch,
+  } = useQuery({
     queryKey: ["system-info"],
     queryFn: async () => {
       const [info, disks] = await Promise.all([

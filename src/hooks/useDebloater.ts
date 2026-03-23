@@ -1,5 +1,5 @@
-import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { sanitizeError } from "../lib/errors";
 import { debloaterService } from "../services/debloaterService";
@@ -20,7 +20,11 @@ export function useDebloater() {
   const notify = useNotify();
   const { t } = useTranslation();
 
-  const { isLoading, error: rawError, refetch: loadApps } = useQuery({
+  const {
+    isLoading,
+    error: rawError,
+    refetch: loadApps,
+  } = useQuery({
     queryKey: ["bloatware-apps"],
     queryFn: async () => {
       const apps = await debloaterService.getInstalledApps();

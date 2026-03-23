@@ -32,9 +32,7 @@ export const useDebloaterStore = create<DebloaterState>((set) => ({
   toggleApp: (packageFullName) =>
     set((s) => {
       const next = new Set(s.selectedApps);
-      next.has(packageFullName)
-        ? next.delete(packageFullName)
-        : next.add(packageFullName);
+      next.has(packageFullName) ? next.delete(packageFullName) : next.add(packageFullName);
       return { selectedApps: next };
     }),
   clearSelection: () => set({ selectedApps: new Set() }),
@@ -44,12 +42,8 @@ export const useDebloaterStore = create<DebloaterState>((set) => ({
     })),
   removeFromList: (packageFullNames) =>
     set((s) => ({
-      apps: s.apps.filter(
-        (a) => !packageFullNames.includes(a.package_full_name)
-      ),
-      selectedApps: new Set(
-        [...s.selectedApps].filter((p) => !packageFullNames.includes(p))
-      ),
+      apps: s.apps.filter((a) => !packageFullNames.includes(a.package_full_name)),
+      selectedApps: new Set([...s.selectedApps].filter((p) => !packageFullNames.includes(p))),
     })),
   setIsLoading: (v) => set({ isLoading: v }),
   setIsRemoving: (v) => set({ isRemoving: v }),

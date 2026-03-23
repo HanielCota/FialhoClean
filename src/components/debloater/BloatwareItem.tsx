@@ -23,10 +23,10 @@ export const BloatwareItem = memo(function BloatwareItem({
 
   const safetyLabel =
     app.safety_level === "safe"
-      ? t('common.safe')
+      ? t("common.safe")
       : app.safety_level === "caution"
-      ? t('common.caution')
-      : t('common.dangerous');
+        ? t("common.caution")
+        : t("common.dangerous");
 
   return (
     <ItemRow
@@ -34,15 +34,15 @@ export const BloatwareItem = memo(function BloatwareItem({
       role="checkbox"
       aria-checked={selected}
       onClick={() => onToggle(app.package_full_name)}
-      className={`border transition-all duration-150 cursor-pointer ${
-        selected
-          ? "bg-accent/5 border-accent/20"
-          : "bg-card border-white/5 hover:border-white/10"
+      className={`cursor-pointer border transition-all duration-150 ${
+        selected ? "border-accent/20 bg-accent/5" : "border-white/5 bg-card hover:border-white/10"
       }`}
       leading={<Checkbox checked={selected} />}
       title={
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[14px] font-medium text-text">{app.name}</span>
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <span className="min-w-0 flex-[1_1_140px] truncate font-medium text-[14px] text-text">
+            {app.name}
+          </span>
           <Badge label={safetyLabel} variant={safetyVariant} />
         </div>
       }

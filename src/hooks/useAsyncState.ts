@@ -11,7 +11,7 @@ export type AsyncStatus = "loading" | "error" | "empty" | "ready";
 export function useAsyncState(
   isLoading: boolean,
   error: string | null,
-  isEmpty: boolean
+  isEmpty: boolean,
 ): AsyncStatus {
   if (isLoading && isEmpty) return "loading";
   if (error && isEmpty) return "error";

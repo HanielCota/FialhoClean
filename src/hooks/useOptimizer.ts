@@ -1,14 +1,14 @@
-import { useCallback, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
 import { sanitizeError } from "../lib/errors";
 import { formatBytes } from "../lib/format";
 import { optimizerService } from "../services/optimizerService";
-import { useStartup } from "./useStartup";
-import { useServices } from "./useServices";
-import { usePowerSettings } from "./usePowerSettings";
-import { useSystemTweaks } from "./useSystemTweaks";
-import { useScheduledTasks } from "./useScheduledTasks";
 import { useNotify } from "./useNotify";
+import { usePowerSettings } from "./usePowerSettings";
+import { useScheduledTasks } from "./useScheduledTasks";
+import { useServices } from "./useServices";
+import { useStartup } from "./useStartup";
+import { useSystemTweaks } from "./useSystemTweaks";
 
 export function useOptimizer() {
   const startup = useStartup();
@@ -34,7 +34,9 @@ export function useOptimizer() {
     try {
       const result = await optimizerService.optimizeRam();
       if (result.freed_bytes > 0) {
-        notify("optimizer.toast.ramOptimized", "success", { size: formatBytes(result.freed_bytes) });
+        notify("optimizer.toast.ramOptimized", "success", {
+          size: formatBytes(result.freed_bytes),
+        });
       } else {
         notify("optimizer.toast.ramOptimizedNoChange", "info");
       }
@@ -75,12 +77,7 @@ export function useOptimizer() {
       power.isLoading ||
       tweaks.isLoading ||
       scheduledTasks.isLoading,
-    error:
-      startup.error ||
-      services.error ||
-      power.error ||
-      tweaks.error ||
-      scheduledTasks.error,
+    error: startup.error || services.error || power.error || tweaks.error || scheduledTasks.error,
     loadAll,
   };
 }
