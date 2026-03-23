@@ -28,6 +28,7 @@ pub fn run() {
             // System
             system::get_system_info,
             system::get_disk_usage,
+            system::open_url,
             // Cleaner
             cleaner::scan_categories,
             cleaner::clean_files,

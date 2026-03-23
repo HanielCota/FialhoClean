@@ -2,20 +2,45 @@
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
-
 | Version | Supported          |
 | ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+| 1.x     | :white_check_mark: |
 
 ## Reporting a Vulnerability
 
-Use this section to tell people how to report a vulnerability.
+If you discover a security vulnerability in FialhoClean, please report it responsibly.
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+**Do NOT open a public GitHub issue for security vulnerabilities.**
+
+Instead, please email: **security@fialho.dev** (or open a private security advisory on GitHub).
+
+### What to include
+
+- Description of the vulnerability
+- Steps to reproduce
+- Affected version(s)
+- Potential impact
+
+### What to expect
+
+- Acknowledgment within 48 hours
+- Status update within 7 days
+- Fix or mitigation plan within 30 days for confirmed vulnerabilities
+
+### Scope
+
+The following are in scope:
+
+- Command injection via IPC commands
+- Path traversal in file operations
+- Privilege escalation
+- Arbitrary code execution
+- Data exfiltration
+- Bypass of service/task/app whitelists
+
+The following are out of scope:
+
+- Attacks requiring physical access to the machine
+- Social engineering
+- Denial of service against the local app
+- Issues in upstream dependencies (report these to the upstream project)

@@ -1,5 +1,9 @@
 {
   "app": { "name": "FialhoClean" },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "message": "An unexpected error occurred in this view."
+  },
   "titlebar": { "close": "Close", "minimize": "Minimize", "maximize": "Maximize" },
   "nav": {
     "label": "Navigation",
@@ -61,11 +65,21 @@
       "ram": "RAM",
       "cpuUsage": "{{pct}}% usage",
       "cpuSub": "processor",
-      "uptime": "Uptime"
+      "uptime": "Uptime",
+      "uptimeDhm": "{{days}}d {{hours}}h {{minutes}}m",
+      "uptimeHm": "{{hours}}h {{minutes}}m",
+      "uptimeM": "{{minutes}}m"
     },
     "activity": {
       "cleaned": "Cleaned {{size}} · {{files}} files removed",
-      "empty": "No cleanups yet. Run Quick Clean to start."
+      "empty": "No cleanups yet. Run Quick Clean to start.",
+      "category_one": "category",
+      "category_other": "categories"
+    },
+    "relative": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "daysAgo": "{{count}} days ago"
     },
     "systemError": "Couldn't load system info",
     "refresh": "Refresh system stats"
@@ -413,6 +427,7 @@
     "restorePoint": {
       "title": "Create Restore Point",
       "description": "Creates a Windows System Restore snapshot you can revert to if something goes wrong.",
+      "defaultDescription": "FialhoClean Backup",
       "placeholder": "Restore point description…",
       "button": "Create"
     },
@@ -462,7 +477,9 @@
     },
     "about": {
       "version": "Version {{version}}",
-      "builtWith": "Built with Tauri 2 + React"
+      "builtWith": "Built with Tauri 2 + React",
+      "reportBug": "Report a bug",
+      "github": "GitHub"
     }
   },
   "debloater": {

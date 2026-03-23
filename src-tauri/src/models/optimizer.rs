@@ -83,8 +83,17 @@ pub struct NetworkSettings {
 pub struct ScheduledTask {
     pub name: String,
     pub task_path: String,
-    pub state: String,
+    pub state: TaskState,
     pub description: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum TaskState {
+    Ready,
+    Running,
+    Disabled,
+    Queued,
+    Unknown,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

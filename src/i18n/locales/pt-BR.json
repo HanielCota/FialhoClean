@@ -2,6 +2,10 @@
   "app": {
     "name": "FialhoClean"
   },
+  "errorBoundary": {
+    "title": "Algo deu errado",
+    "message": "Ocorreu um erro inesperado nesta tela."
+  },
   "titlebar": {
     "close": "Fechar",
     "minimize": "Minimizar",
@@ -67,11 +71,21 @@
       "ram": "RAM",
       "cpuUsage": "{{pct}}% de uso",
       "cpuSub": "processador",
-      "uptime": "Tempo Ligado"
+      "uptime": "Tempo Ligado",
+      "uptimeDhm": "{{days}}d {{hours}}h {{minutes}}m",
+      "uptimeHm": "{{hours}}h {{minutes}}m",
+      "uptimeM": "{{minutes}}m"
     },
     "activity": {
       "cleaned": "Limpou {{size}} · {{files}} arquivos removidos",
-      "empty": "Nenhuma limpeza ainda. Execute Limpeza Rápida para começar."
+      "empty": "Nenhuma limpeza ainda. Execute Limpeza Rápida para começar.",
+      "category_one": "categoria",
+      "category_other": "categorias"
+    },
+    "relative": {
+      "today": "Hoje",
+      "yesterday": "Ontem",
+      "daysAgo": "há {{count}} dias"
     },
     "systemError": "Não foi possível carregar informações do sistema",
     "refresh": "Atualizar estatísticas do sistema"
@@ -419,6 +433,7 @@
     "restorePoint": {
       "title": "Criar Ponto de Restauração",
       "description": "Cria um snapshot do Sistema de Restauração do Windows para reverter caso algo dê errado.",
+      "defaultDescription": "FialhoClean Backup",
       "placeholder": "Descrição do ponto de restauração…",
       "button": "Criar"
     },
@@ -468,7 +483,9 @@
     },
     "about": {
       "version": "Versão {{version}}",
-      "builtWith": "Desenvolvido com Tauri 2 + React"
+      "builtWith": "Desenvolvido com Tauri 2 + React",
+      "reportBug": "Reportar um bug",
+      "github": "GitHub"
     }
   },
   "debloater": {
