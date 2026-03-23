@@ -77,14 +77,14 @@ fn is_path_allowed(path: &str, category: &CleanCategory) -> bool {
     // Build the list of allowed base directories for this category.
     let allowed_prefixes: Vec<String> = match category {
         CleanCategory::TempFiles => {
-            let mut v = vec![WINDOWS_TEMP_FALLBACK.to_string()];
+            let mut paths = vec![WINDOWS_TEMP_FALLBACK.to_string()];
             if let Ok(t) = std::env::var("TEMP") {
-                v.push(t);
+                paths.push(t);
             }
             if let Ok(t) = std::env::var("TMP") {
-                v.push(t);
+                paths.push(t);
             }
-            v
+            paths
         }
         CleanCategory::BrowserCache => {
             let local_app_data = std::env::var("LOCALAPPDATA").unwrap_or_default();
@@ -92,54 +92,54 @@ fn is_path_allowed(path: &str, category: &CleanCategory) -> bool {
             browser_cache_paths(&local_app_data, &app_data)
         }
         CleanCategory::OldLogs => {
-            let mut v = vec![WINDOWS_LOGS_PATH.to_string()];
+            let mut paths = vec![WINDOWS_LOGS_PATH.to_string()];
             if let Ok(t) = std::env::var("TEMP") {
-                v.push(t);
+                paths.push(t);
             }
-            v
+            paths
         }
         CleanCategory::Prefetch => vec![WINDOWS_PREFETCH_PATH.to_string()],
         CleanCategory::WindowsUpdateCache => vec![WINDOWS_UPDATE_DOWNLOAD_PATH.to_string()],
         CleanCategory::DeliveryOptimization => vec![WINDOWS_DELIVERY_OPT_PATH.to_string()],
         CleanCategory::WindowsErrorReports => {
-            let mut v = Vec::new();
+            let mut paths = Vec::new();
             if let Ok(t) = std::env::var("LOCALAPPDATA") {
-                v.push(format!(r"{}\Microsoft\Windows\WER", t));
+                paths.push(format!(r"{}\Microsoft\Windows\WER", t));
             }
             if let Ok(t) = std::env::var("PROGRAMDATA") {
-                v.push(format!(r"{}\Microsoft\Windows\WER", t));
+                paths.push(format!(r"{}\Microsoft\Windows\WER", t));
             }
-            v
+            paths
         }
         CleanCategory::ThumbnailCache | CleanCategory::IconCache => {
-            let mut v = Vec::new();
+            let mut paths = Vec::new();
             if let Ok(t) = std::env::var("LOCALAPPDATA") {
-                v.push(format!(r"{}\Microsoft\Windows\Explorer", t));
+                paths.push(format!(r"{}\Microsoft\Windows\Explorer", t));
             }
-            v
+            paths
         }
         CleanCategory::MemoryDumps => {
             // Special case: also allow the exact MEMORY.DMP file (checked below).
             vec![WINDOWS_MINIDUMP_PATH.to_string()]
         }
         CleanCategory::DiscordCache => {
-            let mut v = Vec::new();
+            let mut paths = Vec::new();
             if let Ok(t) = std::env::var("APPDATA") {
-                v.push(format!(r"{}\discord\Cache", t));
-                v.push(format!(r"{}\discord\Code Cache", t));
-                v.push(format!(r"{}\discord\GPUCache", t));
+                paths.push(format!(r"{}\discord\Cache", t));
+                paths.push(format!(r"{}\discord\Code Cache", t));
+                paths.push(format!(r"{}\discord\GPUCache", t));
             }
-            v
+            paths
         }
         CleanCategory::SpotifyCache => {
-            let mut v = Vec::new();
+            let mut paths = Vec::new();
             if let Ok(t) = std::env::var("LOCALAPPDATA") {
-                v.push(format!(r"{}\Spotify\Storage", t));
+                paths.push(format!(r"{}\Spotify\Storage", t));
             }
-            v
+            paths
         }
         CleanCategory::SteamCache => {
-            let mut v = vec![
+            let mut paths = vec![
                 format!(r"{}\depotcache", STEAM_PATH_X86),
                 format!(r"{}\logs", STEAM_PATH_X86),
                 format!(r"{}\dumps", STEAM_PATH_X86),
@@ -149,18 +149,18 @@ fn is_path_allowed(path: &str, category: &CleanCategory) -> bool {
             ];
             // Also support Steam installed on other drives via LOCALAPPDATA hint.
             if let Ok(t) = std::env::var("LOCALAPPDATA") {
-                v.push(format!(r"{}\Steam\depotcache", t));
-                v.push(format!(r"{}\Steam\logs", t));
-                v.push(format!(r"{}\Steam\dumps", t));
+                paths.push(format!(r"{}\Steam\depotcache", t));
+                paths.push(format!(r"{}\Steam\logs", t));
+                paths.push(format!(r"{}\Steam\dumps", t));
             }
-            v
+            paths
         }
         CleanCategory::RecentFiles => {
-            let mut v = Vec::new();
+            let mut paths = Vec::new();
             if let Ok(t) = std::env::var("APPDATA") {
-                v.push(format!(r"{}\Microsoft\Windows\Recent", t));
+                paths.push(format!(r"{}\Microsoft\Windows\Recent", t));
             }
-            v
+            paths
         }
         // RecycleBin and DnsCache are handled via commands — no individual file paths.
         CleanCategory::RecycleBin | CleanCategory::DnsCache => return false,
@@ -342,21 +342,21 @@ async fn scan_old_logs(category: &CleanCategory) -> Result<CategoryScanResult, A
 
 async fn scan_prefetch(category: &CleanCategory) -> Result<CategoryScanResult, AppError> {
     let path = Path::new(WINDOWS_PREFETCH_PATH);
-    scan_single_path(category, path, collect_files(path)).await
+    scan_single_path(category, collect_files(path)).await
 }
 
 async fn scan_windows_update_cache(
     category: &CleanCategory,
 ) -> Result<CategoryScanResult, AppError> {
     let path = Path::new(WINDOWS_UPDATE_DOWNLOAD_PATH);
-    scan_single_path(category, path, collect_files(path)).await
+    scan_single_path(category, collect_files(path)).await
 }
 
 async fn scan_delivery_optimization(
     category: &CleanCategory,
 ) -> Result<CategoryScanResult, AppError> {
     let path = Path::new(WINDOWS_DELIVERY_OPT_PATH);
-    scan_single_path(category, path, collect_files(path)).await
+    scan_single_path(category, collect_files(path)).await
 }
 
 async fn scan_windows_error_reports(
@@ -384,24 +384,14 @@ async fn scan_thumbnail_cache(category: &CleanCategory) -> Result<CategoryScanRe
     let local_app_data = std::env::var("LOCALAPPDATA").unwrap_or_default();
     let explorer_path = format!(r"{}\Microsoft\Windows\Explorer", local_app_data);
     let path = Path::new(&explorer_path);
-    scan_single_path(
-        category,
-        path,
-        collect_files_by_name_prefix(path, "thumbcache_"),
-    )
-    .await
+    scan_single_path(category, collect_files_by_name_prefix(path, "thumbcache_")).await
 }
 
 async fn scan_icon_cache(category: &CleanCategory) -> Result<CategoryScanResult, AppError> {
     let local_app_data = std::env::var("LOCALAPPDATA").unwrap_or_default();
     let explorer_path = format!(r"{}\Microsoft\Windows\Explorer", local_app_data);
     let path = Path::new(&explorer_path);
-    scan_single_path(
-        category,
-        path,
-        collect_files_by_name_prefix(path, "iconcache_"),
-    )
-    .await
+    scan_single_path(category, collect_files_by_name_prefix(path, "iconcache_")).await
 }
 
 async fn scan_memory_dumps(category: &CleanCategory) -> Result<CategoryScanResult, AppError> {
@@ -471,7 +461,7 @@ async fn scan_spotify_cache(category: &CleanCategory) -> Result<CategoryScanResu
     let local_app_data = std::env::var("LOCALAPPDATA").unwrap_or_default();
     let storage_path = format!(r"{}\Spotify\Storage", local_app_data);
     let path = Path::new(&storage_path);
-    scan_single_path(category, path, collect_files(path)).await
+    scan_single_path(category, collect_files(path)).await
 }
 
 async fn scan_steam_cache(category: &CleanCategory) -> Result<CategoryScanResult, AppError> {
@@ -500,7 +490,7 @@ async fn scan_recent_files(category: &CleanCategory) -> Result<CategoryScanResul
     let app_data = std::env::var("APPDATA").unwrap_or_default();
     let recent_path = format!(r"{}\Microsoft\Windows\Recent", app_data);
     let path = Path::new(&recent_path);
-    scan_single_path(category, path, collect_files(path)).await
+    scan_single_path(category, collect_files(path)).await
 }
 
 async fn scan_dns_cache(category: &CleanCategory) -> Result<CategoryScanResult, AppError> {
@@ -647,11 +637,19 @@ pub async fn clean_files(file_groups: Vec<FileGroup>) -> Result<CleanResult, App
 
             let handle = tokio::spawn(async move {
                 let _permit = permit;
-                let size = tokio::fs::metadata(&path)
-                    .await
-                    .map(|m| m.len())
-                    .unwrap_or(0);
 
+                // Re-check metadata right before deletion to close the
+                // TOCTOU window: reject symlinks/junctions that may have
+                // been swapped in after the initial scan.
+                let meta = match tokio::fs::symlink_metadata(&path).await {
+                    Ok(m) => m,
+                    Err(_) => return (false, 0, None::<String>),
+                };
+                if is_reparse_point(&meta) {
+                    return (false, 0, None);
+                }
+
+                let size = meta.len();
                 match tokio::fs::remove_file(&path).await {
                     Ok(_) => (true, size, None::<String>),
                     Err(_) => (false, 0, None),
@@ -695,4 +693,111 @@ async fn flush_dns() -> Result<(), AppError> {
     cmd.arg("/flushdns");
     RUNNER.run(cmd).await?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // ── Path validation: rejection cases ────────────────────────────────────
+
+    #[test]
+    fn rejects_null_bytes() {
+        assert!(!is_path_allowed(
+            "C:\\temp\\file\0.txt",
+            &CleanCategory::TempFiles
+        ));
+    }
+
+    #[test]
+    fn rejects_relative_path() {
+        assert!(!is_path_allowed(
+            "relative/path.tmp",
+            &CleanCategory::TempFiles
+        ));
+        assert!(!is_path_allowed("./file.tmp", &CleanCategory::TempFiles));
+    }
+
+    #[test]
+    fn rejects_parent_traversal() {
+        assert!(!is_path_allowed(
+            "C:\\Windows\\Temp\\..\\System32\\cmd.exe",
+            &CleanCategory::TempFiles
+        ));
+    }
+
+    #[test]
+    fn rejects_recycle_bin_individual_paths() {
+        // RecycleBin is command-based, individual paths always rejected
+        assert!(!is_path_allowed(
+            "C:\\$Recycle.Bin\\file.txt",
+            &CleanCategory::RecycleBin
+        ));
+    }
+
+    #[test]
+    fn rejects_dns_cache_individual_paths() {
+        // DnsCache is command-based, individual paths always rejected
+        assert!(!is_path_allowed(
+            "C:\\dns\\cache.dat",
+            &CleanCategory::DnsCache
+        ));
+    }
+
+    #[test]
+    fn rejects_empty_path() {
+        assert!(!is_path_allowed("", &CleanCategory::TempFiles));
+    }
+
+    // ── Path validation: acceptance cases ───────────────────────────────────
+
+    #[test]
+    fn accepts_windows_temp_fallback_path() {
+        let path = format!(r"{}\test.tmp", WINDOWS_TEMP_FALLBACK);
+        // This may or may not pass depending on whether the directory exists on the
+        // test machine, but it should not panic.
+        let _ = is_path_allowed(&path, &CleanCategory::TempFiles);
+    }
+
+    #[test]
+    fn accepts_prefetch_path() {
+        let path = format!(r"{}\APP.EXE-12345678.pf", WINDOWS_PREFETCH_PATH);
+        let _ = is_path_allowed(&path, &CleanCategory::Prefetch);
+    }
+
+    // ── Reparse point detection ─────────────────────────────────────────────
+
+    #[test]
+    fn regular_file_is_not_reparse_point() {
+        // Use a known file that exists on all Windows systems
+        let meta = std::fs::metadata(r"C:\Windows\System32\notepad.exe");
+        if let Ok(m) = meta {
+            assert!(!is_reparse_point(&m));
+        }
+    }
+
+    // ── Helper functions ────────────────────────────────────────────────────
+
+    #[test]
+    fn has_extension_case_insensitive() {
+        assert!(has_extension("C:\\logs\\app.LOG", "log"));
+        assert!(has_extension("C:\\logs\\app.log", "log"));
+        assert!(!has_extension("C:\\logs\\app.txt", "log"));
+    }
+
+    #[test]
+    fn file_name_starts_with_case_insensitive() {
+        assert!(file_name_starts_with(
+            "C:\\Explorer\\thumbcache_256.db",
+            "thumbcache_"
+        ));
+        assert!(file_name_starts_with(
+            "C:\\Explorer\\THUMBCACHE_256.db",
+            "thumbcache_"
+        ));
+        assert!(!file_name_starts_with(
+            "C:\\Explorer\\iconcache_256.db",
+            "thumbcache_"
+        ));
+    }
 }

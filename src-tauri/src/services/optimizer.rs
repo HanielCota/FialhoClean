@@ -1,7 +1,7 @@
 use crate::errors::AppError;
 use crate::models::optimizer::{
     HibernateSettings, NetworkSettings, PowerPlan, ScheduledTask, ServiceAction, ServiceInfo,
-    ServiceSafety, ServiceStatus, StartType, StartupItem, StartupSource,
+    ServiceSafety, ServiceStatus, StartType, StartupItem, StartupSource, TaskState,
 };
 use crate::services::process_runner::ProcessRunner;
 use crate::services::registry::{hkcu, hklm, RegistryExt};
@@ -121,7 +121,7 @@ fn parse_power_plan_line(line: &str) -> Option<PowerPlan> {
         .find('(')
         .and_then(|start| line.rfind(')').map(|end| (start, end)))
         .filter(|(start, end)| start < end)
-        .map(|(start, end)| line[start + 1..end].trim().to_string())
+        .and_then(|(start, end)| line.get(start + 1..end).map(|s| s.trim().to_string()))
         .filter(|name| !name.is_empty())
         .unwrap_or_else(|| "Unknown".to_string());
 
@@ -155,47 +155,34 @@ fn startup_root_from_key_path(key_path: &str) -> Result<RegKey, AppError> {
 }
 
 pub async fn get_startup_items() -> Result<Vec<StartupItem>, AppError> {
+    let sources = [
+        (
+            HKEY_CURRENT_USER,
+            "HKEY_CURRENT_USER",
+            StartupSource::HkeyCurrentUser,
+        ),
+        (
+            HKEY_LOCAL_MACHINE,
+            "HKEY_LOCAL_MACHINE",
+            StartupSource::HkeyLocalMachine,
+        ),
+    ];
+
     let mut items = Vec::new();
-
-    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
-    let key_path_hkcu = format!("HKEY_CURRENT_USER\\{}", REG_RUN_KEY);
-
-    if let Ok(run_key) = hkcu.open_subkey(REG_RUN_KEY) {
-        let names: Vec<String> = run_key
-            .enum_values()
-            .flatten()
-            .map(|(name, _)| name)
-            .collect();
-        for name in names {
-            let command: String = run_key.get_value(&name).unwrap_or_default();
-            items.push(StartupItem {
-                name: name.clone(),
-                command,
-                key_path: key_path_hkcu.clone(),
-                enabled: startup_enabled_from_approved(&hkcu, &name),
-                source: StartupSource::HkeyCurrentUser,
-            });
-        }
-    }
-
-    let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
-    let key_path_hklm = format!("HKEY_LOCAL_MACHINE\\{}", REG_RUN_KEY);
-
-    if let Ok(run_key) = hklm.open_subkey(REG_RUN_KEY) {
-        let names: Vec<String> = run_key
-            .enum_values()
-            .flatten()
-            .map(|(name, _)| name)
-            .collect();
-        for name in names {
-            let command: String = run_key.get_value(&name).unwrap_or_default();
-            items.push(StartupItem {
-                name: name.clone(),
-                command,
-                key_path: key_path_hklm.clone(),
-                enabled: startup_enabled_from_approved(&hklm, &name),
-                source: StartupSource::HkeyLocalMachine,
-            });
+    for (hkey, prefix, source) in sources {
+        let root = RegKey::predef(hkey);
+        let key_path = format!("{}\\{}", prefix, REG_RUN_KEY);
+        if let Ok(run_key) = root.open_subkey(REG_RUN_KEY) {
+            for (name, _) in run_key.enum_values().flatten() {
+                let command: String = run_key.get_value(&name).unwrap_or_default();
+                items.push(StartupItem {
+                    name: name.clone(),
+                    command,
+                    key_path: key_path.clone(),
+                    enabled: startup_enabled_from_approved(&root, &name),
+                    source: source.clone(),
+                });
+            }
         }
     }
 
@@ -262,18 +249,18 @@ pub async fn get_services() -> Result<Vec<ServiceInfo>, AppError> {
     Ok(services)
 }
 
-fn parse_service_entry(v: serde_json::Value) -> Option<ServiceInfo> {
-    let name = v["Name"].as_str()?.to_string();
-    let display_name = v["DisplayName"].as_str().unwrap_or(&name).to_string();
+fn parse_service_entry(entry: serde_json::Value) -> Option<ServiceInfo> {
+    let name = entry["Name"].as_str()?.to_string();
+    let display_name = entry["DisplayName"].as_str().unwrap_or(&name).to_string();
 
-    let status = match v["Status"].as_u64().unwrap_or(0) {
+    let status = match entry["Status"].as_u64().unwrap_or(0) {
         4 => ServiceStatus::Running,
         1 => ServiceStatus::Stopped,
         7 => ServiceStatus::Paused,
         _ => ServiceStatus::Unknown,
     };
 
-    let start_type = match v["StartType"].as_u64().unwrap_or(99) {
+    let start_type = match entry["StartType"].as_u64().unwrap_or(99) {
         2 => StartType::Automatic,
         3 => StartType::Manual,
         4 => StartType::Disabled,
@@ -413,10 +400,10 @@ pub async fn set_visual_effects(performance_mode: bool) -> Result<(), AppError> 
 // ─── Hibernate / Fast Startup ──────────────────────────────────────────────
 
 pub async fn get_hibernate_settings() -> Result<HibernateSettings, AppError> {
-    let m = hklm();
+    let lm = hklm();
     Ok(HibernateSettings {
-        hibernate_enabled: m.read_bool(REG_POWER_KEY, "HibernateEnabled", true),
-        fast_startup_enabled: m.read_bool(REG_SESSION_POWER_KEY, "HiberbootEnabled", false),
+        hibernate_enabled: lm.read_bool(REG_POWER_KEY, "HibernateEnabled", true),
+        fast_startup_enabled: lm.read_bool(REG_SESSION_POWER_KEY, "HiberbootEnabled", false),
     })
 }
 
@@ -550,13 +537,19 @@ pub async fn get_scheduled_tasks() -> Result<Vec<ScheduledTask>, AppError> {
     };
 
     let mut tasks = Vec::new();
-    for v in raw {
-        let task_name = match v["TaskName"].as_str() {
+    for entry in raw {
+        let task_name = match entry["TaskName"].as_str() {
             Some(n) => n.to_string(),
             None => continue,
         };
-        let task_path_raw = v["TaskPath"].as_str().unwrap_or("").to_string();
-        let state = v["State"].as_str().unwrap_or("Unknown").to_string();
+        let task_path_raw = entry["TaskPath"].as_str().unwrap_or("").to_string();
+        let state = match entry["State"].as_str().unwrap_or("") {
+            "Ready" => TaskState::Ready,
+            "Running" => TaskState::Running,
+            "Disabled" => TaskState::Disabled,
+            "Queued" => TaskState::Queued,
+            _ => TaskState::Unknown,
+        };
 
         // Build the full path the same way we store in MANAGED_TASKS (no trailing slash on name)
         let full_path = format!("{}{}", task_path_raw.trim_end_matches('\\'), task_name);
@@ -603,12 +596,21 @@ pub async fn set_scheduled_task_enabled(task_path: String, enabled: bool) -> Res
     };
 
     let action = if enabled { "Enable" } else { "Disable" };
-    let ps_command = format!(
-        "{}-ScheduledTask -TaskPath '{}' -TaskName '{}' -ErrorAction Stop",
-        action, folder, name
-    );
 
-    RUNNER.powershell(&ps_command).await?;
+    let mut cmd = tokio::process::Command::new("powershell");
+    cmd.args([
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "& { $a = $env:FIALHO_ACTION; & \"${a}-ScheduledTask\" -TaskPath $env:FIALHO_FOLDER -TaskName $env:FIALHO_NAME -ErrorAction Stop }",
+    ])
+    .env("FIALHO_ACTION", action)
+    .env("FIALHO_FOLDER", folder)
+    .env("FIALHO_NAME", name);
+
+    RUNNER.run(cmd).await?;
     Ok(())
 }
 
@@ -727,4 +729,137 @@ Write-Output $freed
         Err(_) => 0,
     };
     Ok(crate::models::optimizer::RamOptimizationResult { freed_bytes })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // ── GUID validation ─────────────────────────────────────────────────────
+
+    #[test]
+    fn valid_guid_lowercase() {
+        assert!(is_valid_guid("381b4222-f694-41f0-9685-ff5bb260df2e"));
+    }
+
+    #[test]
+    fn valid_guid_uppercase() {
+        assert!(is_valid_guid("E9A42B02-D5DF-448D-AA00-03F14749EB61"));
+    }
+
+    #[test]
+    fn valid_guid_mixed_case() {
+        assert!(is_valid_guid("e9A42b02-D5df-448D-aA00-03f14749Eb61"));
+    }
+
+    #[test]
+    fn rejects_short_string() {
+        assert!(!is_valid_guid("381b4222-f694-41f0-9685"));
+    }
+
+    #[test]
+    fn rejects_long_string() {
+        assert!(!is_valid_guid("381b4222-f694-41f0-9685-ff5bb260df2e0"));
+    }
+
+    #[test]
+    fn rejects_missing_hyphens() {
+        assert!(!is_valid_guid("381b4222xf694x41f0x9685xff5bb260df2e"));
+    }
+
+    #[test]
+    fn rejects_non_hex_characters() {
+        assert!(!is_valid_guid("zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz"));
+    }
+
+    #[test]
+    fn rejects_empty_string() {
+        assert!(!is_valid_guid(""));
+    }
+
+    // ── GUID extraction ─────────────────────────────────────────────────────
+
+    #[test]
+    fn extract_guid_from_powercfg_line() {
+        let line = "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)";
+        assert_eq!(
+            extract_guid(line),
+            Some("381b4222-f694-41f0-9685-ff5bb260df2e".to_string())
+        );
+    }
+
+    #[test]
+    fn extract_guid_returns_none_for_no_guid() {
+        assert_eq!(extract_guid("no guid here"), None);
+    }
+
+    #[test]
+    fn extract_guid_returns_none_for_short_input() {
+        assert_eq!(extract_guid("abc"), None);
+    }
+
+    // ── Power plan line parsing ─────────────────────────────────────────────
+
+    #[test]
+    fn parse_active_power_plan() {
+        let line = "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced) *";
+        let plan = parse_power_plan_line(line).unwrap();
+        assert_eq!(plan.guid, "381b4222-f694-41f0-9685-ff5bb260df2e");
+        assert_eq!(plan.name, "Balanced");
+        assert!(plan.is_active);
+    }
+
+    #[test]
+    fn parse_inactive_power_plan() {
+        let line = "Power Scheme GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c  (High performance)";
+        let plan = parse_power_plan_line(line).unwrap();
+        assert_eq!(plan.guid, "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c");
+        assert_eq!(plan.name, "High performance");
+        assert!(!plan.is_active);
+    }
+
+    #[test]
+    fn parse_plan_without_name_falls_back() {
+        let line = "GUID: 381b4222-f694-41f0-9685-ff5bb260df2e";
+        let plan = parse_power_plan_line(line).unwrap();
+        assert_eq!(plan.name, "Unknown");
+    }
+
+    #[test]
+    fn parse_plan_no_guid_returns_none() {
+        assert!(parse_power_plan_line("no plan here").is_none());
+    }
+
+    // ── Service whitelist ───────────────────────────────────────────────────
+
+    #[test]
+    fn managed_service_is_in_whitelist() {
+        assert!(SAFE_TO_DISABLE_SERVICES.contains(&"DiagTrack"));
+        assert!(CAUTION_SERVICES.contains(&"wuauserv"));
+    }
+
+    #[test]
+    fn critical_service_not_in_whitelist() {
+        assert!(!SAFE_TO_DISABLE_SERVICES.contains(&"WinDefend"));
+        assert!(!CAUTION_SERVICES.contains(&"WinDefend"));
+    }
+
+    // ── Startup key path validation ─────────────────────────────────────────
+
+    #[test]
+    fn valid_hkcu_key_path() {
+        assert!(startup_root_from_key_path("HKEY_CURRENT_USER\\Software\\Test").is_ok());
+    }
+
+    #[test]
+    fn valid_hklm_key_path() {
+        assert!(startup_root_from_key_path("HKEY_LOCAL_MACHINE\\Software\\Test").is_ok());
+    }
+
+    #[test]
+    fn invalid_key_path_rejected() {
+        assert!(startup_root_from_key_path("HKEY_CLASSES_ROOT\\Software").is_err());
+        assert!(startup_root_from_key_path("random_string").is_err());
+        assert!(startup_root_from_key_path("").is_err());
+    }
 }

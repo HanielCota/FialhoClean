@@ -45,7 +45,6 @@ pub async fn scan_paths(
 /// fallback (success / permission denied / error).
 pub async fn scan_single_path(
     category: &CleanCategory,
-    _path: &Path,
     collector: impl std::future::Future<Output = Result<Vec<FileEntry>, AppError>>,
 ) -> Result<CategoryScanResult, AppError> {
     match collector.await {
