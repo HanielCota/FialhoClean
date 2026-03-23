@@ -4,6 +4,7 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
+  Loader2,
   RotateCcw,
   Shield,
   Wrench,
@@ -11,31 +12,59 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useRepair } from "../../hooks/useRepair";
+import { type RepairToolState, formatElapsed, useRepair } from "../../hooks/useRepair";
 import type { RepairStatus } from "../../types/repair";
 import { Header } from "../layout/Header";
 import { Card } from "../shared/Card";
 import { SectionHeading } from "../shared/SectionHeading";
 
-function StatusBadge({ status }: { status: RepairStatus }) {
+// ── Progress bar (indeterminate) ────────────────────────────────────────────
+
+function IndeterminateProgress() {
+  return (
+    <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
+      <div className="h-full w-1/3 animate-indeterminate rounded-full bg-accent/70" />
+    </div>
+  );
+}
+
+// ── Status badge with elapsed time ──────────────────────────────────────────
+
+function StatusBadge({
+  status,
+  elapsedSeconds,
+}: {
+  status: RepairStatus;
+  elapsedSeconds?: number;
+}) {
   const { t } = useTranslation();
+
   if (status === "idle") return null;
+
   if (status === "running") {
+    const time = elapsedSeconds != null && elapsedSeconds > 0 ? formatElapsed(elapsedSeconds) : "";
     return (
       <span className="flex items-center gap-1.5 font-medium text-[12px] text-accent">
-        <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-accent/40 border-t-accent" />
-        {t("repair.status.running")}
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        {time
+          ? t("repair.status.runningElapsed", { time })
+          : t("repair.status.running")}
       </span>
     );
   }
+
   if (status === "success") {
+    const time = elapsedSeconds != null && elapsedSeconds > 0 ? formatElapsed(elapsedSeconds) : "";
     return (
       <span className="flex items-center gap-1.5 font-medium text-[12px] text-green">
         <CheckCircle2 className="h-3.5 w-3.5" />
-        {t("repair.status.done")}
+        {time
+          ? t("repair.status.doneElapsed", { time })
+          : t("repair.status.done")}
       </span>
     );
   }
+
   return (
     <span className="flex items-center gap-1.5 font-medium text-[12px] text-red">
       <XCircle className="h-3.5 w-3.5" />
@@ -43,6 +72,8 @@ function StatusBadge({ status }: { status: RepairStatus }) {
     </span>
   );
 }
+
+// ── Output panel ────────────────────────────────────────────────────────────
 
 function OutputPanel({ output }: { output: string }) {
   const { t } = useTranslation();
@@ -80,12 +111,113 @@ function OutputPanel({ output }: { output: string }) {
   );
 }
 
+// ── Tool card (reusable for SFC and DISM) ───────────────────────────────────
+
+function ToolCard({
+  icon: Icon,
+  title,
+  description,
+  duration,
+  buttonLabel,
+  runAgainLabel,
+  tool,
+  onRun,
+  onReset,
+}: {
+  icon: typeof Wrench;
+  title: string;
+  description: string;
+  duration: string;
+  buttonLabel: string;
+  runAgainLabel: string;
+  tool: RepairToolState;
+  onRun: () => void;
+  onReset: () => void;
+}) {
+  const isRunning = tool.status === "running";
+  const isDone = tool.status !== "idle";
+
+  return (
+    <Card>
+      <div className="flex items-start gap-4">
+        <Icon
+          className={`mt-0.5 h-5 w-5 flex-shrink-0 transition-colors duration-300 ${
+            tool.status === "success"
+              ? "text-green"
+              : tool.status === "error"
+                ? "text-red"
+                : isRunning
+                  ? "text-accent"
+                  : "text-text-muted"
+          }`}
+        />
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold text-[15px] text-text">{title}</p>
+          <p className="mt-1 text-[13px] text-text-muted">{description}</p>
+          <div className="mt-2 flex items-center gap-2 text-[12px] text-text-muted/60">
+            <Clock className="h-3.5 w-3.5" />
+            {duration}
+          </div>
+
+          {isRunning && <IndeterminateProgress />}
+
+          {tool.result && <OutputPanel output={tool.result.output} />}
+        </div>
+
+        <div className="flex flex-shrink-0 flex-col items-end gap-2">
+          <StatusBadge status={tool.status} elapsedSeconds={tool.elapsedSeconds} />
+
+          <button
+            type="button"
+            onClick={onRun}
+            disabled={isRunning}
+            className="focus-ring flex h-10 items-center gap-2 rounded-[10px] border border-white/[0.08] bg-white/[0.04] px-4 font-semibold text-[14px] text-text-muted transition-all duration-200 hover:bg-white/[0.07] hover:text-text disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isRunning ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {buttonLabel}
+              </>
+            ) : isDone ? (
+              <>
+                <RotateCcw className="h-4 w-4" />
+                {runAgainLabel}
+              </>
+            ) : (
+              <>
+                <Icon className="h-4 w-4" />
+                {buttonLabel}
+              </>
+            )}
+          </button>
+
+          {isDone && !isRunning && (
+            <button
+              type="button"
+              onClick={onReset}
+              className="text-[11px] text-text-muted transition-colors hover:text-text"
+            >
+              {/* Reset handled by parent */}
+              Reset
+            </button>
+          )}
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+// ── Main view ───────────────────────────────────────────────────────────────
+
 export function RepairView() {
   const { t } = useTranslation();
-  const { sfc, dism, restorePoint, runSfc, runDism, createRestorePoint, resetTool } = useRepair();
+  const { sfc, dism, restorePoint, rpElapsed, runSfc, runDism, createRestorePoint, resetTool } =
+    useRepair();
   const [rpDescription, setRpDescription] = useState(() =>
     t("repair.restorePoint.defaultDescription"),
   );
+
+  const rpIsRunning = restorePoint === "running";
 
   return (
     <div className="flex h-full flex-col">
@@ -104,7 +236,15 @@ export function RepairView() {
           <Card>
             <div className="flex items-start gap-4">
               <Shield
-                className={`mt-0.5 h-5 w-5 flex-shrink-0 ${restorePoint === "success" ? "text-green" : "text-text-muted"}`}
+                className={`mt-0.5 h-5 w-5 flex-shrink-0 transition-colors duration-300 ${
+                  restorePoint === "success"
+                    ? "text-green"
+                    : restorePoint === "error"
+                      ? "text-red"
+                      : rpIsRunning
+                        ? "text-accent"
+                        : "text-text-muted"
+                }`}
               />
               <div className="min-w-0 flex-1">
                 <p className="font-semibold text-[15px] text-text">
@@ -117,22 +257,29 @@ export function RepairView() {
                   type="text"
                   value={rpDescription}
                   onChange={(e) => setRpDescription(e.target.value)}
+                  disabled={rpIsRunning}
                   placeholder={t("repair.restorePoint.placeholder")}
-                  className="mt-3 h-9 w-full rounded-[8px] border border-white/[0.07] bg-white/[0.04] px-3 text-[13px] text-text transition-colors placeholder:text-text-muted/50 focus:border-white/[0.15] focus:outline-none"
+                  className="mt-3 h-9 w-full rounded-[8px] border border-white/[0.07] bg-white/[0.04] px-3 text-[13px] text-text transition-colors placeholder:text-text-muted/50 focus:border-white/[0.15] focus:outline-none disabled:opacity-50"
                 />
+
+                {rpIsRunning && <IndeterminateProgress />}
               </div>
               <div className="flex flex-shrink-0 flex-col items-end gap-2">
-                <StatusBadge status={restorePoint} />
+                <StatusBadge status={restorePoint} elapsedSeconds={rpElapsed} />
                 <button
                   type="button"
                   onClick={() => void createRestorePoint(rpDescription)}
-                  disabled={restorePoint === "running"}
+                  disabled={rpIsRunning}
                   className="focus-ring flex h-10 items-center gap-2 rounded-[10px] border border-accent/30 bg-accent/10 px-4 font-semibold text-[14px] text-accent transition-all duration-200 hover:bg-accent/15 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <Shield className="h-4 w-4" />
+                  {rpIsRunning ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Shield className="h-4 w-4" />
+                  )}
                   {t("repair.restorePoint.button")}
                 </button>
-                {restorePoint !== "idle" && (
+                {restorePoint !== "idle" && !rpIsRunning && (
                   <button
                     type="button"
                     onClick={() => resetTool("restore_point")}
@@ -149,105 +296,33 @@ export function RepairView() {
         {/* System File Checker */}
         <section>
           <SectionHeading>{t("repair.sections.systemFiles")}</SectionHeading>
-          <Card>
-            <div className="flex items-start gap-4">
-              <Wrench
-                className={`mt-0.5 h-5 w-5 flex-shrink-0 ${sfc.status === "success" ? "text-green" : sfc.status === "error" ? "text-red" : "text-text-muted"}`}
-              />
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold text-[15px] text-text">{t("repair.sfc.title")}</p>
-                <p className="mt-1 text-[13px] text-text-muted">{t("repair.sfc.description")}</p>
-                <div className="mt-2 flex items-center gap-2 text-[12px] text-text-muted/60">
-                  <Clock className="h-3.5 w-3.5" />
-                  {t("repair.sfc.duration")}
-                </div>
-                {sfc.result && <OutputPanel output={sfc.result.output} />}
-              </div>
-              <div className="flex flex-shrink-0 flex-col items-end gap-2">
-                <StatusBadge status={sfc.status} />
-                {sfc.status !== "running" && (
-                  <button
-                    type="button"
-                    onClick={() => void runSfc()}
-                    className="focus-ring flex h-10 items-center gap-2 rounded-[10px] border border-white/[0.08] bg-white/[0.04] px-4 font-semibold text-[14px] text-text-muted transition-all duration-200 hover:bg-white/[0.07] hover:text-text"
-                  >
-                    {sfc.status !== "idle" ? (
-                      <>
-                        <RotateCcw className="h-4 w-4" />
-                        {t("repair.runAgain")}
-                      </>
-                    ) : (
-                      <>
-                        <Wrench className="h-4 w-4" />
-                        {t("repair.sfc.button")}
-                      </>
-                    )}
-                  </button>
-                )}
-                {sfc.status !== "idle" && (
-                  <button
-                    type="button"
-                    onClick={() => resetTool("sfc")}
-                    className="text-[11px] text-text-muted transition-colors hover:text-text"
-                  >
-                    {t("repair.reset")}
-                  </button>
-                )}
-              </div>
-            </div>
-          </Card>
+          <ToolCard
+            icon={Wrench}
+            title={t("repair.sfc.title")}
+            description={t("repair.sfc.description")}
+            duration={t("repair.sfc.duration")}
+            buttonLabel={t("repair.sfc.button")}
+            runAgainLabel={t("repair.runAgain")}
+            tool={sfc}
+            onRun={runSfc}
+            onReset={() => resetTool("sfc")}
+          />
         </section>
 
         {/* DISM */}
         <section>
           <SectionHeading>{t("repair.sections.windowsImage")}</SectionHeading>
-          <Card>
-            <div className="flex items-start gap-4">
-              <Wrench
-                className={`mt-0.5 h-5 w-5 flex-shrink-0 ${dism.status === "success" ? "text-green" : dism.status === "error" ? "text-red" : "text-text-muted"}`}
-              />
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold text-[15px] text-text">{t("repair.dism.title")}</p>
-                <p className="mt-1 text-[13px] text-text-muted">{t("repair.dism.description")}</p>
-                <div className="mt-2 flex items-center gap-2 text-[12px] text-text-muted/60">
-                  <Clock className="h-3.5 w-3.5" />
-                  {t("repair.dism.duration")}
-                </div>
-                {dism.result && <OutputPanel output={dism.result.output} />}
-              </div>
-              <div className="flex flex-shrink-0 flex-col items-end gap-2">
-                <StatusBadge status={dism.status} />
-                {dism.status !== "running" && (
-                  <button
-                    type="button"
-                    onClick={() => void runDism()}
-                    className="focus-ring flex h-10 items-center gap-2 rounded-[10px] border border-white/[0.08] bg-white/[0.04] px-4 font-semibold text-[14px] text-text-muted transition-all duration-200 hover:bg-white/[0.07] hover:text-text"
-                  >
-                    {dism.status !== "idle" ? (
-                      <>
-                        <RotateCcw className="h-4 w-4" />
-                        {t("repair.runAgain")}
-                      </>
-                    ) : (
-                      <>
-                        <Wrench className="h-4 w-4" />
-                        {t("repair.dism.button")}
-                      </>
-                    )}
-                  </button>
-                )}
-                {dism.status !== "idle" && (
-                  <button
-                    type="button"
-                    onClick={() => resetTool("dism")}
-                    className="text-[11px] text-text-muted transition-colors hover:text-text"
-                  >
-                    {t("repair.reset")}
-                  </button>
-                )}
-              </div>
-            </div>
-          </Card>
+          <ToolCard
+            icon={Wrench}
+            title={t("repair.dism.title")}
+            description={t("repair.dism.description")}
+            duration={t("repair.dism.duration")}
+            buttonLabel={t("repair.dism.button")}
+            runAgainLabel={t("repair.runAgain")}
+            tool={dism}
+            onRun={runDism}
+            onReset={() => resetTool("dism")}
+          />
         </section>
       </div>
     </div>

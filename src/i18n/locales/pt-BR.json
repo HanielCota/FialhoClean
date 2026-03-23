@@ -418,7 +418,9 @@
     "runAgain": "Executar Novamente",
     "status": {
       "running": "Executando…",
+      "runningElapsed": "Executando… {{time}}",
       "done": "Concluído",
+      "doneElapsed": "Concluído em {{time}}",
       "failed": "Falhou"
     },
     "output": {

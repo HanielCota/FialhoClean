@@ -231,6 +231,19 @@
   animation: glowPulse 2.2s ease-in-out infinite;
 }
 
+@keyframes indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+.animate-indeterminate {
+  animation: indeterminate 1.5s ease-in-out infinite;
+}
+
 /* ─── Reduce Motion ─── */
 
 @media (prefers-reduced-motion: reduce) {

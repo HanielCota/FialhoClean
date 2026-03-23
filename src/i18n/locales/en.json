@@ -412,7 +412,9 @@
     "runAgain": "Run Again",
     "status": {
       "running": "Running…",
+      "runningElapsed": "Running… {{time}}",
       "done": "Done",
+      "doneElapsed": "Done in {{time}}",
       "failed": "Failed"
     },
     "output": {
