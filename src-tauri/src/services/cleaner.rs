@@ -322,7 +322,7 @@ async fn estimate_recycle_bin_size() -> u64 {
               | Measure-Object -Property Size -Sum \
               | Select-Object -ExpandProperty Sum";
     RUNNER
-        .powershell_utf8(ps)
+        .powershell(ps)
         .await
         .ok()
         .and_then(|o| o.stdout.trim().parse::<u64>().ok())

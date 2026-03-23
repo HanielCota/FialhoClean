@@ -850,11 +850,11 @@ pub async fn get_installed_apps() -> Result<Vec<AppInfo>, AppError> {
 
     if !output.status.success() {
         return Err(AppError::PowerShell(
-            String::from_utf8_lossy(&output.stderr).to_string(),
+            crate::services::process_runner::decode_output(&output.stderr),
         ));
     }
 
-    let json_str = String::from_utf8_lossy(&output.stdout);
+    let json_str = crate::services::process_runner::decode_output(&output.stdout);
     let raw_json = json_str.trim();
 
     let raw: Vec<serde_json::Value> = if raw_json.is_empty() {
@@ -977,7 +977,7 @@ async fn remove_single_app(package_full_name: &str) -> RemoveResult {
         Ok(Ok(o)) => RemoveResult {
             package_full_name: package_full_name.to_string(),
             success: false,
-            error: Some(String::from_utf8_lossy(&o.stderr).trim().to_string()),
+            error: Some(crate::services::process_runner::decode_output(&o.stderr).trim().to_string()),
         },
     }
 }

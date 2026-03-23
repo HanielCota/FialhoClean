@@ -236,7 +236,7 @@ pub async fn set_startup_enabled(
 
 pub async fn get_services() -> Result<Vec<ServiceInfo>, AppError> {
     let out = RUNNER
-        .powershell_utf8(
+        .powershell(
             "Get-Service | Select-Object Name, DisplayName, Status, StartType | ConvertTo-Json",
         )
         .await?;
