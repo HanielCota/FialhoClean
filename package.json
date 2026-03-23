@@ -6,22 +6,32 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "check": "biome check",
+    "check:fix": "biome check --fix",
+    "format": "biome format --write",
+    "lint": "biome lint",
+    "format:rs": "cd src-tauri && cargo fmt",
+    "check:all": "biome check && cd src-tauri && cargo fmt -- --check",
+    "sync-version": "node scripts/sync-version.js",
+    "tauri:build": "tauri build",
+    "test:rs": "cd src-tauri && cargo test"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",
     "@radix-ui/react-dialog": "^1.1.15",
-    "@tanstack/react-query": "^5.94.5",
+    "@tanstack/react-query": "^5.95.0",
     "@tauri-apps/api": "^2.10.1",
-    "i18next": "^25.8.20",
+    "i18next": "^25.10.5",
     "lucide-react": "^0.577.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-i18next": "^16.5.8",
+    "react-i18next": "^16.6.2",
     "sonner": "^2.0.7",
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.4.8",
     "@tailwindcss/postcss": "^4.2.2",
     "@tauri-apps/cli": "^2.10.1",
     "@types/react": "^19.2.14",
@@ -31,6 +41,6 @@
     "postcss": "^8.5.8",
     "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3",
-    "vite": "^8.0.1"
+    "vite": "^8.0.2"
   }
 }
