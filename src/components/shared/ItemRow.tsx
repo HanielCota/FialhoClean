@@ -73,11 +73,11 @@ export function ItemRow({
 
       <div className="min-w-0 flex-1">
         {typeof title === "string" ? (
-          <p className={`truncate font-medium text-[14px] ${titleClass ?? "text-text"}`}>{title}</p>
+          <p title={title} className={`truncate font-medium text-[14px] ${titleClass ?? "text-text"}`}>{title}</p>
         ) : (
           title
         )}
-        {subtitle && <p className="mt-0.5 truncate text-[12px] text-text-muted">{subtitle}</p>}
+        {subtitle && <p title={subtitle} className="mt-0.5 truncate text-[12px] text-text-muted">{subtitle}</p>}
       </div>
 
       {trailing !== undefined && (

@@ -39,6 +39,7 @@ export function ActionCard({
       </div>
       <div className="min-w-0 flex-1">
         <p
+          title={title}
           className={`truncate font-semibold text-[14px] ${isAccent ? "text-on-accent" : "text-text"}`}
         >
           {title}

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getSafetyVariant } from "../../lib/safety";
 import type { ServiceAction, ServiceInfo } from "../../types/optimizer";
@@ -7,11 +8,23 @@ import { ItemRow } from "../shared/ItemRow";
 
 interface ServiceItemProps {
   service: ServiceInfo;
-  onAction: (name: string, action: ServiceAction) => void;
+  onAction: (name: string, action: ServiceAction) => Promise<void> | void;
 }
 
 export function ServiceItem({ service, onAction }: ServiceItemProps) {
   const { t } = useTranslation();
+  const [pendingAction, setPendingAction] = useState<ServiceAction | null>(null);
+
+  const handleAction = async (action: ServiceAction) => {
+    setPendingAction(action);
+    try {
+      await onAction(service.name, action);
+    } finally {
+      setPendingAction(null);
+    }
+  };
+
+  const isBusy = pendingAction !== null;
 
   const statusColor: "success" | "error" | "default" =
     service.status === "running" ? "success" : service.status === "stopped" ? "error" : "default";
@@ -57,7 +70,9 @@ export function ServiceItem({ service, onAction }: ServiceItemProps) {
             <Button
               size="sm"
               variant="secondary"
-              onClick={() => onAction(service.name, "stop")}
+              loading={pendingAction === "stop"}
+              disabled={isBusy}
+              onClick={() => void handleAction("stop")}
               aria-label={t("optimizer.service.stopAria", { name: service.display_name })}
             >
               {t("optimizer.service.stop")}
@@ -66,7 +81,9 @@ export function ServiceItem({ service, onAction }: ServiceItemProps) {
             <Button
               size="sm"
               variant="secondary"
-              onClick={() => onAction(service.name, "start")}
+              loading={pendingAction === "start"}
+              disabled={isBusy}
+              onClick={() => void handleAction("start")}
               aria-label={t("optimizer.service.startAria", { name: service.display_name })}
             >
               {t("optimizer.service.start")}
@@ -76,7 +93,9 @@ export function ServiceItem({ service, onAction }: ServiceItemProps) {
             <Button
               size="sm"
               variant="danger"
-              onClick={() => onAction(service.name, "disable")}
+              loading={pendingAction === "disable"}
+              disabled={isBusy}
+              onClick={() => void handleAction("disable")}
               aria-label={t("optimizer.service.disableAria", { name: service.display_name })}
             >
               {t("optimizer.service.disable")}
@@ -85,7 +104,9 @@ export function ServiceItem({ service, onAction }: ServiceItemProps) {
             <Button
               size="sm"
               variant="secondary"
-              onClick={() => onAction(service.name, "enable")}
+              loading={pendingAction === "enable"}
+              disabled={isBusy}
+              onClick={() => void handleAction("enable")}
               aria-label={t("optimizer.service.enableAria", { name: service.display_name })}
             >
               {t("optimizer.service.enable")}

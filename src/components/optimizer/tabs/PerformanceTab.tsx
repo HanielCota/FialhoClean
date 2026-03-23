@@ -1,4 +1,4 @@
-import { BatteryCharging, Flame, MemoryStick, Monitor, Zap } from "lucide-react";
+import { BatteryCharging, CheckCircle2, Flame, Loader2, MemoryStick, Monitor, Zap } from "lucide-react";
 import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { GpuSettings, PowerPlan } from "../../../types/optimizer";
@@ -35,7 +35,7 @@ export function PerformanceTab({
 }: PerformanceTabProps) {
   const { t } = useTranslation();
   const visualLabelId = useId();
-  const [gameModeApplied, setGameModeApplied] = useState(false);
+  const [gameModeState, setGameModeState] = useState<"idle" | "loading" | "done">("idle");
   const [ultimateApplying, setUltimateApplying] = useState(false);
 
   const activePlan = powerPlans.find((p) => p.is_active);
@@ -46,9 +46,14 @@ export function PerformanceTab({
   );
 
   const handleApplyGameMode = async () => {
-    await onApplyGameMode();
-    setGameModeApplied(true);
-    setTimeout(() => setGameModeApplied(false), 3000);
+    setGameModeState("loading");
+    try {
+      await onApplyGameMode();
+      setGameModeState("done");
+      setTimeout(() => setGameModeState("idle"), 3000);
+    } catch {
+      setGameModeState("idle");
+    }
   };
 
   const handleApplyUltimatePerformance = async () => {
@@ -185,13 +190,21 @@ export function PerformanceTab({
             <button
               type="button"
               onClick={() => void handleApplyGameMode()}
-              className={`focus-ring mt-0.5 flex h-10 flex-shrink-0 items-center gap-2 rounded-[10px] border px-5 font-semibold text-[14px] transition-all duration-200 ${
-                gameModeApplied
+              disabled={gameModeState === "loading"}
+              className={`focus-ring mt-0.5 flex h-10 flex-shrink-0 items-center gap-2 rounded-[10px] border px-5 font-semibold text-[14px] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
+                gameModeState === "done"
                   ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
                   : "border-accent/30 bg-accent/10 text-accent hover:bg-accent/15"
               }`}
             >
-              {gameModeApplied ? t("optimizer.gameMode.applied") : t("optimizer.gameMode.apply")}
+              {gameModeState === "loading" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : gameModeState === "done" ? (
+                <CheckCircle2 className="h-4 w-4" />
+              ) : null}
+              {gameModeState === "done"
+                ? t("optimizer.gameMode.applied")
+                : t("optimizer.gameMode.apply")}
             </button>
           </div>
         </Card>

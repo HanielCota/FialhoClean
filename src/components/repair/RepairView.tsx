@@ -120,6 +120,7 @@ function ToolCard({
   duration,
   buttonLabel,
   runAgainLabel,
+  resetLabel,
   tool,
   onRun,
   onReset,
@@ -130,6 +131,7 @@ function ToolCard({
   duration: string;
   buttonLabel: string;
   runAgainLabel: string;
+  resetLabel: string;
   tool: RepairToolState;
   onRun: () => void;
   onReset: () => void;
@@ -197,8 +199,7 @@ function ToolCard({
               onClick={onReset}
               className="text-[11px] text-text-muted transition-colors hover:text-text"
             >
-              {/* Reset handled by parent */}
-              Reset
+              {resetLabel}
             </button>
           )}
         </div>
@@ -303,6 +304,7 @@ export function RepairView() {
             duration={t("repair.sfc.duration")}
             buttonLabel={t("repair.sfc.button")}
             runAgainLabel={t("repair.runAgain")}
+            resetLabel={t("repair.reset")}
             tool={sfc}
             onRun={runSfc}
             onReset={() => resetTool("sfc")}
@@ -319,6 +321,7 @@ export function RepairView() {
             duration={t("repair.dism.duration")}
             buttonLabel={t("repair.dism.button")}
             runAgainLabel={t("repair.runAgain")}
+            resetLabel={t("repair.reset")}
             tool={dism}
             onRun={runDism}
             onReset={() => resetTool("dism")}
