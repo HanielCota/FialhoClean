@@ -33,13 +33,13 @@ export function useOptimizer() {
     setIsOptimizingRam(true);
     try {
       const result = await optimizerService.optimizeRam();
-      if (result.freed_bytes > 0) {
-        notify("optimizer.toast.ramOptimized", "success", {
-          size: formatBytes(result.freed_bytes),
-        });
-      } else {
+      if (!result || result.freed_bytes <= 0) {
         notify("optimizer.toast.ramOptimizedNoChange", "info");
+        return;
       }
+      notify("optimizer.toast.ramOptimized", "success", {
+        size: formatBytes(result.freed_bytes),
+      });
     } catch (err) {
       notify("optimizer.toast.tweakFailed", "error", { msg: sanitizeError(err) });
     } finally {

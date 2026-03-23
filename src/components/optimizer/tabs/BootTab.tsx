@@ -27,7 +27,7 @@ export function BootTab({
   onToggleStartup,
 }: BootTabProps) {
   const { t } = useTranslation();
-  const startupStatus = useAsyncState(isLoading, null, startupItems.length === 0);
+  const startupStatus = useAsyncState(isLoading, null, (startupItems?.length ?? 0) === 0);
 
   return (
     <div className="space-y-7">
@@ -38,14 +38,14 @@ export function BootTab({
             icon={Moon}
             title={t("optimizer.hibernate.title")}
             description={t("optimizer.hibernate.description")}
-            checked={hibernateSettings.hibernate_enabled}
+            checked={hibernateSettings?.hibernate_enabled ?? false}
             onChange={onSetHibernate}
           />
           <ToggleSetting
             icon={Zap}
             title={t("optimizer.fastStartup.title")}
             description={t("optimizer.fastStartup.description")}
-            checked={hibernateSettings.fast_startup_enabled}
+            checked={hibernateSettings?.fast_startup_enabled ?? false}
             onChange={onSetFastStartup}
           />
         </div>
@@ -54,10 +54,10 @@ export function BootTab({
       <section>
         <SectionHeading>
           {t("optimizer.sections.startupPrograms")}
-          {startupItems.length > 0 && (
+          {(startupItems?.length ?? 0) > 0 && (
             <span className="text-text-muted normal-case tracking-normal">
               {" "}
-              — {t("optimizer.sections.startupCount", { count: startupItems.length })}
+              — {t("optimizer.sections.startupCount", { count: startupItems?.length ?? 0 })}
             </span>
           )}
         </SectionHeading>
@@ -73,7 +73,7 @@ export function BootTab({
           empty={<EmptyState icon={Zap} message={t("optimizer.startup.empty")} />}
         >
           <div className="space-y-2">
-            {startupItems.map((item) => (
+            {startupItems?.map((item) => (
               <StartupItem
                 key={`${item.key_path}-${item.name}`}
                 item={item}

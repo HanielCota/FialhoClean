@@ -61,11 +61,11 @@ export function DebloaterView() {
   // Filtered + searched app list
   const visibleApps = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return apps.filter((app) => {
+    return (apps ?? []).filter((app) => {
       if (safetyFilter === "safe" && app.safety_level !== "safe") return false;
       if (safetyFilter === "caution" && app.safety_level === "safe") return false;
       if (!q) return true;
-      return app.name.toLowerCase().includes(q) || app.description.toLowerCase().includes(q);
+      return (app?.name ?? "").toLowerCase().includes(q) || (app?.description ?? "").toLowerCase().includes(q);
     });
   }, [apps, search, safetyFilter]);
 
@@ -80,17 +80,17 @@ export function DebloaterView() {
   }, [visibleApps]);
 
   const hasCautionSelected = useMemo(
-    () => apps.some((a) => selectedApps.has(a.package_full_name) && a.safety_level !== "safe"),
+    () => (apps ?? []).some((a) => selectedApps.has(a.package_full_name) && a.safety_level !== "safe"),
     [apps, selectedApps],
   );
 
   const selectedAppsList = useMemo(
-    () => apps.filter((a) => selectedApps.has(a.package_full_name)),
+    () => (apps ?? []).filter((a) => selectedApps.has(a.package_full_name)),
     [apps, selectedApps],
   );
 
   const count = selectedApps.size;
-  const appsStatus = useAsyncState(isLoading, error, apps.length === 0);
+  const appsStatus = useAsyncState(isLoading, error, (apps?.length ?? 0) === 0);
 
   // ── Success screen ──────────────────────────────────────────────────────
   if (lastRemovalCount !== null) {
@@ -194,14 +194,14 @@ export function DebloaterView() {
             </button>
           ))}
           <span className="ml-auto text-[11px] text-text-muted">
-            {t("debloater.filter.count", { visible: visibleApps.length, total: apps.length })}
+            {t("debloater.filter.count", { visible: visibleApps?.length ?? 0, total: apps?.length ?? 0 })}
           </span>
         </div>
 
         {/* ── Toolbar ─────────────────────────────────────────────── */}
         <div className="mb-3 flex items-center justify-between">
           <SectionHeading className="mb-0">{t("debloater.sectionTitle")}</SectionHeading>
-          {count === apps.length ? (
+          {count === (apps?.length ?? 0) ? (
             <Button
               variant="ghost"
               size="sm"
@@ -243,7 +243,7 @@ export function DebloaterView() {
         )}
 
         {/* ── App list grouped by category ─────────────────────────── */}
-        {visibleApps.length === 0 ? (
+        {(visibleApps?.length ?? 0) === 0 ? (
           <div className="flex flex-col items-center py-10 text-center">
             <Search className="mb-2 h-7 w-7 text-text-tertiary" />
             <p className="text-[13px] text-text-muted">{t("debloater.noResults")}</p>
@@ -313,15 +313,15 @@ export function DebloaterView() {
       >
         <div className="space-y-3">
           <ul className="space-y-1">
-            {selectedAppsList.slice(0, MODAL_PREVIEW_LIMIT).map((app) => (
+            {selectedAppsList?.slice(0, MODAL_PREVIEW_LIMIT).map((app) => (
               <li key={app.package_full_name} className="text-[14px] text-text">
                 • {app.name}
               </li>
             ))}
-            {selectedAppsList.length > MODAL_PREVIEW_LIMIT && (
+            {(selectedAppsList?.length ?? 0) > MODAL_PREVIEW_LIMIT && (
               <li className="text-[14px] text-text-muted">
                 {t("debloater.modal.andMore", {
-                  count: selectedAppsList.length - MODAL_PREVIEW_LIMIT,
+                  count: (selectedAppsList?.length ?? 0) - MODAL_PREVIEW_LIMIT,
                 })}
               </li>
             )}

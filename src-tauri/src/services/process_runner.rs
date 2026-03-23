@@ -65,10 +65,9 @@ impl ProcessRunner {
         let stderr = decode_output(&output.stderr);
 
         if !output.status.success() {
-            let msg = if stderr.trim().is_empty() {
-                stdout
-            } else {
-                stderr
+            let msg = match stderr.trim().is_empty() {
+                true => stdout,
+                false => stderr,
             };
             return Err(AppError::PowerShell(msg.trim().to_string()));
         }
@@ -101,11 +100,10 @@ impl ProcessRunner {
     /// Output is decoded as UTF-8 with cp850 fallback.
     pub async fn run_best_effort(&self, mut cmd: Command) -> Option<String> {
         let output = timeout(self.timeout, cmd.output()).await.ok()?.ok()?;
-        if output.status.success() {
-            Some(decode_output(&output.stdout))
-        } else {
-            None
+        if !output.status.success() {
+            return None;
         }
+        Some(decode_output(&output.stdout))
     }
 }
 

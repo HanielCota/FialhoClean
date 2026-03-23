@@ -23,10 +23,12 @@ import { ErrorMessage } from "../shared/ErrorMessage";
 import { SectionHeading } from "../shared/SectionHeading";
 
 function relativeDate(
-  isoDate: string,
+  isoDate: string | undefined | null,
   t: ReturnType<typeof import("react-i18next").useTranslation>["t"],
 ): string {
+  if (!isoDate) return "";
   const d = new Date(isoDate);
+  if (Number.isNaN(d.getTime())) return "";
   const now = new Date();
   const diffDays = Math.floor((now.getTime() - d.getTime()) / 86400000);
   if (diffDays === 0) return t("dashboard.relative.today");
@@ -97,7 +99,7 @@ export function DashboardView() {
   const { setActiveView, setPendingQuickScan } = useUiStore();
   const { t } = useTranslation();
 
-  const primaryDisk = diskUsage[0];
+  const primaryDisk = diskUsage?.[0];
   const diskPct = primaryDisk ? formatPercent(primaryDisk.used_bytes, primaryDisk.total_bytes) : 0;
   const health = getHealthKey(diskPct);
 
@@ -112,7 +114,7 @@ export function DashboardView() {
     setActiveView("cleaner");
   };
 
-  const recentHistory = cleanHistory.slice(0, 5);
+  const recentHistory = cleanHistory?.slice(0, 5) ?? [];
 
   return (
     <div className="space-y-6 p-6 xl:p-8">
@@ -142,7 +144,7 @@ export function DashboardView() {
         )}
         {cleanResult && (
           <p className="mt-1 text-[12px] text-text-muted">
-            {t("dashboard.lastCleaned", { size: formatBytes(cleanResult.freed_bytes) })}
+            {t("dashboard.lastCleaned", { size: formatBytes(cleanResult?.freed_bytes ?? 0) })}
           </p>
         )}
       </div>
@@ -254,13 +256,13 @@ export function DashboardView() {
                   <div className="min-w-0 flex-1">
                     <p className="text-[14px] text-text">
                       {t("dashboard.activity.cleaned", {
-                        size: formatBytes(entry.freed_bytes),
-                        files: entry.deleted_count.toLocaleString(),
+                        size: formatBytes(entry?.freed_bytes ?? 0),
+                        files: (entry?.deleted_count ?? 0).toLocaleString(),
                       })}
                     </p>
                     <p className="text-[12px] text-text-muted/60">
-                      {relativeDate(entry.date, t)} ·{" "}
-                      {t("dashboard.activity.category", { count: entry.categories.length })}
+                      {relativeDate(entry?.date, t)} ·{" "}
+                      {t("dashboard.activity.category", { count: entry?.categories?.length ?? 0 })}
                     </p>
                   </div>
                 </div>
@@ -271,8 +273,8 @@ export function DashboardView() {
               <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-green" />
               <p className="text-[14px] text-text">
                 {t("dashboard.activity.cleaned", {
-                  size: formatBytes(cleanResult.freed_bytes),
-                  files: cleanResult.deleted_count.toLocaleString(),
+                  size: formatBytes(cleanResult?.freed_bytes ?? 0),
+                  files: (cleanResult?.deleted_count ?? 0).toLocaleString(),
                 })}
               </p>
             </div>

@@ -48,7 +48,7 @@ export function ScanningScreen({
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
-  const categories = [...selectedCategories] as CleanCategory[];
+  const categories = selectedCategories ? ([...selectedCategories] as CleanCategory[]) : [];
   const doneCount = scanProgress
     ? Object.values(scanProgress).filter((s) => s === "done" || s === "error").length
     : 0;

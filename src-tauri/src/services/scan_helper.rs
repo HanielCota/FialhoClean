@@ -47,32 +47,21 @@ pub async fn scan_single_path(
     category: &CleanCategory,
     collector: impl std::future::Future<Output = Result<Vec<FileEntry>, AppError>>,
 ) -> Result<CategoryScanResult, AppError> {
-    match collector.await {
-        Ok(files) => {
-            let total_size_bytes = files.iter().map(|f| f.size_bytes).sum();
-            Ok(CategoryScanResult {
-                category: category.clone(),
-                files,
-                total_size_bytes,
-                needs_elevation: false,
-                error: None,
-            })
-        }
-        Err(AppError::PermissionDenied { .. }) => Ok(CategoryScanResult {
-            category: category.clone(),
-            files: vec![],
-            total_size_bytes: 0,
-            needs_elevation: true,
-            error: None,
-        }),
-        Err(e) => Ok(CategoryScanResult {
-            category: category.clone(),
-            files: vec![],
-            total_size_bytes: 0,
-            needs_elevation: false,
-            error: Some(e.to_string()),
-        }),
-    }
+    let (files, needs_elevation, error) = match collector.await {
+        Ok(files) => (files, false, None),
+        Err(AppError::PermissionDenied { .. }) => (vec![], true, None),
+        Err(e) => (vec![], false, Some(e.to_string())),
+    };
+
+    let total_size_bytes = files.iter().map(|f| f.size_bytes).sum();
+
+    Ok(CategoryScanResult {
+        category: category.clone(),
+        files,
+        total_size_bytes,
+        needs_elevation,
+        error,
+    })
 }
 
 /// Empty scan result — for command-based categories (RecycleBin, DnsCache).

@@ -29,6 +29,7 @@ export function useScheduledTasks() {
       try {
         await optimizerService.setScheduledTaskEnabled(taskPath, enabled);
         const current = useOptimizerStore.getState().scheduledTasks;
+        if (!current) return;
         useOptimizerStore
           .getState()
           .setScheduledTasks(

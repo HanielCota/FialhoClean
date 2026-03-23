@@ -36,9 +36,9 @@ export function CleanerView() {
   return (
     <div>
       <StepDots
-        current={stepMap[phase]}
+        current={stepMap?.[phase] ?? 1}
         total={4}
-        label={t("cleaner.step", { current: stepMap[phase], total: 4 })}
+        label={t("cleaner.step", { current: stepMap?.[phase] ?? 1, total: 4 })}
       />
 
       {error && (

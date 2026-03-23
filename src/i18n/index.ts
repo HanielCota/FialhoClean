@@ -6,11 +6,10 @@ import ptBR from "./locales/pt-BR.json";
 
 // Validate the stored language against the supported list to prevent
 // untrusted localStorage values from reaching i18next.
-const rawLang = localStorage.getItem("fc_lang");
-const saved: string =
-  rawLang && (SUPPORTED_LANGUAGES as readonly string[]).includes(rawLang)
-    ? rawLang
-    : DEFAULT_LANGUAGE;
+const rawLang = localStorage.getItem("fc_lang") ?? "";
+const saved: string = (SUPPORTED_LANGUAGES as readonly string[]).includes(rawLang)
+  ? rawLang
+  : DEFAULT_LANGUAGE;
 
 i18n.use(initReactI18next).init({
   resources: { "pt-BR": { translation: ptBR }, en: { translation: en } },

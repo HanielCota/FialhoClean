@@ -27,38 +27,38 @@ export function PrivacyTab({
   const { t } = useTranslation();
   const [showTasks, setShowTasks] = useState(false);
 
-  const disabledCount = scheduledTasks.filter((task) => task.state === "Disabled").length;
+  const disabledCount = (scheduledTasks ?? []).filter((task) => task.state === "Disabled").length;
 
   const privacyToggles = [
     {
       key: "telemetry",
       title: t("optimizer.privacy.telemetry.title"),
       description: t("optimizer.privacy.telemetry.description"),
-      checked: privacySettings.telemetry_disabled,
+      checked: privacySettings?.telemetry_disabled ?? false,
     },
     {
       key: "bing_search",
       title: t("optimizer.privacy.bingSearch.title"),
       description: t("optimizer.privacy.bingSearch.description"),
-      checked: privacySettings.bing_search_disabled,
+      checked: privacySettings?.bing_search_disabled ?? false,
     },
     {
       key: "advertising_id",
       title: t("optimizer.privacy.advertisingId.title"),
       description: t("optimizer.privacy.advertisingId.description"),
-      checked: privacySettings.advertising_id_disabled,
+      checked: privacySettings?.advertising_id_disabled ?? false,
     },
     {
       key: "activity_history",
       title: t("optimizer.privacy.activityHistory.title"),
       description: t("optimizer.privacy.activityHistory.description"),
-      checked: privacySettings.activity_history_disabled,
+      checked: privacySettings?.activity_history_disabled ?? false,
     },
     {
       key: "location",
       title: t("optimizer.privacy.location.title"),
       description: t("optimizer.privacy.location.description"),
-      checked: privacySettings.location_disabled,
+      checked: privacySettings?.location_disabled ?? false,
     },
   ] as const;
 
@@ -71,7 +71,7 @@ export function PrivacyTab({
           icon={Network}
           title={t("optimizer.network.title")}
           description={t("optimizer.network.description")}
-          checked={networkSettings.network_throttling_disabled}
+          checked={networkSettings?.network_throttling_disabled ?? false}
           onChange={onSetNetworkOptimized}
         />
       </section>
@@ -93,7 +93,7 @@ export function PrivacyTab({
       </section>
 
       {/* Scheduled Tasks */}
-      {scheduledTasks.length > 0 && (
+      {(scheduledTasks?.length ?? 0) > 0 && (
         <section>
           <div className="mb-4 flex items-center justify-between">
             <SectionHeading className="mb-0">
@@ -133,7 +133,7 @@ export function PrivacyTab({
           ) : (
             <>
               <div className="space-y-2">
-                {scheduledTasks.map((task) => {
+                {scheduledTasks?.map((task) => {
                   const isEnabled = task.state !== "Disabled";
                   return (
                     <div
@@ -179,7 +179,7 @@ export function PrivacyTab({
         </section>
       )}
 
-      {scheduledTasks.length === 0 && (
+      {(scheduledTasks?.length ?? 0) === 0 && (
         <EmptyState icon={CalendarClock} message={t("optimizer.tasks.empty")} />
       )}
     </div>

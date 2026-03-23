@@ -31,7 +31,10 @@ export function Modal({
     <Dialog.Root
       open={open}
       onOpenChange={(isOpen) => {
-        if (!isOpen && !loading) onCancel();
+        if (isOpen || loading) {
+          return;
+        }
+        onCancel();
       }}
     >
       <Dialog.Portal>

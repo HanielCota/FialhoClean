@@ -14,7 +14,7 @@ export function ServicesTab({ services, onAction }: ServicesTabProps) {
   const { t } = useTranslation();
   const [showExpert, setShowExpert] = useState(false);
 
-  if (services.length === 0) {
+  if (!services || services.length === 0) {
     return <EmptyState icon={Settings2} message={t("optimizer.services.empty")} />;
   }
 

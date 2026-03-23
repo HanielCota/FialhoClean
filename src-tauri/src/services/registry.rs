@@ -20,8 +20,6 @@ pub trait RegistryExt {
     /// Write a REG_SZ string value, creating the subkey if needed.
     fn write_string(&self, path: &str, name: &str, val: &str) -> Result<(), AppError>;
 
-    /// Open a subkey with KEY_SET_VALUE flags for writing.
-    fn open_write(&self, path: &str) -> Result<RegKey, AppError>;
 }
 
 impl RegistryExt for RegKey {
@@ -60,10 +58,6 @@ impl RegistryExt for RegKey {
             .map_err(|e| AppError::Registry(e.to_string()))
     }
 
-    fn open_write(&self, path: &str) -> Result<RegKey, AppError> {
-        self.open_subkey_with_flags(path, KEY_SET_VALUE)
-            .map_err(|e| AppError::Registry(e.to_string()))
-    }
 }
 
 /// Shorthand for HKEY_CURRENT_USER.

@@ -3,7 +3,7 @@ import type { Language } from "../i18n/config";
 import { SUPPORTED_LANGUAGES } from "../i18n/config";
 import type { CleanCategory } from "../types/cleaner";
 
-export interface PersistedSettings {
+interface PersistedSettings {
   language: Language;
   confirmBeforeCleaning: boolean;
   defaultCategories: CleanCategory[];
@@ -24,9 +24,12 @@ function loadLanguage(): Language {
 function loadConfirm(): boolean {
   try {
     const raw = localStorage.getItem("fc_confirm");
-    if (raw !== null) {
-      const parsed = JSON.parse(raw);
-      if (typeof parsed === "boolean") return parsed;
+    if (raw === null) {
+      return true;
+    }
+    const parsed = JSON.parse(raw);
+    if (typeof parsed === "boolean") {
+      return parsed;
     }
   } catch {
     /* ignore */
@@ -37,15 +40,19 @@ function loadConfirm(): boolean {
 function loadCategories(): CleanCategory[] {
   try {
     const raw = localStorage.getItem("fc_default_cats");
-    if (raw !== null) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        const valid = parsed.filter(
-          (c): c is CleanCategory =>
-            typeof c === "string" && (ALL_CATEGORIES as readonly string[]).includes(c),
-        );
-        if (valid.length > 0) return valid;
-      }
+    if (raw === null) {
+      return ALL_CATEGORIES;
+    }
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      return ALL_CATEGORIES;
+    }
+    const valid = parsed.filter(
+      (c): c is CleanCategory =>
+        typeof c === "string" && (ALL_CATEGORIES as readonly string[]).includes(c),
+    );
+    if (valid.length > 0) {
+      return valid;
     }
   } catch {
     /* ignore */

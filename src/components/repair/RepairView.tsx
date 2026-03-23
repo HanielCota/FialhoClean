@@ -78,7 +78,7 @@ function StatusBadge({
 function OutputPanel({ output }: { output: string }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
-  if (!output) return null;
+  if (!output?.trim()) return null;
   const lines = output.split("\n").filter(Boolean);
   const preview = lines.slice(0, 4).join("\n");
   const hasMore = lines.length > 4;
@@ -163,7 +163,7 @@ function ToolCard({
 
           {isRunning && <IndeterminateProgress />}
 
-          {tool.result && <OutputPanel output={tool.result.output} />}
+          {tool?.result && <OutputPanel output={tool.result?.output ?? ""} />}
         </div>
 
         <div className="flex flex-shrink-0 flex-col items-end gap-2">

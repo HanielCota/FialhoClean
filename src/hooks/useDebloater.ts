@@ -42,6 +42,7 @@ export function useDebloater() {
     useDebloaterStore.getState().setIsRemoving(true);
     try {
       const results = await debloaterService.removeApps(toRemove);
+      if (!results || results.length === 0) return;
       const successful = results.filter((r) => r.success).map((r) => r.package_full_name);
       const failed = results.filter((r) => !r.success);
 

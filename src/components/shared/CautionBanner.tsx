@@ -8,6 +8,10 @@ interface CautionBannerProps {
 }
 
 export function CautionBanner({ title, message, className = "" }: CautionBannerProps) {
+  if (!message) {
+    return null;
+  }
+
   return (
     <div
       className={`flex items-start gap-3 rounded-xl border border-amber-400/20 bg-white/[0.03] p-4 ${className}`}

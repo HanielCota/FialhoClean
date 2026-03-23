@@ -27,23 +27,23 @@ export function ServiceItem({ service, onAction }: ServiceItemProps) {
   const isBusy = pendingAction !== null;
 
   const statusColor: "success" | "error" | "default" =
-    service.status === "running" ? "success" : service.status === "stopped" ? "error" : "default";
+    service?.status === "running" ? "success" : service?.status === "stopped" ? "error" : "default";
 
-  const safetyVariant = getSafetyVariant(service.safety_level);
+  const safetyVariant = getSafetyVariant(service?.safety_level);
 
   const statusLabel =
-    service.status === "running"
+    service?.status === "running"
       ? t("optimizer.service.status.running")
-      : service.status === "stopped"
+      : service?.status === "stopped"
         ? t("optimizer.service.status.stopped")
-        : service.status === "paused"
+        : service?.status === "paused"
           ? t("optimizer.service.status.paused")
           : t("optimizer.service.status.unknown");
 
   const safetyLabel =
-    service.safety_level === "not_recommended"
+    service?.safety_level === "not_recommended"
       ? t("optimizer.service.notRecommended")
-      : service.safety_level === "safe"
+      : service?.safety_level === "safe"
         ? t("common.safe")
         : t("common.caution");
 
@@ -56,10 +56,10 @@ export function ServiceItem({ service, onAction }: ServiceItemProps) {
             <Badge label={statusLabel} variant={statusColor} />
             <Badge label={safetyLabel} variant={safetyVariant} />
           </div>
-          {service.description ? (
+          {service?.description ? (
             <p className="text-[13px] text-text-muted leading-relaxed">{service.description}</p>
           ) : (
-            <p className="text-[13px] text-text-muted/60">{service.name}</p>
+            <p className="text-[13px] text-text-muted/60">{service?.name}</p>
           )}
         </div>
       }

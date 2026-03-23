@@ -11,9 +11,10 @@ export function Checkbox({
   shape = "square",
   className = "",
 }: CheckboxProps) {
-  const sizeClasses = size === "md" ? "w-5 h-5" : "w-4 h-4";
+  const isMd = size === "md";
+  const sizeClasses = isMd ? "w-5 h-5" : "w-4 h-4";
   const shapeClass = shape === "circle" ? "rounded-full" : "rounded";
-  const svgSize = size === "md" ? "w-3 h-3" : "w-2.5 h-2.5";
+  const svgSize = isMd ? "w-3 h-3" : "w-2.5 h-2.5";
 
   return (
     <div

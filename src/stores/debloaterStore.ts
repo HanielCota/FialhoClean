@@ -32,7 +32,11 @@ export const useDebloaterStore = create<DebloaterState>((set) => ({
   toggleApp: (packageFullName) =>
     set((s) => {
       const next = new Set(s.selectedApps);
-      next.has(packageFullName) ? next.delete(packageFullName) : next.add(packageFullName);
+      if (next.has(packageFullName)) {
+        next.delete(packageFullName);
+        return { selectedApps: next };
+      }
+      next.add(packageFullName);
       return { selectedApps: next };
     }),
   clearSelection: () => set({ selectedApps: new Set() }),

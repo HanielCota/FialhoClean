@@ -8,7 +8,7 @@ interface BadgeProps {
 export function Badge({ label, variant = "default" }: BadgeProps) {
   const { t } = useTranslation();
 
-  const variants = {
+  const variants: Record<NonNullable<BadgeProps["variant"]>, string> = {
     default: "bg-white/5 text-text-muted",
     success: "bg-green/[0.15] text-green",
     warning: "bg-orange/[0.15] text-orange",
@@ -17,18 +17,17 @@ export function Badge({ label, variant = "default" }: BadgeProps) {
     info: "bg-blue/[0.15] text-blue",
   };
 
-  const ariaLabel =
-    variant === "success"
-      ? t("common.safety.safe")
-      : variant === "caution"
-        ? t("common.safety.caution")
-        : variant === "error"
-          ? t("common.safety.danger")
-          : label;
+  const ariaLabelMap: Partial<Record<NonNullable<BadgeProps["variant"]>, string>> = {
+    success: t("common.safety.safe"),
+    caution: t("common.safety.caution"),
+    error: t("common.safety.danger"),
+  };
+
+  const ariaLabel = ariaLabelMap[variant] ?? label;
 
   return (
     <span
-      className={`inline-flex h-5 items-center rounded px-2 font-semibold text-[11px] ${variants[variant]}`}
+      className={`inline-flex h-5 items-center rounded px-2 font-semibold text-[11px] ${variants[variant] ?? variants.default}`}
       aria-label={ariaLabel}
     >
       {label}

@@ -14,8 +14,17 @@ interface AsyncViewProps {
  * Pair with useAsyncState() for the status value.
  */
 export function AsyncView({ status, skeleton, empty, error, children }: AsyncViewProps) {
-  if (status === "loading") return <>{skeleton}</>;
-  if (status === "error") return <>{error ?? null}</>;
-  if (status === "empty") return <>{empty ?? null}</>;
-  return <>{children}</>;
+  if (status === "loading") {
+    return <>{skeleton}</>;
+  }
+
+  if (status === "error") {
+    return <>{error ?? null}</>;
+  }
+
+  if (status === "empty") {
+    return <>{empty ?? null}</>;
+  }
+
+  return <>{children ?? null}</>;
 }

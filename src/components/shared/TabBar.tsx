@@ -19,6 +19,10 @@ export function TabBar<T extends string>({
   onChange,
   className = "",
 }: TabBarProps<T>) {
+  if (!tabs?.length) {
+    return null;
+  }
+
   return (
     <div
       role="tablist"

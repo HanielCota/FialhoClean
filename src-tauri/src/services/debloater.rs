@@ -857,9 +857,11 @@ pub async fn get_installed_apps() -> Result<Vec<AppInfo>, AppError> {
     let json_str = crate::services::process_runner::decode_output(&output.stdout);
     let raw_json = json_str.trim();
 
-    let raw: Vec<serde_json::Value> = if raw_json.is_empty() {
-        Vec::new()
-    } else if raw_json.starts_with('[') {
+    if raw_json.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let raw: Vec<serde_json::Value> = if raw_json.starts_with('[') {
         serde_json::from_str(raw_json).map_err(|e| AppError::Parse(e.to_string()))?
     } else {
         vec![serde_json::from_str(raw_json).map_err(|e| AppError::Parse(e.to_string()))?]
@@ -958,26 +960,23 @@ async fn remove_single_app(package_full_name: &str) -> RemoveResult {
     )
     .await;
 
-    match result {
-        Err(_) => RemoveResult {
-            package_full_name: package_full_name.to_string(),
-            success: false,
-            error: Some("operation timed out".to_string()),
-        },
-        Ok(Err(e)) => RemoveResult {
-            package_full_name: package_full_name.to_string(),
-            success: false,
-            error: Some(e.to_string()),
-        },
-        Ok(Ok(o)) if o.status.success() => RemoveResult {
-            package_full_name: package_full_name.to_string(),
-            success: true,
-            error: None,
-        },
-        Ok(Ok(o)) => RemoveResult {
-            package_full_name: package_full_name.to_string(),
-            success: false,
-            error: Some(crate::services::process_runner::decode_output(&o.stderr).trim().to_string()),
-        },
+    let pkg = package_full_name.to_string();
+    let (success, error) = match result {
+        Err(_) => (false, Some("operation timed out".to_string())),
+        Ok(Err(e)) => (false, Some(e.to_string())),
+        Ok(Ok(o)) if o.status.success() => (true, None),
+        Ok(Ok(o)) => (
+            false,
+            Some(
+                crate::services::process_runner::decode_output(&o.stderr)
+                    .trim()
+                    .to_string(),
+            ),
+        ),
+    };
+    RemoveResult {
+        package_full_name: pkg,
+        success,
+        error,
     }
 }

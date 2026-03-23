@@ -22,8 +22,8 @@ export function SuccessScreen({
   onScanAgain: () => void;
 }) {
   const { t } = useTranslation();
-  const hasIssues = cleanResult.skipped_count > 0 || cleanResult.errors.length > 0;
-  const errorPreview = cleanResult.errors.slice(0, 3).map((error) => sanitizeError(error));
+  const hasIssues = (cleanResult?.skipped_count ?? 0) > 0 || (cleanResult?.errors?.length ?? 0) > 0;
+  const errorPreview = (cleanResult?.errors ?? []).slice(0, 3).map((error) => sanitizeError(error));
 
   return (
     <div className="flex flex-col items-center p-6 text-center xl:p-8">
@@ -41,15 +41,15 @@ export function SuccessScreen({
 
       <h1 className="mb-1 font-bold text-[22px] text-text">
         {t(hasIssues ? "cleaner.success.partialTitle" : "cleaner.success.title", {
-          size: formatBytes(cleanResult.freed_bytes),
+          size: formatBytes(cleanResult?.freed_bytes ?? 0),
         })}
       </h1>
       <p className="mb-6 text-[12px] text-text-muted">
         {t(hasIssues ? "cleaner.success.partialSubtitle" : "cleaner.success.subtitle", {
-          files: cleanResult.deleted_count.toLocaleString(),
-          deleted: cleanResult.deleted_count.toLocaleString(),
-          skipped: cleanResult.skipped_count.toLocaleString(),
-          errors: cleanResult.errors.length.toLocaleString(),
+          files: (cleanResult?.deleted_count ?? 0).toLocaleString(),
+          deleted: (cleanResult?.deleted_count ?? 0).toLocaleString(),
+          skipped: (cleanResult?.skipped_count ?? 0).toLocaleString(),
+          errors: (cleanResult?.errors?.length ?? 0).toLocaleString(),
         })}
       </p>
 
@@ -61,21 +61,21 @@ export function SuccessScreen({
           <div className="mt-3 flex flex-wrap gap-2">
             <span className="rounded-full bg-white/[0.05] px-3 py-1 text-[12px] text-text">
               {t("cleaner.success.summary.deleted", {
-                count: cleanResult.deleted_count,
+                count: cleanResult?.deleted_count ?? 0,
               })}
             </span>
             <span className="rounded-full bg-white/[0.05] px-3 py-1 text-[12px] text-text">
               {t("cleaner.success.summary.skipped", {
-                count: cleanResult.skipped_count,
+                count: cleanResult?.skipped_count ?? 0,
               })}
             </span>
             <span className="rounded-full bg-white/[0.05] px-3 py-1 text-[12px] text-text">
               {t("cleaner.success.summary.errors", {
-                count: cleanResult.errors.length,
+                count: cleanResult?.errors?.length ?? 0,
               })}
             </span>
           </div>
-          {errorPreview.length > 0 && (
+          {errorPreview?.length > 0 && (
             <div className="mt-3 space-y-1.5">
               <p className="font-medium text-[12px] text-text">
                 {t("cleaner.success.issueHeading")}
@@ -85,10 +85,10 @@ export function SuccessScreen({
                   - {error}
                 </p>
               ))}
-              {cleanResult.errors.length > errorPreview.length && (
+              {(cleanResult?.errors?.length ?? 0) > errorPreview.length && (
                 <p className="text-[12px] text-text-muted">
                   {t("cleaner.success.moreIssues", {
-                    count: cleanResult.errors.length - errorPreview.length,
+                    count: (cleanResult?.errors?.length ?? 0) - errorPreview.length,
                   })}
                 </p>
               )}
@@ -97,7 +97,7 @@ export function SuccessScreen({
         </div>
       )}
 
-      {!hasIssues && scanSummary && scanSummary.categories.length > 0 && (
+      {!hasIssues && scanSummary?.categories && scanSummary.categories.length > 0 && (
         <div className="mb-6 w-full overflow-hidden rounded-xl border border-white/[0.06] bg-card">
           {scanSummary.categories.map((cat, i) => {
             const Icon = CATEGORY_ICONS[cat.category];

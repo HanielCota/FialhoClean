@@ -45,13 +45,15 @@ async fn run_system_tool(
         });
     }
 
+    let output_text = if combined.is_empty() {
+        format!("{} completed.", tool_name)
+    } else {
+        combined
+    };
+
     Ok(RepairResult {
         success: output.status.success() && !needs_admin,
-        output: if combined.is_empty() {
-            format!("{} completed.", tool_name)
-        } else {
-            combined
-        },
+        output: output_text,
     })
 }
 

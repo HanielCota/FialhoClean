@@ -4,9 +4,9 @@ import { useSettingsStore } from "../stores/settingsStore";
 import { useUiStore } from "../stores/uiStore";
 import { useCleaner } from "./useCleaner";
 
-export type CleanerPhase = "select" | "scanning" | "results" | "success";
+type CleanerPhase = "select" | "scanning" | "results" | "success";
 
-export const CLEANER_STEP_MAP = {
+const CLEANER_STEP_MAP = {
   select: 1,
   scanning: 2,
   results: 3,
@@ -17,7 +17,7 @@ export const CLEANER_STEP_MAP = {
  * Pure function — derives the current phase from store booleans.
  * Extracted so it can be tested independently of React.
  */
-export function derivePhase(
+function derivePhase(
   hasCleanResult: boolean,
   isScanning: boolean,
   hasScanSummary: boolean,

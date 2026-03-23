@@ -42,12 +42,13 @@ fn is_reparse_point(_metadata: &std::fs::Metadata) -> bool {
 }
 
 fn canonicalize_for_scope(path: &Path) -> Option<PathBuf> {
-    std::fs::canonicalize(path).ok().or_else(|| {
-        let file_name = path.file_name()?.to_os_string();
-        let parent = path.parent()?;
-        let resolved_parent = std::fs::canonicalize(parent).ok()?;
-        Some(resolved_parent.join(file_name))
-    })
+    if let Ok(resolved) = std::fs::canonicalize(path) {
+        return Some(resolved);
+    }
+    let file_name = path.file_name()?.to_os_string();
+    let parent = path.parent()?;
+    let resolved_parent = std::fs::canonicalize(parent).ok()?;
+    Some(resolved_parent.join(file_name))
 }
 
 /// Returns true if `path` is within a directory legitimately scanned for
@@ -171,12 +172,11 @@ fn is_path_allowed(path: &str, category: &CleanCategory) -> bool {
     };
 
     // Special exact-path check for MEMORY.DMP.
-    if *category == CleanCategory::MemoryDumps {
-        if let Some(memory_dump_path) = canonicalize_for_scope(Path::new(WINDOWS_MEMORY_DMP)) {
-            if resolved_path == memory_dump_path {
-                return true;
-            }
-        }
+    if *category == CleanCategory::MemoryDumps
+        && canonicalize_for_scope(Path::new(WINDOWS_MEMORY_DMP))
+            .is_some_and(|memory_dump_path| resolved_path == memory_dump_path)
+    {
+        return true;
     }
 
     allowed_prefixes
@@ -300,11 +300,12 @@ fn find_firefox_cache(app_data: &str) -> Option<String> {
 
     for entry in dir.flatten() {
         let path = entry.path();
-        if path.is_dir() {
-            let cache = path.join("cache2");
-            if cache.exists() {
-                return Some(cache.to_string_lossy().to_string());
-            }
+        if !path.is_dir() {
+            continue;
+        }
+        let cache = path.join("cache2");
+        if cache.exists() {
+            return Some(cache.to_string_lossy().to_string());
         }
     }
     None
@@ -406,21 +407,18 @@ async fn scan_memory_dumps(category: &CleanCategory) -> Result<CategoryScanResul
     }
 
     // Also include the full memory dump if it exists.
-    let memory_dmp = Path::new(WINDOWS_MEMORY_DMP);
-    if memory_dmp.exists() {
-        if let Ok(meta) = std::fs::metadata(memory_dmp) {
-            let modified_timestamp = meta
-                .modified()
-                .ok()
-                .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
-                .map(|d| d.as_secs())
-                .unwrap_or(0);
-            all_files.push(FileEntry {
-                path: WINDOWS_MEMORY_DMP.to_string(),
-                size_bytes: meta.len(),
-                modified_timestamp,
-            });
-        }
+    if let Ok(meta) = std::fs::metadata(WINDOWS_MEMORY_DMP) {
+        let modified_timestamp = meta
+            .modified()
+            .ok()
+            .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
+            .map(|d| d.as_secs())
+            .unwrap_or(0);
+        all_files.push(FileEntry {
+            path: WINDOWS_MEMORY_DMP.to_string(),
+            size_bytes: meta.len(),
+            modified_timestamp,
+        });
     }
 
     let total_size_bytes = all_files.iter().map(|f| f.size_bytes).sum();
@@ -603,7 +601,7 @@ pub async fn clean_files(file_groups: Vec<FileGroup>) -> Result<CleanResult, App
                     deleted_count += 1;
                 }
                 Err(e) => errors.push(e.to_string()),
-            }
+            };
             continue;
         }
 
@@ -611,7 +609,7 @@ pub async fn clean_files(file_groups: Vec<FileGroup>) -> Result<CleanResult, App
             match flush_dns().await {
                 Ok(_) => deleted_count += 1,
                 Err(e) => errors.push(e.to_string()),
-            }
+            };
             continue;
         }
 

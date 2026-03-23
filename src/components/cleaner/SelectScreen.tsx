@@ -21,7 +21,7 @@ export function SelectScreen({
   onScan: () => void;
 }) {
   const { t } = useTranslation();
-  const noneSelected = selectedCategories.size === 0;
+  const noneSelected = !selectedCategories || selectedCategories.size === 0;
 
   return (
     <div className="p-6 xl:p-8">
@@ -54,7 +54,7 @@ export function SelectScreen({
 
       <div className="mb-6 space-y-2">
         {ALL_CATEGORIES.map((cat) => {
-          const selected = selectedCategories.has(cat);
+          const selected = selectedCategories?.has(cat) ?? false;
           const Icon = CATEGORY_ICONS[cat];
           const needsAdmin = cat === "prefetch";
 
@@ -93,7 +93,7 @@ export function SelectScreen({
       <Button onClick={onScan} disabled={noneSelected} className="relative w-full">
         {noneSelected
           ? t("cleaner.scan.button_none")
-          : t("cleaner.scan.button", { count: selectedCategories.size })}
+          : t("cleaner.scan.button", { count: selectedCategories?.size ?? 0 })}
         <span
           aria-hidden="true"
           className="pointer-events-none absolute top-1/2 right-4 flex h-4 w-4 -translate-y-1/2 items-center justify-center"

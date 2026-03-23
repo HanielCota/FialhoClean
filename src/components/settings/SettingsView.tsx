@@ -39,11 +39,11 @@ export function SettingsView() {
   };
 
   const handleCategoryToggle = (cat: CleanCategory) => {
-    if (defaultCategories.includes(cat)) {
-      setDefaultCategories(defaultCategories.filter((c) => c !== cat));
-    } else {
-      setDefaultCategories([...defaultCategories, cat]);
-    }
+    const current = defaultCategories ?? [];
+    const next = current.includes(cat)
+      ? current.filter((c) => c !== cat)
+      : [...current, cat];
+    setDefaultCategories(next);
     toast.success(t("settings.toast.saved"), { duration: TOAST_DURATIONS.success });
   };
 
@@ -136,7 +136,7 @@ export function SettingsView() {
         </p>
         <div className="space-y-2 border-white/[0.06] border-t pt-3">
           {ALL_CATEGORIES.map((cat) => {
-            const checked = defaultCategories.includes(cat);
+            const checked = defaultCategories?.includes(cat) ?? false;
             return (
               <button
                 key={cat}

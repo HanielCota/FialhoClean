@@ -54,10 +54,11 @@ export function ItemRow({
   disabled = false,
 }: ItemRowProps) {
   const Component = as;
+  const buttonProps = as === "button" ? { type: "button" as const, disabled } : {};
 
   return (
     <Component
-      {...(as === "button" ? { type: "button", disabled } : {})}
+      {...buttonProps}
       role={role}
       aria-checked={ariaChecked}
       aria-labelledby={ariaLabelledBy}
@@ -69,18 +70,24 @@ export function ItemRow({
         as === "button" ? "focus-ring w-full text-left disabled:cursor-not-allowed" : ""
       } ${className}`}
     >
-      {leading !== undefined && <div className="flex flex-shrink-0 items-center">{leading}</div>}
+      {leading != null && <div className="flex flex-shrink-0 items-center">{leading}</div>}
 
       <div className="min-w-0 flex-1">
         {typeof title === "string" ? (
-          <p title={title} className={`truncate font-medium text-[14px] ${titleClass ?? "text-text"}`}>{title}</p>
+          <p title={title} className={`truncate font-medium text-[14px] ${titleClass ?? "text-text"}`}>
+            {title}
+          </p>
         ) : (
           title
         )}
-        {subtitle && <p title={subtitle} className="mt-0.5 truncate text-[12px] text-text-muted">{subtitle}</p>}
+        {subtitle && (
+          <p title={subtitle} className="mt-0.5 truncate text-[12px] text-text-muted">
+            {subtitle}
+          </p>
+        )}
       </div>
 
-      {trailing !== undefined && (
+      {trailing != null && (
         <div className="flex flex-shrink-0 items-center gap-2">{trailing}</div>
       )}
     </Component>

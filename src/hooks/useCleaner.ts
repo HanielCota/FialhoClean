@@ -40,7 +40,12 @@ export function useCleaner() {
           const result = await cleanerService.scan([category]);
           if (cancelledRef.current) break;
 
-          const catResult = result.categories?.[0];
+          const categories = result?.categories;
+          if (!categories || categories.length === 0) {
+            useCleanerStore.getState().updateCategoryProgress(category, "done");
+            continue;
+          }
+          const catResult = categories[0];
           if (catResult) allCategoryResults.push(catResult);
           useCleanerStore.getState().updateCategoryProgress(category, "done");
         } catch {
@@ -48,19 +53,17 @@ export function useCleaner() {
         }
       }
 
-      if (!cancelledRef.current) {
-        const totalSize = allCategoryResults.reduce((sum, c) => sum + c.total_size_bytes, 0);
-        useCleanerStore.getState().setScanSummary({
-          categories: allCategoryResults,
-          total_size_bytes: totalSize,
-        });
-      }
+      if (cancelledRef.current) return;
+      const totalSize = allCategoryResults.reduce((sum, c) => sum + c.total_size_bytes, 0);
+      useCleanerStore.getState().setScanSummary({
+        categories: allCategoryResults,
+        total_size_bytes: totalSize,
+      });
     } catch (err) {
-      if (!cancelledRef.current) {
-        const msg = sanitizeError(err);
-        useCleanerStore.getState().setError(msg);
-        notify("cleaner.toast.scanFailed", "error", { msg });
-      }
+      if (cancelledRef.current) return;
+      const msg = sanitizeError(err);
+      useCleanerStore.getState().setError(msg);
+      notify("cleaner.toast.scanFailed", "error", { msg });
     } finally {
       useCleanerStore.getState().setIsScanning(false);
     }
@@ -78,7 +81,10 @@ export function useCleaner() {
     store.setIsCleaning(true);
     store.setError(null);
 
-    const fileGroups: FileGroup[] = store.scanSummary.categories
+    const categories = store.scanSummary?.categories;
+    if (!categories) return;
+
+    const fileGroups: FileGroup[] = categories
       .filter((c) => c.files.length > 0 || c.category === "recycle_bin")
       .map((c) => ({
         category: c.category,
@@ -87,6 +93,7 @@ export function useCleaner() {
 
     try {
       const result = await cleanerService.clean(fileGroups);
+      if (!result) return;
       useCleanerStore.getState().setCleanResult(result);
       useCleanerStore.getState().addCleanHistory({
         freed_bytes: result.freed_bytes,

@@ -21,10 +21,10 @@ export default function App() {
 
   useEffect(() => {
     setEverVisited((prev) => {
-      if (prev.has(activeView)) return prev;
-      const next = new Set(prev);
-      next.add(activeView);
-      return next;
+      if (prev.has(activeView)) {
+        return prev;
+      }
+      return new Set(prev).add(activeView);
     });
   }, [activeView]);
 

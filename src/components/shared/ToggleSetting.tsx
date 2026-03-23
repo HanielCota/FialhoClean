@@ -20,10 +20,14 @@ export function ToggleSetting({
 }: ToggleSettingProps) {
   const labelId = useId();
 
+  if (!onChange) {
+    return null;
+  }
+
   return (
     <Card>
       <div className="flex items-start gap-4">
-        {Icon && <Icon className="mt-0.5 h-5 w-5 flex-shrink-0 text-text-muted" />}
+        {Icon ? <Icon className="mt-0.5 h-5 w-5 flex-shrink-0 text-text-muted" /> : null}
         <div className="min-w-0 flex-1">
           <p id={labelId} className="font-semibold text-[15px] text-text">
             {title}

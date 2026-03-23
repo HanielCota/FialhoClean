@@ -12,10 +12,9 @@ pub fn run() {
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
-                if cfg!(debug_assertions) {
-                    "fialho_clean_lib=debug".into()
-                } else {
-                    "fialho_clean_lib=warn".into()
+                match cfg!(debug_assertions) {
+                    true => "fialho_clean_lib=debug".into(),
+                    false => "fialho_clean_lib=warn".into(),
                 }
             }),
         )

@@ -34,6 +34,7 @@ export function useSystemTweaks() {
       try {
         await optimizerService.setHibernate(enabled);
         const current = useOptimizerStore.getState().hibernateSettings;
+        if (!current) return;
         useOptimizerStore
           .getState()
           .setHibernateSettings({ ...current, hibernate_enabled: enabled });
@@ -53,6 +54,7 @@ export function useSystemTweaks() {
       try {
         await optimizerService.setFastStartup(enabled);
         const current = useOptimizerStore.getState().hibernateSettings;
+        if (!current) return;
         useOptimizerStore
           .getState()
           .setHibernateSettings({ ...current, fast_startup_enabled: enabled });
@@ -110,6 +112,7 @@ export function useSystemTweaks() {
       try {
         await optimizerService.setPrivacySetting(key, disabled);
         const current = useOptimizerStore.getState().privacySettings;
+        if (!current) return;
         useOptimizerStore
           .getState()
           .setPrivacySettings({ ...current, [`${key}_disabled`]: disabled });

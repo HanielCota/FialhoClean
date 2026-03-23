@@ -13,6 +13,10 @@ export function Toggle({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledBy,
 }: ToggleProps) {
+  if (!onChange) {
+    return null;
+  }
+
   return (
     <button
       type="button"

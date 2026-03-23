@@ -18,6 +18,10 @@ export function ActionCard({
   className = "",
   tone = "default",
 }: ActionCardProps) {
+  if (!Icon || !onClick) {
+    return null;
+  }
+
   const isAccent = tone === "accent";
 
   return (

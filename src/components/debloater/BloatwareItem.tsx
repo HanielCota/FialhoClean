@@ -19,12 +19,12 @@ export const BloatwareItem = memo(function BloatwareItem({
 }: BloatwareItemProps) {
   const { t } = useTranslation();
 
-  const safetyVariant = getSafetyVariant(app.safety_level);
+  const safetyVariant = getSafetyVariant(app?.safety_level);
 
   const safetyLabel =
-    app.safety_level === "safe"
+    app?.safety_level === "safe"
       ? t("common.safe")
-      : app.safety_level === "caution"
+      : app?.safety_level === "caution"
         ? t("common.caution")
         : t("common.dangerous");
 

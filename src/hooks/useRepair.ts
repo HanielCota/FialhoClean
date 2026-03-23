@@ -135,12 +135,16 @@ export function useRepair() {
   );
 
   const resetTool = useCallback((tool: RepairToolId) => {
-    if (tool === "sfc") setSfc(initialState);
-    else if (tool === "dism") setDism(initialState);
-    else {
-      setRestorePoint("idle");
-      setRpElapsed(0);
+    if (tool === "sfc") {
+      setSfc(initialState);
+      return;
     }
+    if (tool === "dism") {
+      setDism(initialState);
+      return;
+    }
+    setRestorePoint("idle");
+    setRpElapsed(0);
   }, []);
 
   return {

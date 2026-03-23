@@ -143,15 +143,15 @@ fn startup_enabled_from_approved(root: &RegKey, name: &str) -> bool {
 
 fn startup_root_from_key_path(key_path: &str) -> Result<RegKey, AppError> {
     if key_path.starts_with("HKEY_CURRENT_USER\\") {
-        Ok(RegKey::predef(HKEY_CURRENT_USER))
-    } else if key_path.starts_with("HKEY_LOCAL_MACHINE\\") {
-        Ok(RegKey::predef(HKEY_LOCAL_MACHINE))
-    } else {
-        Err(AppError::Custom(format!(
-            "unsupported startup key path: {}",
-            key_path
-        )))
+        return Ok(RegKey::predef(HKEY_CURRENT_USER));
     }
+    if key_path.starts_with("HKEY_LOCAL_MACHINE\\") {
+        return Ok(RegKey::predef(HKEY_LOCAL_MACHINE));
+    }
+    Err(AppError::Custom(format!(
+        "unsupported startup key path: {}",
+        key_path
+    )))
 }
 
 pub async fn get_startup_items() -> Result<Vec<StartupItem>, AppError> {
@@ -272,14 +272,8 @@ fn parse_service_entry(entry: serde_json::Value) -> Option<ServiceInfo> {
     } else if CAUTION_SERVICES.contains(&name.as_str()) {
         ServiceSafety::Caution
     } else {
-        ServiceSafety::NotRecommended
-    };
-
-    // Only include services that are safe or caution
-    let is_relevant = matches!(safety_level, ServiceSafety::Safe | ServiceSafety::Caution);
-    if !is_relevant {
         return None;
-    }
+    };
 
     let description = service_description(&name).to_string();
 
@@ -373,14 +367,15 @@ pub async fn apply_ultimate_performance() -> Result<(), AppError> {
     // Step 2: unlock by duplicating the built-in scheme
     let mut cmd2 = tokio::process::Command::new("powercfg");
     cmd2.args(["-duplicatescheme", ULTIMATE_PERF_GUID]);
-    if let Some(stdout) = RUNNER.run_best_effort(cmd2).await {
-        let new_guid = stdout.lines().find_map(extract_guid);
-        if let Some(guid) = new_guid {
-            let mut cmd3 = tokio::process::Command::new("powercfg");
-            cmd3.args(["/setactive", &guid]);
-            let _ = RUNNER.run(cmd3).await;
-            return Ok(());
-        }
+    if let Some(guid) = RUNNER
+        .run_best_effort(cmd2)
+        .await
+        .and_then(|stdout| stdout.lines().find_map(extract_guid))
+    {
+        let mut cmd3 = tokio::process::Command::new("powercfg");
+        cmd3.args(["/setactive", &guid]);
+        let _ = RUNNER.run(cmd3).await;
+        return Ok(());
     }
 
     // Step 3: fallback to High Performance
@@ -453,17 +448,21 @@ pub async fn get_network_settings() -> Result<NetworkSettings, AppError> {
 pub async fn set_network_optimized(enabled: bool) -> Result<(), AppError> {
     tracing::info!(enabled, "toggling network optimization");
     let lm = hklm();
-    if enabled {
-        lm.write_u32(
-            REG_MULTIMEDIA_PROFILE_KEY,
-            "NetworkThrottlingIndex",
-            0xFFFF_FFFF,
-        )?;
-        lm.write_u32(REG_MULTIMEDIA_PROFILE_KEY, "SystemResponsiveness", 0)?;
+    let (throttle_val, responsiveness_val) = if enabled {
+        (0xFFFF_FFFF, 0)
     } else {
-        lm.write_u32(REG_MULTIMEDIA_PROFILE_KEY, "NetworkThrottlingIndex", 10)?;
-        lm.write_u32(REG_MULTIMEDIA_PROFILE_KEY, "SystemResponsiveness", 20)?;
-    }
+        (10, 20)
+    };
+    lm.write_u32(
+        REG_MULTIMEDIA_PROFILE_KEY,
+        "NetworkThrottlingIndex",
+        throttle_val,
+    )?;
+    lm.write_u32(
+        REG_MULTIMEDIA_PROFILE_KEY,
+        "SystemResponsiveness",
+        responsiveness_val,
+    )?;
     Ok(())
 }
 
@@ -538,10 +537,10 @@ pub async fn get_scheduled_tasks() -> Result<Vec<ScheduledTask>, AppError> {
 
     let mut tasks = Vec::new();
     for entry in raw {
-        let task_name = match entry["TaskName"].as_str() {
-            Some(n) => n.to_string(),
-            None => continue,
+        let Some(task_name_str) = entry["TaskName"].as_str() else {
+            continue;
         };
+        let task_name = task_name_str.to_string();
         let task_path_raw = entry["TaskPath"].as_str().unwrap_or("").to_string();
         let state = match entry["State"].as_str().unwrap_or("") {
             "Ready" => TaskState::Ready,
@@ -589,11 +588,10 @@ pub async fn set_scheduled_task_enabled(task_path: String, enabled: bool) -> Res
     }
 
     // Split into folder path and task name for PowerShell
-    let (folder, name) = if let Some(pos) = task_path.rfind('\\') {
-        (&task_path[..pos + 1], &task_path[pos + 1..])
-    } else {
+    let Some(pos) = task_path.rfind('\\') else {
         return Err(AppError::Custom("invalid task path format".into()));
     };
+    let (folder, name) = (&task_path[..pos + 1], &task_path[pos + 1..]);
 
     let action = if enabled { "Enable" } else { "Disable" };
 
@@ -723,11 +721,12 @@ if ($freed -lt 0) { $freed = 0 }
 Write-Output $freed
 "#;
 
-    let result = RUNNER.powershell(script).await;
-    let freed_bytes: i64 = match result {
-        Ok(output) => output.stdout.trim().parse().unwrap_or(0),
-        Err(_) => 0,
-    };
+    let freed_bytes: i64 = RUNNER
+        .powershell(script)
+        .await
+        .ok()
+        .and_then(|output| output.stdout.trim().parse().ok())
+        .unwrap_or(0);
     Ok(crate::models::optimizer::RamOptimizationResult { freed_bytes })
 }
 

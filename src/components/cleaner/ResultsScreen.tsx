@@ -30,8 +30,8 @@ export function ResultsScreen({
     cancel: handleCancel,
   } = useConfirmModal(onClean);
   const [expandedCategory, setExpandedCategory] = useState<CleanCategory | null>(null);
-  const totalSize = scanSummary.total_size_bytes;
-  const totalFiles = scanSummary.categories.reduce((s, c) => s + c.files.length, 0);
+  const totalSize = scanSummary?.total_size_bytes ?? 0;
+  const totalFiles = scanSummary?.categories?.reduce((s, c) => s + (c.files?.length ?? 0), 0) ?? 0;
 
   if (totalSize === 0) {
     return (
@@ -60,11 +60,11 @@ export function ResultsScreen({
       </p>
 
       <div className="mb-6 space-y-2">
-        {scanSummary.categories.map((cat) => {
+        {scanSummary?.categories?.map((cat) => {
           const Icon = CATEGORY_ICONS[cat.category];
-          const isExpandable = cat.category !== "recycle_bin" && cat.files.length > 0;
+          const isExpandable = cat.category !== "recycle_bin" && (cat.files?.length ?? 0) > 0;
           const isExpanded = expandedCategory === cat.category;
-          const previewFiles = cat.files.slice(0, 10);
+          const previewFiles = cat.files?.slice(0, 10) ?? [];
 
           return (
             <div
@@ -96,7 +96,7 @@ export function ResultsScreen({
                   <p className="text-[12px] text-text-muted">
                     {formatBytes(cat.total_size_bytes)}
                     {cat.category !== "recycle_bin"
-                      ? ` ${t("cleaner.results.files", { count: cat.files.length })}`
+                      ? ` ${t("cleaner.results.files", { count: cat.files?.length ?? 0 })}`
                       : ` ${t("cleaner.results.estimated")}`}
                   </p>
                 </div>
@@ -134,9 +134,9 @@ export function ResultsScreen({
                         </div>
                       );
                     })}
-                    {cat.files.length > 10 && (
+                    {(cat.files?.length ?? 0) > 10 && (
                       <p className="px-1 pt-1 text-[11px] text-text-muted/50">
-                        {t("cleaner.results.moreFiles", { count: cat.files.length - 10 })}
+                        {t("cleaner.results.moreFiles", { count: (cat.files?.length ?? 0) - 10 })}
                       </p>
                     )}
                   </div>

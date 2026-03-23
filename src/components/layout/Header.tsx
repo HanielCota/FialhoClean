@@ -8,16 +8,16 @@ interface HeaderProps {
   isRefreshing?: boolean;
 }
 
-export function Header({ title, subtitle, onRefresh, isRefreshing }: HeaderProps) {
+export function Header({ title, subtitle, onRefresh, isRefreshing = false }: HeaderProps) {
   const { t } = useTranslation();
 
   return (
     <div className="mb-6 flex items-start justify-between gap-4">
       <div className="min-w-0 flex-1">
         <h1 className="font-bold text-[26px] text-text">{title}</h1>
-        {subtitle && <p className="mt-1 text-[13px] text-text-muted">{subtitle}</p>}
+        {subtitle ? <p className="mt-1 text-[13px] text-text-muted">{subtitle}</p> : null}
       </div>
-      {onRefresh && (
+      {onRefresh ? (
         <button
           type="button"
           onClick={onRefresh}
@@ -27,7 +27,7 @@ export function Header({ title, subtitle, onRefresh, isRefreshing }: HeaderProps
         >
           <RefreshCw className={`h-[18px] w-[18px] ${isRefreshing ? "animate-spin" : ""}`} />
         </button>
-      )}
+      ) : null}
     </div>
   );
 }

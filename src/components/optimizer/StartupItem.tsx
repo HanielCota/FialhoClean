@@ -43,7 +43,7 @@ const SLOW_KEYWORDS = [
 const FAST_PATHS = ["system32", "syswow64", "\\windows\\", "/windows/"];
 
 function getStartupImpact(item: StartupItemType): ImpactLevel {
-  const str = `${item.name} ${item.command}`.toLowerCase();
+  const str = `${item?.name ?? ""} ${item?.command ?? ""}`.toLowerCase();
   if (SLOW_KEYWORDS.some((k) => str.includes(k))) return "slow";
   if (FAST_PATHS.some((p) => str.includes(p))) return "fast";
   return "medium";
@@ -90,9 +90,9 @@ export const StartupItem = memo(function StartupItem({ item, onToggle }: Startup
           </span>
 
           <Toggle
-            checked={item.enabled}
+            checked={item?.enabled ?? false}
             onChange={(enabled) => onToggle(item.name, item.key_path, enabled)}
-            aria-label={item.name}
+            aria-label={item?.name ?? ""}
           />
         </>
       }

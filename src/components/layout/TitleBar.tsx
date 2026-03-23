@@ -84,14 +84,20 @@ export function TitleBar() {
   const { t } = useTranslation();
 
   const handleAction = async (key: (typeof TRAFFIC_LIGHTS)[number]["key"]) => {
+    if (!win) {
+      return;
+    }
+
     if (key === "close") {
       await win.close();
       return;
     }
+
     if (key === "minimize") {
       await win.minimize();
       return;
     }
+
     await win.toggleMaximize();
   };
 

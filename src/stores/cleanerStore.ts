@@ -7,7 +7,7 @@ export type ScanProgressStatus = "pending" | "scanning" | "done" | "error";
 const HISTORY_STORAGE_KEY = "fc_clean_history";
 const MAX_HISTORY_ENTRIES = 30;
 
-export interface CleanHistoryEntry {
+interface CleanHistoryEntry {
   id: string;
   date: string; // ISO string
   freed_bytes: number;
@@ -86,7 +86,11 @@ export const useCleanerStore = create<CleanerState>((set) => ({
   toggleCategory: (category) =>
     set((s) => {
       const next = new Set(s.selectedCategories);
-      next.has(category) ? next.delete(category) : next.add(category);
+      if (next.has(category)) {
+        next.delete(category);
+        return { selectedCategories: next };
+      }
+      next.add(category);
       return { selectedCategories: next };
     }),
 
@@ -104,9 +108,12 @@ export const useCleanerStore = create<CleanerState>((set) => ({
   setScanProgress: (progress) => set({ scanProgress: progress }),
 
   updateCategoryProgress: (category, status) =>
-    set((s) => ({
-      scanProgress: s.scanProgress ? { ...s.scanProgress, [category]: status } : null,
-    })),
+    set((s) => {
+      if (!s.scanProgress) {
+        return { scanProgress: null };
+      }
+      return { scanProgress: { ...s.scanProgress, [category]: status } };
+    }),
 
   addCleanHistory: (entry) =>
     set((s) => {

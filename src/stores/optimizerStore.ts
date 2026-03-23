@@ -53,7 +53,12 @@ export const useOptimizerStore = create<OptimizerState>((set) => ({
   setStartupItems: (items) => set({ startupItems: items }),
   updateStartupItem: (name, enabled) =>
     set((s) => ({
-      startupItems: s.startupItems.map((i) => (i.name === name ? { ...i, enabled } : i)),
+      startupItems: s.startupItems.map((i) => {
+        if (i.name === name) {
+          return { ...i, enabled };
+        }
+        return i;
+      }),
     })),
   setServices: (services) => set({ services }),
   setPowerPlans: (plans) => set({ powerPlans: plans }),

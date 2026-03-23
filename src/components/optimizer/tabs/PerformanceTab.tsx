@@ -38,8 +38,8 @@ export function PerformanceTab({
   const [gameModeState, setGameModeState] = useState<"idle" | "loading" | "done">("idle");
   const [ultimateApplying, setUltimateApplying] = useState(false);
 
-  const activePlan = powerPlans.find((p) => p.is_active);
-  const ultimateIsActive = powerPlans.some(
+  const activePlan = powerPlans?.find((p) => p.is_active);
+  const ultimateIsActive = (powerPlans ?? []).some(
     (p) =>
       p.is_active &&
       (p.guid.toLowerCase() === ULTIMATE_PERF_GUID || p.name.toLowerCase().includes("ultimate")),
@@ -68,11 +68,11 @@ export function PerformanceTab({
   return (
     <div className="space-y-7">
       {/* Power Mode */}
-      {powerPlans.length > 0 && (
+      {(powerPlans?.length ?? 0) > 0 && (
         <section>
           <SectionHeading>{t("optimizer.sections.powerMode")}</SectionHeading>
           <div className="flex flex-wrap gap-2">
-            {powerPlans.map((plan) => (
+            {powerPlans?.map((plan) => (
               <button
                 key={plan.guid}
                 type="button"
@@ -114,7 +114,7 @@ export function PerformanceTab({
         <ToggleSetting
           title={t("optimizer.gpuHags.title")}
           description={t("optimizer.gpuHags.description")}
-          checked={gpuSettings.hags_enabled}
+          checked={gpuSettings?.hags_enabled ?? false}
           onChange={onSetGpuHags}
         />
       </section>
