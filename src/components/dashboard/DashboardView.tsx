@@ -3,52 +3,46 @@ import {
   Clock,
   Cpu,
   HardDrive,
-  Minus,
   MemoryStick,
+  Minus,
   RefreshCw,
   Zap,
 } from "lucide-react";
 import type { ComponentType } from "react";
 import { useTranslation } from "react-i18next";
+import { DISK_HEALTH_CRITICAL, USAGE_CRITICAL, USAGE_WARNING } from "../../constants/thresholds";
+import { useAsyncState } from "../../hooks/useAsyncState";
+import { useSystemInfo } from "../../hooks/useSystemInfo";
+import { formatBytes, formatPercent } from "../../lib/format";
 import { useCleanerStore } from "../../stores/cleanerStore";
 import { useUiStore } from "../../stores/uiStore";
-import { useSystemInfo } from "../../hooks/useSystemInfo";
-import { useAsyncState } from "../../hooks/useAsyncState";
-import { formatBytes, formatPercent, formatUptime } from "../../lib/format";
-import { DISK_HEALTH_CRITICAL, USAGE_CRITICAL, USAGE_WARNING } from "../../constants/thresholds";
 import { ActionCard } from "../shared/ActionCard";
 import { AsyncView } from "../shared/AsyncView";
 import { Button } from "../shared/Button";
 import { ErrorMessage } from "../shared/ErrorMessage";
 import { SectionHeading } from "../shared/SectionHeading";
 
-function relativeDate(isoDate: string): string {
+function relativeDate(
+  isoDate: string,
+  t: ReturnType<typeof import("react-i18next").useTranslation>["t"],
+): string {
   const d = new Date(isoDate);
   const now = new Date();
   const diffDays = Math.floor((now.getTime() - d.getTime()) / 86400000);
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  return `${diffDays} days ago`;
+  if (diffDays === 0) return t("dashboard.relative.today");
+  if (diffDays === 1) return t("dashboard.relative.yesterday");
+  return t("dashboard.relative.daysAgo", { count: diffDays });
 }
 
 function HealthDot({ color }: { color: "green" | "orange" | "red" }) {
-  const cls =
-    color === "green"
-      ? "bg-green"
-      : color === "orange"
-      ? "bg-orange"
-      : "bg-red";
-  return (
-    <span
-      className={`inline-block w-2.5 h-2.5 rounded-full ${cls}`}
-      aria-hidden="true"
-    />
-  );
+  const cls = color === "green" ? "bg-green" : color === "orange" ? "bg-orange" : "bg-red";
+  return <span className={`inline-block h-2.5 w-2.5 rounded-full ${cls}`} aria-hidden="true" />;
 }
 
-function getHealthKey(
-  diskPct: number
-): { key: "good" | "better" | "attention"; color: "green" | "orange" | "red" } {
+function getHealthKey(diskPct: number): {
+  key: "good" | "better" | "attention";
+  color: "green" | "orange" | "red";
+} {
   if (diskPct >= DISK_HEALTH_CRITICAL) return { key: "attention", color: "red" };
   if (diskPct >= USAGE_WARNING) return { key: "better", color: "orange" };
   return { key: "good", color: "green" };
@@ -73,16 +67,16 @@ function StatCard({
     pct >= USAGE_CRITICAL ? "bg-red" : pct >= USAGE_WARNING ? "bg-orange" : "bg-accent";
 
   return (
-    <div className="bg-card border border-white/[0.06] rounded-xl p-4">
-      <div className="flex items-center gap-2 mb-2">
-        <Icon className="w-4 h-4 text-text-muted" />
-        <span className="text-[13px] font-medium text-text-muted">{title}</span>
+    <div className="rounded-xl border border-white/[0.06] bg-card p-4">
+      <div className="mb-2 flex items-center gap-2">
+        <Icon className="h-4 w-4 text-text-muted" />
+        <span className="font-medium text-[13px] text-text-muted">{title}</span>
       </div>
-      <p className="text-[17px] font-semibold text-text mb-0.5">{main}</p>
-      <p className="text-[12px] text-text-muted mb-2">{sub}</p>
+      <p className="mb-0.5 font-semibold text-[17px] text-text">{main}</p>
+      <p className="mb-2 text-[12px] text-text-muted">{sub}</p>
       {progress !== undefined && (
         <div
-          className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden"
+          className="h-1.5 overflow-hidden rounded-full bg-white/[0.06]"
           role="progressbar"
           aria-valuenow={pct}
           aria-valuetext={t("dashboard.stats.storageUsed", { pct })}
@@ -104,9 +98,7 @@ export function DashboardView() {
   const { t } = useTranslation();
 
   const primaryDisk = diskUsage[0];
-  const diskPct = primaryDisk
-    ? formatPercent(primaryDisk.used_bytes, primaryDisk.total_bytes)
-    : 0;
+  const diskPct = primaryDisk ? formatPercent(primaryDisk.used_bytes, primaryDisk.total_bytes) : 0;
   const health = getHealthKey(diskPct);
 
   const ramPct = systemInfo
@@ -123,25 +115,25 @@ export function DashboardView() {
   const recentHistory = cleanHistory.slice(0, 5);
 
   return (
-    <div className="p-6 xl:p-8 space-y-6">
+    <div className="space-y-6 p-6 xl:p-8">
       <div>
-        <p className="text-[28px] font-bold text-text leading-tight">
+        <p className="font-bold text-[28px] text-text leading-tight">
           {t("dashboard.healthIntro")}
         </p>
         {isLoading && !systemInfo ? (
-          <p className="text-[22px] font-bold text-text-muted mt-1">
+          <p className="mt-1 font-bold text-[22px] text-text-muted">
             {t("dashboard.healthChecking")}
           </p>
         ) : (
-          <div className="flex items-center gap-2 mt-1">
+          <div className="mt-1 flex items-center gap-2">
             <HealthDot color={health.color} />
             <p
-              className={`text-[22px] font-bold ${
+              className={`font-bold text-[22px] ${
                 health.color === "green"
                   ? "text-green"
                   : health.color === "orange"
-                  ? "text-orange"
-                  : "text-red"
+                    ? "text-orange"
+                    : "text-red"
               }`}
             >
               {t(`dashboard.health.${health.key}`)}
@@ -149,7 +141,7 @@ export function DashboardView() {
           </div>
         )}
         {cleanResult && (
-          <p className="text-[12px] text-text-muted mt-1">
+          <p className="mt-1 text-[12px] text-text-muted">
             {t("dashboard.lastCleaned", { size: formatBytes(cleanResult.freed_bytes) })}
           </p>
         )}
@@ -163,10 +155,8 @@ export function DashboardView() {
       />
 
       <div>
-        <div className="flex items-center justify-between mb-3">
-          <SectionHeading className="mb-0">
-            {t("dashboard.sections.systemStatus")}
-          </SectionHeading>
+        <div className="mb-3 flex items-center justify-between">
+          <SectionHeading className="mb-0">{t("dashboard.sections.systemStatus")}</SectionHeading>
           <button
             type="button"
             onClick={refresh}
@@ -174,18 +164,18 @@ export function DashboardView() {
             aria-label={isLoading ? t("common.refreshing") : t("dashboard.refresh")}
             className="focus-ring flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-all duration-150 hover:bg-white/5 hover:text-text disabled:opacity-40"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
           </button>
         </div>
 
         <AsyncView
           status={statsStatus}
           skeleton={
-            <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
               {[0, 1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="h-24 bg-card border border-white/[0.06] rounded-xl animate-shimmer"
+                  className="h-24 animate-shimmer rounded-xl border border-white/[0.06] bg-card"
                 />
               ))}
             </div>
@@ -200,7 +190,7 @@ export function DashboardView() {
           }
           empty={null}
         >
-          <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
             {primaryDisk && (
               <StatCard
                 icon={HardDrive}
@@ -218,7 +208,9 @@ export function DashboardView() {
                   icon={MemoryStick}
                   title={t("dashboard.stats.memory")}
                   main={formatBytes(systemInfo.ram_used_bytes)}
-                  sub={t("dashboard.stats.memoryOf", { total: formatBytes(systemInfo.ram_total_bytes) })}
+                  sub={t("dashboard.stats.memoryOf", {
+                    total: formatBytes(systemInfo.ram_total_bytes),
+                  })}
                   progress={ramPct}
                 />
                 <StatCard
@@ -231,7 +223,15 @@ export function DashboardView() {
                 <StatCard
                   icon={Clock}
                   title={t("dashboard.stats.uptime")}
-                  main={formatUptime(systemInfo.uptime_seconds)}
+                  main={(() => {
+                    const totalSeconds = systemInfo.uptime_seconds;
+                    const days = Math.floor(totalSeconds / 86400);
+                    const hours = Math.floor((totalSeconds % 86400) / 3600);
+                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                    if (days > 0) return t("dashboard.stats.uptimeDhm", { days, hours, minutes });
+                    if (hours > 0) return t("dashboard.stats.uptimeHm", { hours, minutes });
+                    return t("dashboard.stats.uptimeM", { minutes });
+                  })()}
                   sub={systemInfo.hostname}
                 />
               </>
@@ -246,9 +246,12 @@ export function DashboardView() {
           {recentHistory.length > 0 ? (
             <div className="space-y-0">
               {recentHistory.map((entry) => (
-                <div key={entry.id} className="flex items-center gap-3 py-3 border-b border-white/[0.06]">
-                  <CheckCircle2 className="w-4 h-4 text-green flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
+                <div
+                  key={entry.id}
+                  className="flex items-center gap-3 border-white/[0.06] border-b py-3"
+                >
+                  <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-green" />
+                  <div className="min-w-0 flex-1">
                     <p className="text-[14px] text-text">
                       {t("dashboard.activity.cleaned", {
                         size: formatBytes(entry.freed_bytes),
@@ -256,15 +259,16 @@ export function DashboardView() {
                       })}
                     </p>
                     <p className="text-[12px] text-text-muted/60">
-                      {relativeDate(entry.date)} · {entry.categories.length} {entry.categories.length === 1 ? "category" : "categories"}
+                      {relativeDate(entry.date, t)} ·{" "}
+                      {t("dashboard.activity.category", { count: entry.categories.length })}
                     </p>
                   </div>
                 </div>
               ))}
             </div>
           ) : cleanResult ? (
-            <div className="flex items-center gap-3 py-3 border-b border-white/[0.06]">
-              <CheckCircle2 className="w-4 h-4 text-green flex-shrink-0" />
+            <div className="flex items-center gap-3 border-white/[0.06] border-b py-3">
+              <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-green" />
               <p className="text-[14px] text-text">
                 {t("dashboard.activity.cleaned", {
                   size: formatBytes(cleanResult.freed_bytes),
@@ -273,11 +277,9 @@ export function DashboardView() {
               </p>
             </div>
           ) : (
-            <div className="flex items-center gap-3 py-3 border-b border-white/[0.06]">
-              <Minus className="w-4 h-4 text-text-tertiary flex-shrink-0" />
-              <p className="text-[14px] text-text-muted">
-                {t("dashboard.activity.empty")}
-              </p>
+            <div className="flex items-center gap-3 border-white/[0.06] border-b py-3">
+              <Minus className="h-4 w-4 flex-shrink-0 text-text-tertiary" />
+              <p className="text-[14px] text-text-muted">{t("dashboard.activity.empty")}</p>
             </div>
           )}
         </div>

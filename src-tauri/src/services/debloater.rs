@@ -875,12 +875,15 @@ pub async fn get_installed_apps() -> Result<Vec<AppInfo>, AppError> {
     Ok(apps)
 }
 
-fn parse_app_entry(v: serde_json::Value, db: &[BloatwareEntry]) -> Option<AppInfo> {
-    let name = v["Name"].as_str()?.to_string();
-    let package_full_name = v["PackageFullName"].as_str()?.to_string();
-    let package_family_name = v["PackageFamilyName"].as_str().unwrap_or("").to_string();
-    let publisher = v["Publisher"].as_str().unwrap_or("").to_string();
-    let version = v["Version"].as_str().unwrap_or("").to_string();
+fn parse_app_entry(entry: serde_json::Value, db: &[BloatwareEntry]) -> Option<AppInfo> {
+    let name = entry["Name"].as_str()?.to_string();
+    let package_full_name = entry["PackageFullName"].as_str()?.to_string();
+    let package_family_name = entry["PackageFamilyName"]
+        .as_str()
+        .unwrap_or("")
+        .to_string();
+    let publisher = entry["Publisher"].as_str().unwrap_or("").to_string();
+    let version = entry["Version"].as_str().unwrap_or("").to_string();
 
     // Skip system-critical apps
     let is_critical = SYSTEM_CRITICAL_PREFIXES

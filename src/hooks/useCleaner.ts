@@ -2,9 +2,9 @@ import { useCallback, useRef } from "react";
 import { sanitizeError } from "../lib/errors";
 import { formatBytes } from "../lib/format";
 import { cleanerService } from "../services/cleanerService";
+import type { ScanProgressStatus } from "../stores/cleanerStore";
 import { useCleanerStore } from "../stores/cleanerStore";
 import type { CleanCategory, FileGroup, ScanSummary } from "../types/cleaner";
-import type { ScanProgressStatus } from "../stores/cleanerStore";
 import { useNotify } from "./useNotify";
 
 export function useCleaner() {
@@ -16,18 +16,18 @@ export function useCleaner() {
   const scan = useCallback(async () => {
     cancelledRef.current = false;
 
-    const s = useCleanerStore.getState();
-    const categories = [...s.selectedCategories] as CleanCategory[];
+    const store = useCleanerStore.getState();
+    const categories = [...store.selectedCategories] as CleanCategory[];
 
-    s.setIsScanning(true);
-    s.setError(null);
-    s.setScanSummary(null);
-    s.setCleanResult(null);
+    store.setIsScanning(true);
+    store.setError(null);
+    store.setScanSummary(null);
+    store.setCleanResult(null);
 
     const initialProgress = Object.fromEntries(
-      categories.map((c) => [c, "pending" as const])
+      categories.map((c) => [c, "pending" as const]),
     ) as Record<CleanCategory, ScanProgressStatus>;
-    s.setScanProgress(initialProgress);
+    store.setScanProgress(initialProgress);
 
     const allCategoryResults: ScanSummary["categories"] = [];
 
@@ -40,7 +40,7 @@ export function useCleaner() {
           const result = await cleanerService.scan([category]);
           if (cancelledRef.current) break;
 
-          const catResult = result.categories[0];
+          const catResult = result.categories?.[0];
           if (catResult) allCategoryResults.push(catResult);
           useCleanerStore.getState().updateCategoryProgress(category, "done");
         } catch {
@@ -72,13 +72,13 @@ export function useCleaner() {
   }, []);
 
   const clean = useCallback(async () => {
-    const s = useCleanerStore.getState();
-    if (!s.scanSummary) return;
+    const store = useCleanerStore.getState();
+    if (!store.scanSummary) return;
 
-    s.setIsCleaning(true);
-    s.setError(null);
+    store.setIsCleaning(true);
+    store.setError(null);
 
-    const fileGroups: FileGroup[] = s.scanSummary.categories
+    const fileGroups: FileGroup[] = store.scanSummary.categories
       .filter((c) => c.files.length > 0 || c.category === "recycle_bin")
       .map((c) => ({
         category: c.category,
@@ -94,12 +94,16 @@ export function useCleaner() {
         categories: fileGroups.map((g) => g.category),
       });
       const hasIssues = result.skipped_count > 0 || result.errors.length > 0;
-      notify(hasIssues ? "cleaner.toast.cleanedPartial" : "cleaner.toast.cleaned", hasIssues ? "warning" : "success", {
-        count: result.deleted_count,
-        size: formatBytes(result.freed_bytes),
-        skipped: result.skipped_count,
-        errors: result.errors.length,
-      });
+      notify(
+        hasIssues ? "cleaner.toast.cleanedPartial" : "cleaner.toast.cleaned",
+        hasIssues ? "warning" : "success",
+        {
+          count: result.deleted_count,
+          size: formatBytes(result.freed_bytes),
+          skipped: result.skipped_count,
+          errors: result.errors.length,
+        },
+      );
     } catch (err) {
       const msg = sanitizeError(err);
       useCleanerStore.getState().setError(msg);
