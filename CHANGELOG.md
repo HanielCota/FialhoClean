@@ -12,6 +12,6 @@ All notable changes to FialhoClean will be documented in this file.
 - Repair tools (SFC, DISM, system restore points)
 - Dashboard with system info, disk usage, and cleaning history
 - Settings with language selection (PT-BR / EN), default categories, and cleaning confirmation
-- Dark theme with Carbon Black + Amber Gold palette
+- Dark theme with Carbon Black + Pure White palette
 - Custom title bar with minimize/maximize/close
 - In-app bug report and GitHub links
