@@ -1,5 +1,4 @@
 import {
-  AlertTriangle,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
@@ -16,6 +15,7 @@ import { type RepairToolState, formatElapsed, useRepair } from "../../hooks/useR
 import type { RepairStatus } from "../../types/repair";
 import { Header } from "../layout/Header";
 import { Card } from "../shared/Card";
+import { CautionBanner } from "../shared/CautionBanner";
 import { SectionHeading } from "../shared/SectionHeading";
 
 // ── Progress bar (indeterminate) ────────────────────────────────────────────
@@ -224,10 +224,7 @@ export function RepairView() {
     <div className="flex h-full flex-col">
       <div className="flex-shrink-0 px-6 pt-6 xl:px-8 xl:pt-8">
         <Header title={t("repair.title")} subtitle={t("repair.subtitle")} />
-        <div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-400/20 bg-white/[0.03] p-4">
-          <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-400" />
-          <p className="text-[13px] text-text-muted">{t("repair.adminWarning")}</p>
-        </div>
+        <CautionBanner message={t("repair.adminWarning")} className="mb-4" />
       </div>
 
       <div className="flex-1 space-y-7 overflow-y-auto px-6 py-4 xl:px-8">

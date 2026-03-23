@@ -2,11 +2,12 @@ import { AlertTriangle, ChevronDown, ChevronUp, Settings2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { ServiceAction, ServiceInfo } from "../../../types/optimizer";
+import { EmptyState } from "../../shared/EmptyState";
 import { ServiceItem } from "../ServiceItem";
 
 interface ServicesTabProps {
   services: ServiceInfo[];
-  onAction: (name: string, action: ServiceAction) => void;
+  onAction: (name: string, action: ServiceAction) => Promise<void> | void;
 }
 
 export function ServicesTab({ services, onAction }: ServicesTabProps) {
@@ -14,17 +15,11 @@ export function ServicesTab({ services, onAction }: ServicesTabProps) {
   const [showExpert, setShowExpert] = useState(false);
 
   if (services.length === 0) {
-    return (
-      <div className="flex flex-col items-center gap-3 py-10 text-center">
-        <Settings2 className="h-10 w-10 text-text-tertiary" />
-        <p className="text-[14px] text-text-muted">{t("optimizer.services.empty")}</p>
-      </div>
-    );
+    return <EmptyState icon={Settings2} message={t("optimizer.services.empty")} />;
   }
 
   return (
     <div className="space-y-3">
-      {/* Expert warning banner */}
       {!showExpert ? (
         <div className="flex items-start gap-4 rounded-xl border border-white/[0.06] bg-white/[0.03] p-5">
           <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-400" />

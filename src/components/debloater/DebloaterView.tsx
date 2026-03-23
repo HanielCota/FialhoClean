@@ -11,6 +11,7 @@ import { Header } from "../layout/Header";
 import { ActionCard } from "../shared/ActionCard";
 import { AsyncView } from "../shared/AsyncView";
 import { Button } from "../shared/Button";
+import { CautionBanner } from "../shared/CautionBanner";
 import { ErrorMessage } from "../shared/ErrorMessage";
 import { Modal } from "../shared/Modal";
 import { SectionHeading } from "../shared/SectionHeading";
@@ -279,17 +280,11 @@ export function DebloaterView() {
 
         {/* ── Caution banner ───────────────────────────────────────── */}
         {hasCautionSelected && (
-          <div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-400/20 bg-white/[0.03] p-4">
-            <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-400" />
-            <div>
-              <p className="font-semibold text-[13px] text-text">
-                {t("debloater.cautionBanner.title")}
-              </p>
-              <p className="mt-0.5 text-[12px] text-text-muted">
-                {t("debloater.cautionBanner.message")}
-              </p>
-            </div>
-          </div>
+          <CautionBanner
+            title={t("debloater.cautionBanner.title")}
+            message={t("debloater.cautionBanner.message")}
+            className="mb-4"
+          />
         )}
 
         {/* ── Remove button ────────────────────────────────────────── */}

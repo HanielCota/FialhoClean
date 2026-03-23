@@ -1,10 +1,11 @@
-import { BatteryCharging, CheckCircle2, Flame, Loader2, MemoryStick, Monitor, Zap } from "lucide-react";
-import { useId, useState } from "react";
+import { BatteryCharging, CheckCircle2, Flame, Loader2, MemoryStick, Zap } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { GpuSettings, PowerPlan } from "../../../types/optimizer";
+import { Button } from "../../shared/Button";
 import { Card } from "../../shared/Card";
 import { SectionHeading } from "../../shared/SectionHeading";
-import { Toggle } from "../../shared/Toggle";
+import { ToggleSetting } from "../../shared/ToggleSetting";
 
 const ULTIMATE_PERF_GUID = "e9a42b02-d5df-448d-aa00-03f14749eb61";
 
@@ -34,7 +35,6 @@ export function PerformanceTab({
   onSetGpuHags,
 }: PerformanceTabProps) {
   const { t } = useTranslation();
-  const visualLabelId = useId();
   const [gameModeState, setGameModeState] = useState<"idle" | "loading" | "done">("idle");
   const [ultimateApplying, setUltimateApplying] = useState(false);
 
@@ -100,48 +100,23 @@ export function PerformanceTab({
       {/* Visual Effects */}
       <section>
         <SectionHeading>{t("optimizer.sections.visualEffects")}</SectionHeading>
-        <Card>
-          <div className="flex items-start gap-4">
-            <div className="min-w-0 flex-1">
-              <p id={visualLabelId} className="font-semibold text-[15px] text-text">
-                {t("optimizer.visualEffects.title")}
-              </p>
-              <p className="mt-1 text-[13px] text-text-muted">
-                {t("optimizer.visualEffects.description")}
-              </p>
-            </div>
-            <div className="mt-0.5 flex-shrink-0">
-              <Toggle
-                checked={visualEffectsPerformanceMode}
-                onChange={onSetVisualEffects}
-                aria-labelledby={visualLabelId}
-              />
-            </div>
-          </div>
-        </Card>
+        <ToggleSetting
+          title={t("optimizer.visualEffects.title")}
+          description={t("optimizer.visualEffects.description")}
+          checked={visualEffectsPerformanceMode}
+          onChange={onSetVisualEffects}
+        />
       </section>
 
       {/* GPU HAGS */}
       <section>
         <SectionHeading>{t("optimizer.sections.gpuScheduling")}</SectionHeading>
-        <Card>
-          <div className="flex items-start gap-4">
-            <Monitor className="h-5 w-5 flex-shrink-0 text-text-muted" />
-            <div className="min-w-0 flex-1">
-              <p className="font-semibold text-[15px] text-text">{t("optimizer.gpuHags.title")}</p>
-              <p className="mt-1 text-[13px] text-text-muted">
-                {t("optimizer.gpuHags.description")}
-              </p>
-            </div>
-            <div className="mt-0.5 flex-shrink-0">
-              <Toggle
-                checked={gpuSettings.hags_enabled}
-                onChange={onSetGpuHags}
-                aria-label={t("optimizer.gpuHags.title")}
-              />
-            </div>
-          </div>
-        </Card>
+        <ToggleSetting
+          title={t("optimizer.gpuHags.title")}
+          description={t("optimizer.gpuHags.description")}
+          checked={gpuSettings.hags_enabled}
+          onChange={onSetGpuHags}
+        />
       </section>
 
       {/* RAM Optimizer */}
@@ -158,19 +133,15 @@ export function PerformanceTab({
                 {t("optimizer.ramOptimizer.description")}
               </p>
             </div>
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              loading={isOptimizingRam}
               onClick={() => void onOptimizeRam()}
-              disabled={isOptimizingRam}
-              className="focus-ring mt-0.5 flex h-10 flex-shrink-0 items-center gap-2 rounded-[10px] border border-white/[0.08] bg-white/[0.04] px-5 font-semibold text-[14px] text-text-muted transition-all duration-200 hover:bg-white/[0.07] hover:text-text disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-0.5 flex-shrink-0"
             >
-              {isOptimizingRam ? (
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white/60" />
-              ) : (
-                <MemoryStick className="h-4 w-4" />
-              )}
+              {!isOptimizingRam && <MemoryStick className="h-4 w-4" />}
               {t("optimizer.ramOptimizer.button")}
-            </button>
+            </Button>
           </div>
         </Card>
       </section>
