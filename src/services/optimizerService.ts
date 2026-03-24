@@ -28,11 +28,9 @@ export const optimizerService = {
   // Power plans
   getPowerPlans: () => invoke<PowerPlan[]>("get_power_plans"),
 
-  setPowerPlan: (planGuid: string) =>
-    invoke("set_power_plan", { planGuid: planGuid ?? "" }),
+  setPowerPlan: (planGuid: string) => invoke("set_power_plan", { planGuid: planGuid ?? "" }),
 
-  setVisualEffects: (performanceMode: boolean) =>
-    invoke("set_visual_effects", { performanceMode }),
+  setVisualEffects: (performanceMode: boolean) => invoke("set_visual_effects", { performanceMode }),
 
   // Hibernate / fast startup
   getHibernateSettings: () => invoke<HibernateSettings>("get_hibernate_settings"),

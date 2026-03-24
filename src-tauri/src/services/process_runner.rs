@@ -23,9 +23,8 @@ pub struct ProcessOutput {
 /// non-English Windows locales (Portuguese, Spanish, French, German, etc.)
 /// which use the OEM codepage for console output.
 pub fn decode_output(bytes: &[u8]) -> String {
-    String::from_utf8(bytes.to_vec()).unwrap_or_else(|_| {
-        bytes.iter().map(|&b| cp850_to_char(b)).collect()
-    })
+    String::from_utf8(bytes.to_vec())
+        .unwrap_or_else(|_| bytes.iter().map(|&b| cp850_to_char(b)).collect())
 }
 
 /// Map a single cp850 byte to its Unicode character.
