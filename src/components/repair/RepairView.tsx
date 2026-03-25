@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { type RepairToolState, formatElapsed, useRepair } from "../../hooks/useRepair";
+import { formatElapsed, type RepairToolState, useRepair } from "../../hooks/useRepair";
 import type { RepairStatus } from "../../types/repair";
 import { Header } from "../layout/Header";
 import { Card } from "../shared/Card";
@@ -46,9 +46,7 @@ function StatusBadge({
     return (
       <span className="flex items-center gap-1.5 font-medium text-[12px] text-accent">
         <Loader2 className="h-3.5 w-3.5 animate-spin" />
-        {time
-          ? t("repair.status.runningElapsed", { time })
-          : t("repair.status.running")}
+        {time ? t("repair.status.runningElapsed", { time }) : t("repair.status.running")}
       </span>
     );
   }
@@ -58,9 +56,7 @@ function StatusBadge({
     return (
       <span className="flex items-center gap-1.5 font-medium text-[12px] text-green">
         <CheckCircle2 className="h-3.5 w-3.5" />
-        {time
-          ? t("repair.status.doneElapsed", { time })
-          : t("repair.status.done")}
+        {time ? t("repair.status.doneElapsed", { time }) : t("repair.status.done")}
       </span>
     );
   }

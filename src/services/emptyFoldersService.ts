@@ -3,6 +3,5 @@ import type { DeleteEmptyFoldersResult, EmptyFolderScanResult } from "../types/e
 
 export const emptyFoldersService = {
   scan: () => invoke<EmptyFolderScanResult>("scan_empty_folders"),
-  delete: (paths: string[]) =>
-    invoke<DeleteEmptyFoldersResult>("delete_empty_folders", { paths }),
+  delete: (paths: string[]) => invoke<DeleteEmptyFoldersResult>("delete_empty_folders", { paths }),
 };

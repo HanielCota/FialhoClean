@@ -74,7 +74,10 @@ export function ItemRow({
 
       <div className="min-w-0 flex-1">
         {typeof title === "string" ? (
-          <p title={title} className={`truncate font-medium text-[14px] ${titleClass ?? "text-text"}`}>
+          <p
+            title={title}
+            className={`truncate font-medium text-[14px] ${titleClass ?? "text-text"}`}
+          >
             {title}
           </p>
         ) : (
@@ -87,9 +90,7 @@ export function ItemRow({
         )}
       </div>
 
-      {trailing != null && (
-        <div className="flex flex-shrink-0 items-center gap-2">{trailing}</div>
-      )}
+      {trailing != null && <div className="flex flex-shrink-0 items-center gap-2">{trailing}</div>}
     </Component>
   );
 }

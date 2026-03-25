@@ -7,6 +7,8 @@ pub async fn scan_empty_folders() -> Result<EmptyFolderScanResult, AppError> {
 }
 
 #[tauri::command]
-pub async fn delete_empty_folders(paths: Vec<String>) -> Result<DeleteEmptyFoldersResult, AppError> {
+pub async fn delete_empty_folders(
+    paths: Vec<String>,
+) -> Result<DeleteEmptyFoldersResult, AppError> {
     crate::services::empty_folders::delete_empty_folders(paths).await
 }

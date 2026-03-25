@@ -448,11 +448,7 @@ pub async fn get_network_settings() -> Result<NetworkSettings, AppError> {
 pub async fn set_network_optimized(enabled: bool) -> Result<(), AppError> {
     tracing::info!(enabled, "toggling network optimization");
     let lm = hklm();
-    let (throttle_val, responsiveness_val) = if enabled {
-        (0xFFFF_FFFF, 0)
-    } else {
-        (10, 20)
-    };
+    let (throttle_val, responsiveness_val) = if enabled { (0xFFFF_FFFF, 0) } else { (10, 20) };
     lm.write_u32(
         REG_MULTIMEDIA_PROFILE_KEY,
         "NetworkThrottlingIndex",

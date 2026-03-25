@@ -3,10 +3,10 @@ import { useId } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { APP_VERSION, GITHUB_ISSUES_URL, GITHUB_URL } from "../../constants/app";
-import { systemService } from "../../services/systemService";
 import { ALL_CATEGORIES } from "../../constants/categories";
 import { TOAST_DURATIONS } from "../../constants/ui";
 import type { Language } from "../../i18n/config";
+import { systemService } from "../../services/systemService";
 import { useSettingsStore } from "../../stores/settingsStore";
 import type { CleanCategory } from "../../types/cleaner";
 import { Header } from "../layout/Header";
@@ -40,9 +40,7 @@ export function SettingsView() {
 
   const handleCategoryToggle = (cat: CleanCategory) => {
     const current = defaultCategories ?? [];
-    const next = current.includes(cat)
-      ? current.filter((c) => c !== cat)
-      : [...current, cat];
+    const next = current.includes(cat) ? current.filter((c) => c !== cat) : [...current, cat];
     setDefaultCategories(next);
     toast.success(t("settings.toast.saved"), { duration: TOAST_DURATIONS.success });
   };

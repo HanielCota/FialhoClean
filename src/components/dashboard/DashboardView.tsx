@@ -125,9 +125,7 @@ function StepCard({
             <span className="font-bold text-[12px] text-text-muted">{step}</span>
           )}
         </div>
-        <Icon
-          className={`h-4 w-4 flex-shrink-0 ${isDone ? "text-green" : "text-text-muted"}`}
-        />
+        <Icon className={`h-4 w-4 flex-shrink-0 ${isDone ? "text-green" : "text-text-muted"}`} />
         <p
           className={`font-semibold text-[13px] leading-tight ${
             isDone ? "text-green" : "text-text"
@@ -188,28 +186,41 @@ export function DashboardView() {
   };
 
   const HealthIcon =
-    health.color === "green" ? CheckCircle2 : health.color === "orange" ? AlertTriangle : AlertCircle;
+    health.color === "green"
+      ? CheckCircle2
+      : health.color === "orange"
+        ? AlertTriangle
+        : AlertCircle;
 
   const healthIconClass =
-    health.color === "green" ? "text-green" : health.color === "orange" ? "text-orange" : "text-red";
+    health.color === "green"
+      ? "text-green"
+      : health.color === "orange"
+        ? "text-orange"
+        : "text-red";
 
   const healthIconBg =
-    health.color === "green" ? "bg-green/[0.12]" : health.color === "orange" ? "bg-orange/[0.12]" : "bg-red/[0.12]";
+    health.color === "green"
+      ? "bg-green/[0.12]"
+      : health.color === "orange"
+        ? "bg-orange/[0.12]"
+        : "bg-red/[0.12]";
 
   return (
     <div className="flex flex-col gap-6 p-5">
-
       {/* ══════════════════════════════════════════
           FAIXA 1 — STATUS DO PC
       ══════════════════════════════════════════ */}
       <div className="flex items-center gap-4 rounded-2xl border border-white/[0.06] bg-card px-5 py-4">
-
         {/* Ícone */}
-        <div className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl ${healthIconBg}`}>
-          {isLoading && !systemInfo
-            ? <RefreshCw className="h-5 w-5 animate-spin text-text-tertiary" />
-            : <HealthIcon className={`h-5 w-5 ${healthIconClass}`} />
-          }
+        <div
+          className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl ${healthIconBg}`}
+        >
+          {isLoading && !systemInfo ? (
+            <RefreshCw className="h-5 w-5 animate-spin text-text-tertiary" />
+          ) : (
+            <HealthIcon className={`h-5 w-5 ${healthIconClass}`} />
+          )}
         </div>
 
         {/* Texto */}
@@ -266,10 +277,14 @@ export function DashboardView() {
             title={t("dashboard.steps.clean.title")}
             description={
               cleanDone
-                ? t("dashboard.steps.clean.done", { size: formatBytes(cleanResult?.freed_bytes ?? 0) })
+                ? t("dashboard.steps.clean.done", {
+                    size: formatBytes(cleanResult?.freed_bytes ?? 0),
+                  })
                 : t("dashboard.steps.clean.desc")
             }
-            ctaLabel={cleanDone ? t("dashboard.steps.clean.ctaDone") : t("dashboard.steps.clean.cta")}
+            ctaLabel={
+              cleanDone ? t("dashboard.steps.clean.ctaDone") : t("dashboard.steps.clean.cta")
+            }
             isDone={cleanDone}
             onClick={handleQuickClean}
           />
@@ -302,7 +317,10 @@ export function DashboardView() {
           skeleton={
             <div className="grid grid-cols-4 gap-3">
               {[0, 1, 2, 3].map((i) => (
-                <div key={i} className="h-24 animate-shimmer rounded-2xl border border-white/[0.06] bg-card" />
+                <div
+                  key={i}
+                  className="h-24 animate-shimmer rounded-2xl border border-white/[0.06] bg-card"
+                />
               ))}
             </div>
           }
@@ -334,7 +352,9 @@ export function DashboardView() {
                   icon={MemoryStick}
                   title={t("dashboard.stats.memory")}
                   main={formatBytes(systemInfo.ram_used_bytes)}
-                  sub={t("dashboard.stats.memoryOf", { total: formatBytes(systemInfo.ram_total_bytes) })}
+                  sub={t("dashboard.stats.memoryOf", {
+                    total: formatBytes(systemInfo.ram_total_bytes),
+                  })}
                   progress={ramPct}
                 />
                 <StatCard
@@ -352,7 +372,8 @@ export function DashboardView() {
                     const d = Math.floor(s / 86400);
                     const h = Math.floor((s % 86400) / 3600);
                     const m = Math.floor((s % 3600) / 60);
-                    if (d > 0) return t("dashboard.stats.uptimeDhm", { days: d, hours: h, minutes: m });
+                    if (d > 0)
+                      return t("dashboard.stats.uptimeDhm", { days: d, hours: h, minutes: m });
                     if (h > 0) return t("dashboard.stats.uptimeHm", { hours: h, minutes: m });
                     return t("dashboard.stats.uptimeM", { minutes: m });
                   })()}
@@ -363,7 +384,6 @@ export function DashboardView() {
           </div>
         </AsyncView>
       </div>
-
     </div>
   );
 }

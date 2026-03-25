@@ -106,11 +106,7 @@ export function Sidebar() {
                 ariaCurrent={isActive ? "page" : undefined}
                 onClick={() => setActiveView(id)}
               >
-                <Icon
-                  className={`flex-shrink-0 ${
-                    collapsed ? "h-[17px] w-[17px]" : "h-4 w-4"
-                  }`}
-                />
+                <Icon className={`flex-shrink-0 ${collapsed ? "h-[17px] w-[17px]" : "h-4 w-4"}`} />
                 {!collapsed && (
                   <span className="truncate font-medium text-[13px] leading-snug tracking-[-0.01em]">
                     {label}
@@ -136,9 +132,7 @@ export function Sidebar() {
                 onClick={() => setActiveView("settings")}
               >
                 <SlidersHorizontal
-                  className={`flex-shrink-0 ${
-                    collapsed ? "h-[17px] w-[17px]" : "h-4 w-4"
-                  }`}
+                  className={`flex-shrink-0 ${collapsed ? "h-[17px] w-[17px]" : "h-4 w-4"}`}
                 />
                 {!collapsed && (
                   <span className="truncate font-medium text-[13px] leading-snug tracking-[-0.01em]">

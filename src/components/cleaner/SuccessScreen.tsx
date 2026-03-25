@@ -26,7 +26,6 @@ export function SuccessScreen({
 
   return (
     <div className="flex flex-col items-center p-6 text-center xl:p-8">
-
       {/* Ícone de sucesso */}
       <div
         className={`mb-4 flex h-16 w-16 animate-scale-in items-center justify-center rounded-full ${
@@ -57,7 +56,9 @@ export function SuccessScreen({
       {/* Alertas parciais */}
       {hasIssues && (
         <div className="mb-6 w-full rounded-2xl border border-orange/20 bg-orange/[0.06] p-4 text-left">
-          <p className="font-semibold text-[13px] text-text">{t("cleaner.success.partialNotice")}</p>
+          <p className="font-semibold text-[13px] text-text">
+            {t("cleaner.success.partialNotice")}
+          </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <span className="rounded-full bg-white/[0.05] px-3 py-1 text-[12px] text-text">
               {t("cleaner.success.summary.deleted", { count: cleanResult?.deleted_count ?? 0 })}
@@ -71,7 +72,9 @@ export function SuccessScreen({
           </div>
           {errorPreview?.length > 0 && (
             <div className="mt-3 space-y-1.5">
-              <p className="font-medium text-[12px] text-text">{t("cleaner.success.issueHeading")}</p>
+              <p className="font-medium text-[12px] text-text">
+                {t("cleaner.success.issueHeading")}
+              </p>
               {errorPreview.map((error, index) => (
                 <p key={`${error}-${index}`} className="text-[12px] text-text-muted">
                   — {error}
@@ -132,9 +135,7 @@ export function SuccessScreen({
             <p className="font-semibold text-[14px] text-text">
               {t("cleaner.success.upsell.title")}
             </p>
-            <p className="text-[12px] text-text-muted">
-              {t("cleaner.success.upsell.description")}
-            </p>
+            <p className="text-[12px] text-text-muted">{t("cleaner.success.upsell.description")}</p>
           </div>
           <span className="text-[13px] font-semibold text-accent flex-shrink-0">
             {t("dashboard.steps.apps.cta")} →
@@ -149,7 +150,6 @@ export function SuccessScreen({
       <Button variant="ghost" onClick={onScanAgain} className="w-full">
         {t("cleaner.success.scanAgain")}
       </Button>
-
     </div>
   );
 }

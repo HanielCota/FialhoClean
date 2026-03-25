@@ -52,9 +52,7 @@ export function EmptyFoldersView() {
         <h1 className="mb-1 font-bold text-[22px] text-text">
           {t("emptyFolders.done.title", { count: deleteResult.deleted_count })}
         </h1>
-        <p className="mb-6 text-[13px] text-text-muted">
-          {t("emptyFolders.done.subtitle")}
-        </p>
+        <p className="mb-6 text-[13px] text-text-muted">{t("emptyFolders.done.subtitle")}</p>
 
         {deleteResult.errors.length > 0 && (
           <div className="mb-6 w-full rounded-2xl border border-orange/20 bg-orange/[0.06] p-4 text-left">
@@ -85,9 +83,7 @@ export function EmptyFoldersView() {
         <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/[0.06]">
           <FolderX className="h-8 w-8 text-text-muted" />
         </div>
-        <h1 className="mb-2 font-bold text-[22px] text-text">
-          {t("emptyFolders.idle.title")}
-        </h1>
+        <h1 className="mb-2 font-bold text-[22px] text-text">{t("emptyFolders.idle.title")}</h1>
         <p className="mb-2 max-w-sm text-[13px] text-text-muted">
           {t("emptyFolders.idle.description")}
         </p>
@@ -161,7 +157,8 @@ export function EmptyFoldersView() {
           <SectionHeading className="mb-0">
             {t("emptyFolders.results.sectionLabel")}
             <span className="font-normal text-text-muted normal-case tracking-normal">
-              {" "}— {folders.length}
+              {" "}
+              — {folders.length}
             </span>
           </SectionHeading>
           <div className="flex items-center gap-1.5">
@@ -192,7 +189,10 @@ export function EmptyFoldersView() {
           {folders.map((folder) => {
             const isSelected = selected.has(folder.path);
             const basename = folder.path.split(/[\\/]/).pop() ?? folder.path;
-            const parent = folder.path.substring(0, folder.path.lastIndexOf("\\") || folder.path.lastIndexOf("/"));
+            const parent = folder.path.substring(
+              0,
+              folder.path.lastIndexOf("\\") || folder.path.lastIndexOf("/"),
+            );
 
             return (
               <button
@@ -223,10 +223,7 @@ export function EmptyFoldersView() {
         </div>
 
         {/* Caution banner */}
-        <CautionBanner
-          message={t("emptyFolders.results.caution")}
-          className="mb-4"
-        />
+        <CautionBanner message={t("emptyFolders.results.caution")} className="mb-4" />
 
         {error && (
           <div className="mb-3">

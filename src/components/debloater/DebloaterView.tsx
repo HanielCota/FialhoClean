@@ -65,7 +65,10 @@ export function DebloaterView() {
       if (safetyFilter === "safe" && app.safety_level !== "safe") return false;
       if (safetyFilter === "caution" && app.safety_level === "safe") return false;
       if (!q) return true;
-      return (app?.name ?? "").toLowerCase().includes(q) || (app?.description ?? "").toLowerCase().includes(q);
+      return (
+        (app?.name ?? "").toLowerCase().includes(q) ||
+        (app?.description ?? "").toLowerCase().includes(q)
+      );
     });
   }, [apps, search, safetyFilter]);
 
@@ -80,7 +83,8 @@ export function DebloaterView() {
   }, [visibleApps]);
 
   const hasCautionSelected = useMemo(
-    () => (apps ?? []).some((a) => selectedApps.has(a.package_full_name) && a.safety_level !== "safe"),
+    () =>
+      (apps ?? []).some((a) => selectedApps.has(a.package_full_name) && a.safety_level !== "safe"),
     [apps, selectedApps],
   );
 
@@ -160,7 +164,10 @@ export function DebloaterView() {
           <label htmlFor="debloater-search" className="sr-only">
             {t("debloater.searchPlaceholder")}
           </label>
-          <Search className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" aria-hidden="true" />
+          <Search
+            className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-text-muted"
+            aria-hidden="true"
+          />
           <input
             id="debloater-search"
             type="search"
@@ -198,7 +205,10 @@ export function DebloaterView() {
             </button>
           ))}
           <span className="ml-auto text-[11px] text-text-muted">
-            {t("debloater.filter.count", { visible: visibleApps?.length ?? 0, total: apps?.length ?? 0 })}
+            {t("debloater.filter.count", {
+              visible: visibleApps?.length ?? 0,
+              total: apps?.length ?? 0,
+            })}
           </span>
         </div>
 

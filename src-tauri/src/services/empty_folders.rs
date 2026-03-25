@@ -72,8 +72,8 @@ pub async fn delete_empty_folders(
 // ── Sync scan implementation ──────────────────────────────────────────────────
 
 fn scan_sync() -> Result<EmptyFolderScanResult, AppError> {
-    let user_profile = std::env::var("USERPROFILE")
-        .map_err(|_| AppError::Custom("USERPROFILE not set".into()))?;
+    let user_profile =
+        std::env::var("USERPROFILE").map_err(|_| AppError::Custom("USERPROFILE not set".into()))?;
     let profile_path = PathBuf::from(&user_profile);
 
     // Collect safe scan roots that actually exist on this machine.
@@ -85,7 +85,10 @@ fn scan_sync() -> Result<EmptyFolderScanResult, AppError> {
 
     let mut all_folders: Vec<EmptyFolderEntry> = Vec::new();
     let mut skipped_permission_count: u32 = 0;
-    let scanned_roots: Vec<String> = roots.iter().map(|p| p.to_string_lossy().into_owned()).collect();
+    let scanned_roots: Vec<String> = roots
+        .iter()
+        .map(|p| p.to_string_lossy().into_owned())
+        .collect();
 
     for root in &roots {
         collect_empty_dirs(
@@ -160,14 +163,8 @@ fn collect_empty_dirs(
                 // Treat blocked paths as non-empty so we never touch them.
                 all_subdirs_empty = false;
             } else {
-                let sub_empty = collect_empty_dirs(
-                    &path,
-                    root,
-                    depth + 1,
-                    allowed_roots,
-                    out,
-                    skipped,
-                );
+                let sub_empty =
+                    collect_empty_dirs(&path, root, depth + 1, allowed_roots, out, skipped);
                 if !sub_empty {
                     all_subdirs_empty = false;
                 }
@@ -191,8 +188,8 @@ fn collect_empty_dirs(
 // ── Sync delete implementation ────────────────────────────────────────────────
 
 fn delete_sync(paths: Vec<String>) -> Result<DeleteEmptyFoldersResult, AppError> {
-    let user_profile = std::env::var("USERPROFILE")
-        .map_err(|_| AppError::Custom("USERPROFILE not set".into()))?;
+    let user_profile =
+        std::env::var("USERPROFILE").map_err(|_| AppError::Custom("USERPROFILE not set".into()))?;
     let profile_path = PathBuf::from(&user_profile);
 
     let allowed_roots: Vec<PathBuf> = SAFE_SUBDIR_NAMES
