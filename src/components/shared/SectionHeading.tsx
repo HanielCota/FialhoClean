@@ -12,7 +12,7 @@ export function SectionHeading({ children, className = "" }: SectionHeadingProps
 
   return (
     <h2
-      className={`mb-4 font-semibold text-[12px] text-text-muted uppercase tracking-[0.18em] ${className}`}
+      className={`mb-3 font-semibold text-[12px] text-text-tertiary uppercase tracking-[0.10em] ${className}`}
     >
       {children}
     </h2>

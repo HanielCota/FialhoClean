@@ -20,7 +20,7 @@ export function CleaningOverlay() {
       role="status"
       aria-live="assertive"
       aria-busy="true"
-      className="fixed inset-0 z-40 flex animate-fade-in flex-col items-center justify-center gap-8 bg-background/88 backdrop-blur-md"
+      className="fixed inset-0 z-40 flex animate-fade-in flex-col items-center justify-center gap-8 bg-background/95"
     >
       {/* ── Animation stage ── */}
       <div className="relative flex h-44 w-44 items-center justify-center">
@@ -67,7 +67,7 @@ export function CleaningOverlay() {
         <div className="pointer-events-none absolute inset-[30px] animate-glow-pulse rounded-full bg-white/[0.04]" />
 
         {/* Central icon */}
-        <div className="relative z-10 flex h-[68px] w-[68px] items-center justify-center rounded-full border border-white/[0.14] bg-white/[0.07] shadow-[0_0_36px_rgba(255,255,255,0.07)]">
+        <div className="relative z-10 flex h-[68px] w-[68px] items-center justify-center rounded-full border border-white/[0.14] bg-white/[0.07]">
           <Sparkles className="h-7 w-7 text-white/90" />
         </div>
       </div>

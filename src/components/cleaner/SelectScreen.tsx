@@ -65,7 +65,7 @@ export function SelectScreen({
               onClick={() => onToggle(cat)}
               role="checkbox"
               aria-checked={selected}
-              className={`focus-ring flex w-full items-start gap-4 rounded-xl border p-3 text-left transition-all duration-150 ${
+              className={`focus-ring flex w-full items-start gap-4 rounded-2xl border p-3 text-left transition-all duration-150 ${
                 selected
                   ? "border-accent/20 bg-accent/[0.06]"
                   : "border-white/[0.06] bg-card hover:border-white/[0.10] hover:bg-card-hover"

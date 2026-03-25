@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronDown, ChevronRight, File, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronRight, File, Sparkles, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CATEGORY_ICONS } from "../../constants/categoryIcons";
@@ -36,7 +36,9 @@ export function ResultsScreen({
   if (totalSize === 0) {
     return (
       <div className="flex flex-col items-center p-6 text-center xl:p-8">
-        <div className="mb-4 select-none text-5xl">✨</div>
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green/[0.15]">
+          <Sparkles className="h-7 w-7 text-green" />
+        </div>
         <h1 className="mb-2 font-bold text-[22px] text-text">{t("cleaner.results.empty.title")}</h1>
         <p className="mb-6 text-[12px] text-text-muted">{t("cleaner.results.empty.message")}</p>
         <Button variant="ghost" onClick={onRescan}>
@@ -69,10 +71,10 @@ export function ResultsScreen({
           return (
             <div
               key={cat.category}
-              className="overflow-hidden rounded-xl border border-white/[0.06] bg-card"
+              className="overflow-hidden rounded-2xl border border-white/[0.06] bg-card"
             >
               <div
-                className={`flex items-center gap-4 p-3 ${isExpandable ? "cursor-pointer transition-colors hover:bg-white/[0.02]" : ""}`}
+                className={`flex items-center gap-4 p-3 ${isExpandable ? "focus-ring cursor-pointer transition-colors hover:bg-white/[0.02]" : ""}`}
                 onClick={() => {
                   if (isExpandable) {
                     setExpandedCategory(isExpanded ? null : cat.category);

@@ -1,21 +1,20 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useTranslation } from "react-i18next";
 
-/* ─── Custom SVG icons ─────────────────────────────────────────────────────
-   Each renders inside an 8×8 viewBox. Stroke colour is injected via `color`
-   so it inherits from the parent's `style={{ color }}`. */
+/* ─── SVG icons — Windows 11 geometry ──────────────────────────────────────
+   10×10 viewBox with sharp, clean strokes matching the Windows 11 Fluent style.
+   Color inherits from parent via currentColor. */
 
 function IconMinimize() {
   return (
-    <svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true">
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
       <line
         x1="1"
-        y1="6"
-        x2="7"
-        y2="6"
+        y1="7"
+        x2="9"
+        y2="7"
         stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
+        strokeWidth="1.25"
       />
     </svg>
   );
@@ -23,59 +22,21 @@ function IconMinimize() {
 
 function IconMaximize() {
   return (
-    <svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true">
-      <rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+      <rect x="1" y="1" width="8" height="8" stroke="currentColor" strokeWidth="1.25" />
     </svg>
   );
 }
+
 
 function IconClose() {
   return (
-    <svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true">
-      <line
-        x1="1.5"
-        y1="1.5"
-        x2="6.5"
-        y2="6.5"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <line
-        x1="6.5"
-        y1="1.5"
-        x2="1.5"
-        y2="6.5"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+      <line x1="1.5" y1="1.5" x2="8.5" y2="8.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="square" />
+      <line x1="8.5" y1="1.5" x2="1.5" y2="8.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="square" />
     </svg>
   );
 }
-
-/* ─── Button definitions ────────────────────────────────────────────────── */
-
-const TRAFFIC_LIGHTS = [
-  {
-    key: "minimize" as const,
-    bg: "#febc2e",
-    iconColor: "#7a5c00",
-    Icon: IconMinimize,
-  },
-  {
-    key: "maximize" as const,
-    bg: "#28c840",
-    iconColor: "#0f5217",
-    Icon: IconMaximize,
-  },
-  {
-    key: "close" as const,
-    bg: "#ff5f57",
-    iconColor: "#7a1a15",
-    Icon: IconClose,
-  },
-];
 
 /* ─── Component ─────────────────────────────────────────────────────────── */
 
@@ -83,54 +44,52 @@ export function TitleBar() {
   const win = getCurrentWindow();
   const { t } = useTranslation();
 
-  const handleAction = async (key: (typeof TRAFFIC_LIGHTS)[number]["key"]) => {
-    if (!win) {
-      return;
-    }
-
-    if (key === "close") {
-      await win.close();
-      return;
-    }
-
-    if (key === "minimize") {
-      await win.minimize();
-      return;
-    }
-
+  const handleAction = async (key: "minimize" | "maximize" | "close") => {
+    if (!win) return;
+    if (key === "close") { await win.close(); return; }
+    if (key === "minimize") { await win.minimize(); return; }
     await win.toggleMaximize();
   };
 
   return (
     <div
       data-tauri-drag-region
-      className="relative flex h-10 flex-shrink-0 items-center justify-end border-white/[0.06] border-b bg-sidebar px-4"
+      className="relative flex h-10 flex-shrink-0 items-center justify-end border-b border-white/[0.06] bg-sidebar"
     >
-      {/* Título à esquerda */}
-      <span className="pointer-events-none absolute left-4 select-none font-medium text-[11px] text-text-tertiary uppercase tracking-[0.18em]">
-        {t("app.name")}
-      </span>
+      {/* Window controls — right-aligned, Windows convention */}
+      <div className="relative flex h-full items-stretch">
+        {/* Minimize */}
+        <button
+          type="button"
+          onClick={() => void handleAction("minimize")}
+          title={t("titlebar.minimize")}
+          aria-label={t("titlebar.minimize")}
+          className="flex h-full w-[46px] items-center justify-center text-text-tertiary transition-colors duration-100 hover:bg-white/[0.07] hover:text-text active:bg-white/[0.04]"
+        >
+          <IconMinimize />
+        </button>
 
-      {/* Botões — à direita, sem herdar drag-region */}
-      <div className="relative flex items-center gap-[7px]">
-        {TRAFFIC_LIGHTS.map(({ key, bg, iconColor, Icon }) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => void handleAction(key)}
-            className="focus-ring-tight group flex h-[14px] w-[14px] items-center justify-center rounded-full transition-transform duration-150 active:scale-90"
-            style={{ backgroundColor: bg }}
-            title={t(`titlebar.${key}`)}
-            aria-label={t(`titlebar.${key}`)}
-          >
-            <span
-              className="flex items-center justify-center opacity-0 transition-opacity duration-100 group-hover:opacity-100"
-              style={{ color: iconColor }}
-            >
-              <Icon />
-            </span>
-          </button>
-        ))}
+        {/* Maximize / Restore */}
+        <button
+          type="button"
+          onClick={() => void handleAction("maximize")}
+          title={t("titlebar.maximize")}
+          aria-label={t("titlebar.maximize")}
+          className="flex h-full w-[46px] items-center justify-center text-text-tertiary transition-colors duration-100 hover:bg-white/[0.07] hover:text-text active:bg-white/[0.04]"
+        >
+          <IconMaximize />
+        </button>
+
+        {/* Close — red hover, Windows 11 */}
+        <button
+          type="button"
+          onClick={() => void handleAction("close")}
+          title={t("titlebar.close")}
+          aria-label={t("titlebar.close")}
+          className="flex h-full w-[46px] items-center justify-center text-text-tertiary transition-colors duration-100 hover:bg-[#c42b1c] hover:text-white active:bg-[#a32318]"
+        >
+          <IconClose />
+        </button>
       </div>
     </div>
   );

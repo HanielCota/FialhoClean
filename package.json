@@ -12,7 +12,15 @@
   "bugs": {
     "url": "https://github.com/HanielCota/FialhoClean/issues"
   },
-  "keywords": ["windows", "cleaner", "optimizer", "tauri", "rust", "react", "desktop"],
+  "keywords": [
+    "windows",
+    "cleaner",
+    "optimizer",
+    "tauri",
+    "rust",
+    "react",
+    "desktop"
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -34,6 +42,7 @@
     "@radix-ui/react-dialog": "^1.1.15",
     "@tanstack/react-query": "^5.95.0",
     "@tauri-apps/api": "^2.10.1",
+    "geist": "^1.7.0",
     "i18next": "^25.10.5",
     "lucide-react": "^0.577.0",
     "react": "^19.2.4",

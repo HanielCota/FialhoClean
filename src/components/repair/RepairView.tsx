@@ -84,7 +84,7 @@ function OutputPanel({ output }: { output: string }) {
   const hasMore = lines.length > 4;
 
   return (
-    <div className="mt-3 overflow-hidden rounded-lg border border-white/[0.06] bg-black/30">
+    <div className="mt-3 overflow-hidden rounded-lg border border-white/[0.06] bg-card-elevated">
       <pre className="whitespace-pre-wrap break-words p-3 font-mono text-[11px] text-text-muted leading-relaxed">
         {expanded ? output : preview}
         {!expanded && hasMore && "\n…"}
@@ -251,7 +251,11 @@ export function RepairView() {
                 <p className="mt-1 text-[13px] text-text-muted">
                   {t("repair.restorePoint.description")}
                 </p>
+                <label htmlFor="rp-description" className="sr-only">
+                  {t("repair.restorePoint.title")}
+                </label>
                 <input
+                  id="rp-description"
                   type="text"
                   value={rpDescription}
                   onChange={(e) => setRpDescription(e.target.value)}

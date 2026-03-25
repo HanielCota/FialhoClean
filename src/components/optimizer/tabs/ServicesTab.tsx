@@ -22,7 +22,7 @@ export function ServicesTab({ services, onAction }: ServicesTabProps) {
     <div className="space-y-3">
       {!showExpert ? (
         <div className="flex items-start gap-4 rounded-xl border border-white/[0.06] bg-white/[0.03] p-5">
-          <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-400" />
+          <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-orange" />
           <div className="min-w-0 flex-1">
             <p className="font-semibold text-[14px] text-text">
               {t("optimizer.expertWarning.title")}

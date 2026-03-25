@@ -5,13 +5,22 @@
     "message": "An unexpected error occurred in this view."
   },
   "titlebar": { "close": "Close", "minimize": "Minimize", "maximize": "Maximize" },
+  "sidebar": { "collapse": "Collapse sidebar", "expand": "Expand sidebar" },
   "nav": {
     "label": "Navigation",
     "dashboard": "Dashboard",
     "cleaner": "Cleaner",
     "optimizer": "Optimizer",
     "debloater": "Debloater",
-    "repair": "Repair"
+    "repair": "Repair",
+    "desc": {
+      "dashboard": "Your PC overview",
+      "cleaner": "Free up disk space",
+      "optimizer": "Speed up your PC",
+      "debloater": "Remove unused apps",
+      "repair": "Fix Windows errors",
+      "settings": "Preferences"
+    }
   },
   "common": {
     "cancel": "Cancel",
@@ -22,6 +31,8 @@
     "dangerous": "Dangerous",
     "unknownError": "Unknown error",
     "dismiss": "Dismiss notification",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
     "retry": "Try Again",
     "refresh": "Refresh",
     "refreshing": "Refreshing…",
@@ -43,7 +54,27 @@
     "lastCleaned": "Last cleaned: {{size}} freed",
     "quickClean": {
       "title": "Quick Clean",
-      "description": "Free up space in one tap"
+      "description": "Free up space in one click"
+    },
+    "steps": {
+      "title": "What to do now",
+      "clean": {
+        "title": "Clean Your PC",
+        "desc": "Remove unnecessary files and free up disk space",
+        "cta": "Start Cleaning",
+        "ctaDone": "Clean Again",
+        "done": "Cleaned — {{size}} freed"
+      },
+      "apps": {
+        "title": "Remove Unnecessary Apps",
+        "desc": "Programs that came pre-installed on your PC that you probably never use",
+        "cta": "View Apps"
+      },
+      "speed": {
+        "title": "Speed Up Your PC",
+        "desc": "Small tweaks that make your PC respond faster",
+        "cta": "View Settings"
+      }
     },
     "quickActions": {
       "scanButton": "Quick Scan",
@@ -82,11 +113,22 @@
       "daysAgo": "{{count}} days ago"
     },
     "systemError": "Couldn't load system info",
-    "refresh": "Refresh system stats"
+    "refresh": "Refresh system stats",
+    "statusLabel": "Your PC status",
+    "neverCleaned": "Never cleaned — try Quick Clean!",
+    "healthDesc": {
+      "good": "Everything is running smoothly",
+      "better": "Disk space is getting low",
+      "attention": "Disk almost full — clean now"
+    }
   },
   "cleaner": {
+    "tabs": {
+      "files": "File Cleaner",
+      "emptyFolders": "Empty Folders"
+    },
     "title": "Clean Your PC",
-    "subtitle": "Select what to remove, then tap Scan",
+    "subtitle": "Select what to remove, then click Scan",
     "selectAll": "Select all",
     "deselectAll": "Clear",
     "needsAdmin": "Needs Admin",
@@ -215,9 +257,9 @@
       "backToDashboard": "Back to Dashboard",
       "scanAgain": "Scan Again",
       "upsell": {
-        "sectionTitle": "Also Consider",
-        "title": "Remove bloatware apps?",
-        "description": "Pre-installed apps you don't need"
+        "sectionTitle": "Next Step",
+        "title": "Remove unnecessary apps?",
+        "description": "Your PC came with programs you probably never use — remove them now"
       }
     },
     "cleaning": {
@@ -516,7 +558,7 @@
     },
     "cautionBanner": {
       "title": "Contains cautionary apps",
-      "message": "Some selected apps may affect system features. Review the ⚠ Caution labels above before removing."
+      "message": "Some selected apps may affect system features. Review the Caution labels before removing."
     },
     "removeButton_one": "Remove {{count}} App",
     "removeButton_other": "Remove {{count}} Apps",
@@ -544,6 +586,53 @@
       "removed_other": "{{count}} apps removed successfully",
       "removeFailed": "Failed to remove {{name}}: {{error}}",
       "removalFailed": "Removal failed: {{msg}}"
+    }
+  },
+  "emptyFolders": {
+    "idle": {
+      "title": "Find Empty Folders",
+      "description": "Scans your personal folders (Documents, Downloads, Desktop, Pictures, Music, Videos and cloud drives) for directories that contain no files.",
+      "safeguard": "System folders, AppData and hidden directories are never touched.",
+      "scanButton": "Scan for empty folders"
+    },
+    "scanning": {
+      "title": "Scanning…",
+      "subtitle": "Looking for empty folders in your personal directories"
+    },
+    "results": {
+      "title_one": "{{count}} empty folder found",
+      "title_other": "{{count}} empty folders found",
+      "subtitle_one": "Scanned {{roots}} root folder",
+      "subtitle_other": "Scanned {{roots}} root folders",
+      "sectionLabel": "Empty folders",
+      "emptyTitle": "No empty folders found",
+      "emptySubtitle": "Your personal folders are clean.",
+      "scanAgain": "Scan again",
+      "deleteButton_one": "Delete {{count}} folder",
+      "deleteButton_other": "Delete {{count}} folders",
+      "caution": "Deleted folders cannot be recovered from Recycle Bin. Make sure you don't need them."
+    },
+    "modal": {
+      "title_one": "Delete {{count}} folder?",
+      "title_other": "Delete {{count}} folders?",
+      "body_one": "{{count}} empty folder will be permanently deleted.",
+      "body_other": "{{count}} empty folders will be permanently deleted.",
+      "confirm_one": "Delete {{count}} folder",
+      "confirm_other": "Delete {{count}} folders",
+      "warning": "This action cannot be undone."
+    },
+    "done": {
+      "title_one": "{{count}} folder deleted",
+      "title_other": "{{count}} folders deleted",
+      "subtitle": "Your personal folders are now cleaner.",
+      "errorsTitle_one": "{{count}} folder could not be deleted",
+      "errorsTitle_other": "{{count}} folders could not be deleted",
+      "scanAgain": "Scan again"
+    },
+    "toast": {
+      "deleted_one": "{{count}} empty folder deleted",
+      "deleted_other": "{{count}} empty folders deleted",
+      "deletedPartial": "{{count}} deleted, {{errors}} error(s)"
     }
   }
 }

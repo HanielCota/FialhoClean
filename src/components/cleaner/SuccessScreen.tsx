@@ -4,7 +4,6 @@ import { CATEGORY_ICONS } from "../../constants/categoryIcons";
 import { sanitizeError } from "../../lib/errors";
 import { formatBytes } from "../../lib/format";
 import type { CleanResult, ScanSummary } from "../../types/cleaner";
-import { ActionCard } from "../shared/ActionCard";
 import { Button } from "../shared/Button";
 import { SectionHeading } from "../shared/SectionHeading";
 
@@ -27,13 +26,15 @@ export function SuccessScreen({
 
   return (
     <div className="flex flex-col items-center p-6 text-center xl:p-8">
+
+      {/* Ícone de sucesso */}
       <div
         className={`mb-4 flex h-16 w-16 animate-scale-in items-center justify-center rounded-full ${
-          hasIssues ? "bg-amber-400/[0.15]" : "bg-green/[0.15]"
+          hasIssues ? "bg-orange/[0.15]" : "bg-green/[0.15]"
         }`}
       >
         {hasIssues ? (
-          <AlertTriangle className="h-9 w-9 text-amber-400" />
+          <AlertTriangle className="h-9 w-9 text-orange" />
         ) : (
           <CheckCircle2 className="h-9 w-9 text-green" />
         )}
@@ -44,7 +45,7 @@ export function SuccessScreen({
           size: formatBytes(cleanResult?.freed_bytes ?? 0),
         })}
       </h1>
-      <p className="mb-6 text-[12px] text-text-muted">
+      <p className="mb-6 text-[13px] text-text-muted">
         {t(hasIssues ? "cleaner.success.partialSubtitle" : "cleaner.success.subtitle", {
           files: (cleanResult?.deleted_count ?? 0).toLocaleString(),
           deleted: (cleanResult?.deleted_count ?? 0).toLocaleString(),
@@ -53,36 +54,27 @@ export function SuccessScreen({
         })}
       </p>
 
+      {/* Alertas parciais */}
       {hasIssues && (
-        <div className="mb-6 w-full rounded-xl border border-amber-400/20 bg-amber-400/[0.06] p-4 text-left">
-          <p className="font-semibold text-[13px] text-text">
-            {t("cleaner.success.partialNotice")}
-          </p>
+        <div className="mb-6 w-full rounded-2xl border border-orange/20 bg-orange/[0.06] p-4 text-left">
+          <p className="font-semibold text-[13px] text-text">{t("cleaner.success.partialNotice")}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <span className="rounded-full bg-white/[0.05] px-3 py-1 text-[12px] text-text">
-              {t("cleaner.success.summary.deleted", {
-                count: cleanResult?.deleted_count ?? 0,
-              })}
+              {t("cleaner.success.summary.deleted", { count: cleanResult?.deleted_count ?? 0 })}
             </span>
             <span className="rounded-full bg-white/[0.05] px-3 py-1 text-[12px] text-text">
-              {t("cleaner.success.summary.skipped", {
-                count: cleanResult?.skipped_count ?? 0,
-              })}
+              {t("cleaner.success.summary.skipped", { count: cleanResult?.skipped_count ?? 0 })}
             </span>
             <span className="rounded-full bg-white/[0.05] px-3 py-1 text-[12px] text-text">
-              {t("cleaner.success.summary.errors", {
-                count: cleanResult?.errors?.length ?? 0,
-              })}
+              {t("cleaner.success.summary.errors", { count: cleanResult?.errors?.length ?? 0 })}
             </span>
           </div>
           {errorPreview?.length > 0 && (
             <div className="mt-3 space-y-1.5">
-              <p className="font-medium text-[12px] text-text">
-                {t("cleaner.success.issueHeading")}
-              </p>
+              <p className="font-medium text-[12px] text-text">{t("cleaner.success.issueHeading")}</p>
               {errorPreview.map((error, index) => (
                 <p key={`${error}-${index}`} className="text-[12px] text-text-muted">
-                  - {error}
+                  — {error}
                 </p>
               ))}
               {(cleanResult?.errors?.length ?? 0) > errorPreview.length && (
@@ -97,15 +89,16 @@ export function SuccessScreen({
         </div>
       )}
 
+      {/* Breakdown por categoria */}
       {!hasIssues && scanSummary?.categories && scanSummary.categories.length > 0 && (
-        <div className="mb-6 w-full overflow-hidden rounded-xl border border-white/[0.06] bg-card">
+        <div className="mb-6 w-full overflow-hidden rounded-2xl border border-white/[0.06] bg-card">
           {scanSummary.categories.map((cat, i) => {
             const Icon = CATEGORY_ICONS[cat.category];
             return (
               <div
                 key={cat.category}
                 className={`flex items-center gap-3 px-4 py-3 ${
-                  i < scanSummary.categories.length - 1 ? "border-white/[0.06] border-b" : ""
+                  i < scanSummary.categories.length - 1 ? "border-b border-white/[0.06]" : ""
                 }`}
               >
                 <Icon className="h-4 w-4 text-text-muted" />
@@ -122,24 +115,41 @@ export function SuccessScreen({
         </div>
       )}
 
-      <Button onClick={onDashboard} className="mb-2 w-full">
-        {t("cleaner.success.backToDashboard")}
-      </Button>
-      <Button variant="ghost" onClick={onScanAgain} className="mb-3 w-full">
-        {t("cleaner.success.scanAgain")}
-      </Button>
-
-      <div className="w-full">
+      {/* ── Próximo Passo (destaque) ── */}
+      <div className="mb-4 w-full">
         <SectionHeading className="text-left">
           {t("cleaner.success.upsell.sectionTitle")}
         </SectionHeading>
-        <ActionCard
-          icon={Shield}
-          title={t("cleaner.success.upsell.title")}
-          description={t("cleaner.success.upsell.description")}
+        <button
+          type="button"
           onClick={onDebloater}
-        />
+          className="focus-ring group flex w-full items-center gap-4 rounded-2xl border border-white/[0.08] bg-card p-4 text-left transition-all duration-150 hover:border-white/[0.14] hover:bg-card-hover active:scale-[0.99]"
+        >
+          <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-white/[0.07]">
+            <Shield className="h-5 w-5 text-accent" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-[14px] text-text">
+              {t("cleaner.success.upsell.title")}
+            </p>
+            <p className="text-[12px] text-text-muted">
+              {t("cleaner.success.upsell.description")}
+            </p>
+          </div>
+          <span className="text-[13px] font-semibold text-accent flex-shrink-0">
+            {t("dashboard.steps.apps.cta")} →
+          </span>
+        </button>
       </div>
+
+      {/* Ações secundárias */}
+      <Button onClick={onDashboard} variant="secondary" className="mb-2 w-full">
+        {t("cleaner.success.backToDashboard")}
+      </Button>
+      <Button variant="ghost" onClick={onScanAgain} className="w-full">
+        {t("cleaner.success.scanAgain")}
+      </Button>
+
     </div>
   );
 }

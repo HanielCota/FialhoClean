@@ -11,13 +11,22 @@
     "minimize": "Minimizar",
     "maximize": "Maximizar"
   },
+  "sidebar": { "collapse": "Recolher menu", "expand": "Expandir menu" },
   "nav": {
     "label": "Navegação",
-    "dashboard": "Painel",
+    "dashboard": "Início",
     "cleaner": "Limpeza",
-    "optimizer": "Otimização",
-    "debloater": "Debloater",
-    "repair": "Reparar"
+    "optimizer": "Velocidade",
+    "debloater": "Apps",
+    "repair": "Consertar",
+    "desc": {
+      "dashboard": "Estado do seu PC",
+      "cleaner": "Liberar espaço",
+      "optimizer": "Melhorar velocidade",
+      "debloater": "Remover apps inúteis",
+      "repair": "Corrigir erros",
+      "settings": "Preferências"
+    }
   },
   "common": {
     "cancel": "Cancelar",
@@ -28,6 +37,8 @@
     "dangerous": "Perigoso",
     "unknownError": "Erro desconhecido",
     "dismiss": "Fechar notificação",
+    "selectAll": "Selecionar tudo",
+    "deselectAll": "Desmarcar tudo",
     "retry": "Tentar Novamente",
     "refresh": "Atualizar",
     "refreshing": "Atualizando…",
@@ -41,15 +52,42 @@
   "dashboard": {
     "healthIntro": "Seu PC está",
     "healthChecking": "Verificando…",
+    "statusLabel": "Estado do seu PC",
+    "neverCleaned": "Nunca foi limpo — experimente a Limpeza Rápida!",
     "health": {
       "good": "Em Boa Forma",
       "better": "Pode Melhorar",
       "attention": "Precisa de Atenção"
     },
+    "healthDesc": {
+      "good": "Tudo funcionando normalmente",
+      "better": "Espaço em disco ficando baixo",
+      "attention": "Disco quase cheio — limpe agora"
+    },
     "lastCleaned": "Última limpeza: {{size}} liberados",
     "quickClean": {
       "title": "Limpeza Rápida",
-      "description": "Libere espaço em um toque"
+      "description": "Libere espaço em um clique"
+    },
+    "steps": {
+      "title": "O que fazer agora",
+      "clean": {
+        "title": "Limpar o PC",
+        "desc": "Remova arquivos desnecessários e libere espaço em disco",
+        "cta": "Iniciar Limpeza",
+        "ctaDone": "Limpar Novamente",
+        "done": "Limpeza feita — {{size}} liberados"
+      },
+      "apps": {
+        "title": "Remover Apps Inúteis",
+        "desc": "Programas que vieram instalados no seu PC e você provavelmente nunca vai usar",
+        "cta": "Ver Apps"
+      },
+      "speed": {
+        "title": "Deixar Mais Rápido",
+        "desc": "Pequenos ajustes que fazem o PC responder melhor",
+        "cta": "Ver Ajustes"
+      }
     },
     "quickActions": {
       "scanButton": "Verificação Rápida",
@@ -91,8 +129,12 @@
     "refresh": "Atualizar estatísticas do sistema"
   },
   "cleaner": {
+    "tabs": {
+      "files": "Limpeza de Arquivos",
+      "emptyFolders": "Pastas Vazias"
+    },
     "title": "Limpar seu PC",
-    "subtitle": "Selecione o que remover e toque em Verificar",
+    "subtitle": "Selecione o que remover e clique em Verificar",
     "selectAll": "Selecionar tudo",
     "deselectAll": "Limpar",
     "needsAdmin": "Requer Admin",
@@ -221,9 +263,9 @@
       "backToDashboard": "Voltar ao Painel",
       "scanAgain": "Verificar Novamente",
       "upsell": {
-        "sectionTitle": "Considere Também",
-        "title": "Remover apps indesejados?",
-        "description": "Apps pré-instalados que você não precisa"
+        "sectionTitle": "Próximo Passo",
+        "title": "Remover apps inúteis?",
+        "description": "Seu PC veio com programas que você provavelmente nunca vai usar — remova-os agora"
       }
     },
     "cleaning": {
@@ -245,8 +287,8 @@
     }
   },
   "optimizer": {
-    "title": "Otimizador",
-    "subtitle": "Configurações de velocidade e energia",
+    "title": "Deixe Mais Rápido",
+    "subtitle": "Ajustes simples para o PC rodar melhor",
     "tabs": {
       "performance": "Desempenho",
       "boot": "Boot",
@@ -275,11 +317,11 @@
     },
     "hibernate": {
       "title": "Hibernação",
-      "description": "Salva a RAM no disco ao desligar para retomar exatamente onde parou."
+      "description": "Ao desligar, o PC salva tudo que estava aberto e retoma exatamente do mesmo ponto ao ligar de novo."
     },
     "fastStartup": {
       "title": "Inicialização Rápida",
-      "description": "Desligamento híbrido que acelera o boot hibernando parcialmente o kernel."
+      "description": "Faz o Windows ligar mais rápido guardando parte do sistema antes de desligar."
     },
     "gameMode": {
       "title": "Aplicar Preset de Jogo",
@@ -288,14 +330,14 @@
       "applied": "Aplicado ✓"
     },
     "ultimatePerformance": {
-      "title": "Desbloquear Ultimate Performance",
-      "description": "Ativa o plano de energia Ultimate Performance oculto — elimina micro-latência impedindo que a CPU entre em estados de baixo consumo.",
+      "title": "Máximo Desempenho",
+      "description": "Ativa um plano de energia avançado do Windows que mantém o PC sempre no pique máximo. Ideal para quem precisa de tudo muito rápido.",
       "activate": "Ativar",
       "active": "Ativo ✓"
     },
     "network": {
-      "title": "Desativar Throttling de Rede",
-      "description": "Remove o throttling de rede multimídia do Windows — reduz latência em jogos e apps em tempo real."
+      "title": "Melhorar Velocidade da Internet",
+      "description": "Remove um limitador de rede que o Windows aplica em segundo plano — pode melhorar jogos e chamadas de vídeo."
     },
     "ramOptimizer": {
       "title": "Liberar RAM",
@@ -303,8 +345,8 @@
       "button": "Otimizar"
     },
     "gpuHags": {
-      "title": "Agendamento de GPU por Hardware",
-      "description": "Permite que a GPU gerencie diretamente sua memória de vídeo, reduzindo a sobrecarga da CPU e a latência em jogos."
+      "title": "Melhorar Desempenho em Jogos",
+      "description": "Faz a placa de vídeo trabalhar de forma mais eficiente, o que pode aumentar o FPS e reduzir travamentos em jogos."
     },
     "privacy": {
       "telemetry": {
@@ -411,9 +453,9 @@
     }
   },
   "repair": {
-    "title": "Ferramentas de Reparo",
-    "subtitle": "Verifica e corrige problemas no sistema Windows",
-    "adminWarning": "Essas ferramentas requerem privilégios de administrador. Se o app não estiver elevado, as ferramentas reportarão um erro.",
+    "title": "Consertar o PC",
+    "subtitle": "Corrige erros comuns do Windows automaticamente",
+    "adminWarning": "Para funcionar corretamente, o app precisa ser executado como administrador. Se aparecer um erro, clique com o botão direito no atalho do app e escolha \"Executar como administrador\".",
     "reset": "Redefinir",
     "runAgain": "Executar Novamente",
     "status": {
@@ -428,28 +470,28 @@
       "showFull": "Mostrar saída completa ({{count}} linhas)"
     },
     "sections": {
-      "restorePoint": "Ponto de Restauração do Sistema",
-      "systemFiles": "Verificador de Arquivos do Sistema",
-      "windowsImage": "Reparo da Imagem do Windows"
+      "restorePoint": "Ponto de Restauração",
+      "systemFiles": "Verificar Arquivos do Sistema",
+      "windowsImage": "Corrigir o Windows"
     },
     "restorePoint": {
       "title": "Criar Ponto de Restauração",
-      "description": "Cria um snapshot do Sistema de Restauração do Windows para reverter caso algo dê errado.",
+      "description": "Salva o estado atual do PC. Se algo der errado depois, você pode voltar para esse ponto.",
       "defaultDescription": "FialhoClean Backup",
-      "placeholder": "Descrição do ponto de restauração…",
+      "placeholder": "Nome para lembrar depois (ex: Antes da limpeza)…",
       "button": "Criar"
     },
     "sfc": {
-      "title": "SFC /scannow",
-      "description": "Verifica todos os arquivos protegidos do sistema e substitui versões corrompidas por uma cópia em cache.",
+      "title": "Verificar Arquivos do Sistema",
+      "description": "Procura por arquivos do Windows danificados ou corrompidos e tenta repará-los automaticamente.",
       "duration": "Leva de 5 a 20 minutos",
-      "button": "Executar SFC"
+      "button": "Verificar Agora"
     },
     "dism": {
-      "title": "DISM /RestoreHealth",
-      "description": "Repara o repositório de componentes do Windows usado pelo SFC. Execute primeiro se o SFC continuar falhando.",
+      "title": "Corrigir o Windows",
+      "description": "Reparo mais profundo do Windows. Use se o PC ainda apresentar erros após a verificação de arquivos.",
       "duration": "Leva de 10 a 30 minutos",
-      "button": "Executar DISM"
+      "button": "Corrigir Agora"
     },
     "toast": {
       "sfcSuccess": "SFC concluído com sucesso",
@@ -491,8 +533,8 @@
     }
   },
   "debloater": {
-    "title": "Remover Bloatware",
-    "subtitle": "Apps pré-instalados que você provavelmente não precisa",
+    "title": "Apps Desnecessários",
+    "subtitle": "Programas que vieram instalados no seu PC mas você provavelmente nunca vai usar",
     "empty": {
       "title": "Nenhum bloatware encontrado",
       "message": "Seu PC veio limpo!"
@@ -521,8 +563,8 @@
       "third_party": "Terceiros"
     },
     "cautionBanner": {
-      "title": "Contém apps com aviso",
-      "message": "Alguns apps selecionados podem afetar recursos do sistema. Revise os avisos ⚠ acima antes de remover."
+      "title": "Atenção antes de remover",
+      "message": "Alguns apps selecionados podem afetar funções do Windows. Revise os que têm o aviso Cuidado antes de remover."
     },
     "removeButton_one": "Remover {{count}} App",
     "removeButton_other": "Remover {{count}} Apps",
@@ -532,8 +574,8 @@
       "confirm_one": "Remover {{count}} App",
       "confirm_other": "Remover {{count}} Apps",
       "andMore": "· · · e mais {{count}}",
-      "cautionWarning": "Alguns apps podem afetar recursos do Windows quando removidos.",
-      "disclaimer": "Isso não pode ser desfeito sem reinstalar da Microsoft Store."
+      "cautionWarning": "Um ou mais apps selecionados podem ser usados pelo Windows. Só remova se tiver certeza.",
+      "disclaimer": "Essa ação não pode ser desfeita. Para reinstalar, você precisaria buscar o app na Microsoft Store."
     },
     "success": {
       "title": "Tudo certo!",
@@ -550,6 +592,53 @@
       "removed_other": "{{count}} apps removidos com sucesso",
       "removeFailed": "Falha ao remover {{name}}: {{error}}",
       "removalFailed": "Falha na remoção: {{msg}}"
+    }
+  },
+  "emptyFolders": {
+    "idle": {
+      "title": "Encontrar Pastas Vazias",
+      "description": "Varre suas pastas pessoais (Documentos, Downloads, Área de Trabalho, Imagens, Música, Vídeos e drives na nuvem) em busca de diretórios sem arquivos.",
+      "safeguard": "Pastas do sistema, AppData e diretórios ocultos nunca são tocados.",
+      "scanButton": "Verificar pastas vazias"
+    },
+    "scanning": {
+      "title": "Verificando…",
+      "subtitle": "Procurando pastas vazias nos seus diretórios pessoais"
+    },
+    "results": {
+      "title_one": "{{count}} pasta vazia encontrada",
+      "title_other": "{{count}} pastas vazias encontradas",
+      "subtitle_one": "Verificada {{roots}} pasta raiz",
+      "subtitle_other": "Verificadas {{roots}} pastas raiz",
+      "sectionLabel": "Pastas vazias",
+      "emptyTitle": "Nenhuma pasta vazia encontrada",
+      "emptySubtitle": "Suas pastas pessoais estão organizadas.",
+      "scanAgain": "Verificar novamente",
+      "deleteButton_one": "Remover {{count}} pasta",
+      "deleteButton_other": "Remover {{count}} pastas",
+      "caution": "Pastas removidas não podem ser recuperadas da Lixeira. Certifique-se de que não precisará delas."
+    },
+    "modal": {
+      "title_one": "Remover {{count}} pasta?",
+      "title_other": "Remover {{count}} pastas?",
+      "body_one": "{{count}} pasta vazia será removida permanentemente.",
+      "body_other": "{{count}} pastas vazias serão removidas permanentemente.",
+      "confirm_one": "Remover {{count}} pasta",
+      "confirm_other": "Remover {{count}} pastas",
+      "warning": "Essa ação não pode ser desfeita."
+    },
+    "done": {
+      "title_one": "{{count}} pasta removida",
+      "title_other": "{{count}} pastas removidas",
+      "subtitle": "Suas pastas pessoais estão mais organizadas.",
+      "errorsTitle_one": "{{count}} pasta não pôde ser removida",
+      "errorsTitle_other": "{{count}} pastas não puderam ser removidas",
+      "scanAgain": "Verificar novamente"
+    },
+    "toast": {
+      "deleted_one": "{{count}} pasta vazia removida",
+      "deleted_other": "{{count}} pastas vazias removidas",
+      "deletedPartial": "{{count}} removidas, {{errors}} erro(s)"
     }
   }
 }

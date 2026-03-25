@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
 
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/Geist-Variable.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -17,7 +25,7 @@
   body {
     background-color: #111111;
     color: #f2f2f2;
-    font-family: "Inter", sans-serif;
+    font-family: "Geist", sans-serif;
     font-size: 14px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
@@ -79,11 +87,11 @@
 /* ─── Animation Keyframes ─── */
 
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
+  0%, 100% {
+    opacity: 1;
   }
-  100% {
-    background-position: 200% 0;
+  50% {
+    opacity: 0.5;
   }
 }
 
@@ -179,9 +187,8 @@
 /* ─── Animation Utilities ─── */
 
 .animate-shimmer {
-  background: linear-gradient(90deg, #1b1b1b 25%, #292929 50%, #1b1b1b 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  background-color: #1b1b1b;
+  animation: shimmer 1.5s ease-in-out infinite;
 }
 
 .animate-slide-up {

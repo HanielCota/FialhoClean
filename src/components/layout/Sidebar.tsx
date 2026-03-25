@@ -1,103 +1,173 @@
-import { LayoutDashboard, Shield, SlidersHorizontal, Trash2, Wrench, Zap } from "lucide-react";
+import {
+  LayoutDashboard,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Shield,
+  SlidersHorizontal,
+  Trash2,
+  Wrench,
+  Zap,
+} from "lucide-react";
+import type { ComponentType } from "react";
 import { useTranslation } from "react-i18next";
 import { useUiStore } from "../../stores/uiStore";
 
-const NAV_ITEMS = [
-  { id: "dashboard" as const, icon: LayoutDashboard },
-  { id: "cleaner" as const, icon: Trash2 },
-  { id: "optimizer" as const, icon: Zap },
-  { id: "debloater" as const, icon: Shield },
-  { id: "repair" as const, icon: Wrench },
+type ViewId = "dashboard" | "cleaner" | "optimizer" | "debloater" | "repair";
+
+const NAV_ITEMS: { id: ViewId; icon: ComponentType<{ className?: string }> }[] = [
+  { id: "dashboard", icon: LayoutDashboard },
+  { id: "cleaner", icon: Trash2 },
+  { id: "optimizer", icon: Zap },
+  { id: "debloater", icon: Shield },
+  { id: "repair", icon: Wrench },
 ];
 
+function NavButton({
+  isActive,
+  collapsed,
+  label,
+  onClick,
+  onKeyDown,
+  ariaCurrent,
+  children,
+}: {
+  isActive: boolean;
+  collapsed: boolean;
+  label: string;
+  onClick: () => void;
+  onKeyDown?: React.KeyboardEventHandler;
+  ariaCurrent?: "page" | undefined;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      onKeyDown={onKeyDown}
+      aria-current={ariaCurrent}
+      title={collapsed ? label : undefined}
+      className={`focus-ring group relative flex w-full items-center rounded-lg text-left transition-colors duration-150 ${
+        collapsed ? "justify-center px-0 py-[9px]" : "gap-3 px-3 py-[7px]"
+      } ${
+        isActive
+          ? "bg-white/[0.07] text-white"
+          : "text-white/38 hover:bg-white/[0.05] hover:text-white/70"
+      }`}
+    >
+      {/* Left active bar */}
+      {isActive && (
+        <span
+          className="absolute left-0 top-[18%] h-[64%] w-[3px] rounded-r-full bg-white/55"
+          aria-hidden="true"
+        />
+      )}
+      {children}
+    </button>
+  );
+}
+
 export function Sidebar() {
-  const { activeView, setActiveView } = useUiStore();
+  const { activeView, setActiveView, sidebarCollapsed, toggleSidebar } = useUiStore();
   const { t } = useTranslation();
 
-  const navLabels: Record<
-    "dashboard" | "cleaner" | "optimizer" | "debloater" | "repair" | "settings",
-    string
-  > = {
-    dashboard: t("nav.dashboard"),
-    cleaner: t("nav.cleaner"),
-    optimizer: t("nav.optimizer"),
-    debloater: t("nav.debloater"),
-    repair: t("nav.repair"),
-    settings: t("settings.title"),
+  const navConfig: Record<ViewId | "settings", { label: string }> = {
+    dashboard: { label: t("nav.dashboard") },
+    cleaner: { label: t("nav.cleaner") },
+    optimizer: { label: t("nav.optimizer") },
+    debloater: { label: t("nav.debloater") },
+    repair: { label: t("nav.repair") },
+    settings: { label: t("settings.title") },
   };
 
+  const collapsed = sidebarCollapsed;
+
   return (
-    <aside className="w-56 flex-shrink-0 border-white/[0.06] border-r bg-sidebar">
-      <div className="flex h-full flex-col px-3 pt-4 pb-4">
-        {/* Nav label */}
-        <p className="mb-1.5 px-2 font-semibold text-[11px] text-text-tertiary uppercase tracking-[0.18em]">
-          {t("nav.label")}
-        </p>
+    <aside
+      className={`relative flex-shrink-0 bg-sidebar flex flex-col transition-[width] duration-200 ease-in-out ${
+        collapsed ? "w-14" : "w-52"
+      }`}
+    >
+      {/* Right border */}
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-white/[0.06]" />
 
-        {/* Nav items */}
-        <nav className="flex-1">
-          <div className="space-y-0.5">
-            {NAV_ITEMS.map(({ id, icon: Icon }) => {
-              const isActive = activeView === id;
+      {/* ── Nav ── */}
+      <div className="flex flex-1 flex-col gap-0 px-2 py-2">
+        <nav className="flex-1 flex flex-col gap-px" aria-label={t("nav.label")}>
+          {NAV_ITEMS.map(({ id, icon: Icon }) => {
+            const isActive = activeView === id;
+            const { label } = navConfig[id];
 
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => setActiveView(id)}
-                  aria-current={isActive ? "page" : undefined}
-                  className={`focus-ring group flex h-9 w-full items-center gap-3 rounded-[10px] px-2.5 text-left transition-all duration-150 ${
-                    isActive
-                      ? "bg-accent/[0.13] text-accent"
-                      : "text-text-muted hover:bg-white/[0.04] hover:text-text"
+            return (
+              <NavButton
+                key={id}
+                isActive={isActive}
+                collapsed={collapsed}
+                label={label}
+                ariaCurrent={isActive ? "page" : undefined}
+                onClick={() => setActiveView(id)}
+              >
+                <Icon
+                  className={`flex-shrink-0 ${
+                    collapsed ? "h-[17px] w-[17px]" : "h-4 w-4"
                   }`}
-                >
-                  <Icon
-                    className={`h-[15px] w-[15px] flex-shrink-0 transition-colors duration-150 ${
-                      isActive ? "text-accent" : "text-text-tertiary group-hover:text-text-muted"
-                    }`}
-                  />
-                  <span className="truncate font-medium text-[15px] tracking-[-0.01em]">
-                    {navLabels[id]}
+                />
+                {!collapsed && (
+                  <span className="truncate font-medium text-[13px] leading-snug tracking-[-0.01em]">
+                    {label}
                   </span>
-                  {isActive && (
-                    <span
-                      className="ml-auto h-1.5 w-1.5 rounded-full bg-accent/70"
-                      aria-hidden="true"
-                    />
-                  )}
-                </button>
-              );
-            })}
-          </div>
+                )}
+              </NavButton>
+            );
+          })}
         </nav>
 
-        {/* Settings footer */}
-        <div className="border-white/[0.06] border-t pt-3">
+        {/* ── Footer: settings + collapse toggle ── */}
+        <div className="flex flex-col gap-px border-t border-white/[0.05] pt-2">
+          {/* Settings */}
+          {(() => {
+            const isActive = activeView === "settings";
+            const label = navConfig.settings.label;
+            return (
+              <NavButton
+                isActive={isActive}
+                collapsed={collapsed}
+                label={label}
+                ariaCurrent={isActive ? "page" : undefined}
+                onClick={() => setActiveView("settings")}
+              >
+                <SlidersHorizontal
+                  className={`flex-shrink-0 ${
+                    collapsed ? "h-[17px] w-[17px]" : "h-4 w-4"
+                  }`}
+                />
+                {!collapsed && (
+                  <span className="truncate font-medium text-[13px] leading-snug tracking-[-0.01em]">
+                    {label}
+                  </span>
+                )}
+              </NavButton>
+            );
+          })()}
+
+          {/* Collapse toggle */}
           <button
             type="button"
-            onClick={() => setActiveView("settings")}
-            aria-current={activeView === "settings" ? "page" : undefined}
-            title={t("settings.title")}
-            aria-label={t("settings.title")}
-            className={`focus-ring group flex h-9 w-full items-center gap-3 rounded-[10px] px-2.5 text-left transition-all duration-150 ${
-              activeView === "settings"
-                ? "bg-accent/[0.13] text-accent"
-                : "text-text-muted hover:bg-white/[0.04] hover:text-text"
+            onClick={toggleSidebar}
+            title={collapsed ? t("sidebar.expand") : t("sidebar.collapse")}
+            aria-label={collapsed ? t("sidebar.expand") : t("sidebar.collapse")}
+            className={`focus-ring group relative flex w-full items-center rounded-lg text-white/22 transition-colors duration-150 hover:bg-white/[0.05] hover:text-white/50 ${
+              collapsed ? "justify-center px-0 py-[9px]" : "gap-3 px-3 py-[7px]"
             }`}
           >
-            <SlidersHorizontal
-              className={`h-[15px] w-[15px] flex-shrink-0 transition-colors duration-150 ${
-                activeView === "settings"
-                  ? "text-accent"
-                  : "text-text-tertiary group-hover:text-text-muted"
-              }`}
-            />
-            <span className="truncate font-medium text-[13px] tracking-[-0.01em]">
-              {t("settings.title")}
-            </span>
-            {activeView === "settings" && (
-              <span className="ml-auto h-1.5 w-1.5 rounded-full bg-accent/70" aria-hidden="true" />
+            {collapsed ? (
+              <PanelLeftOpen className="h-[17px] w-[17px] flex-shrink-0" />
+            ) : (
+              <>
+                <PanelLeftClose className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate font-medium text-[13px] leading-snug tracking-[-0.01em]">
+                  {t("sidebar.collapse")}
+                </span>
+              </>
             )}
           </button>
         </div>

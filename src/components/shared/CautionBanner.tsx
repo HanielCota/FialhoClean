@@ -14,9 +14,9 @@ export function CautionBanner({ title, message, className = "" }: CautionBannerP
 
   return (
     <div
-      className={`flex items-start gap-3 rounded-xl border border-amber-400/20 bg-white/[0.03] p-4 ${className}`}
+      className={`flex items-start gap-3 rounded-xl border border-orange/20 bg-orange/[0.04] p-4 ${className}`}
     >
-      <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-400" />
+      <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-orange" />
       <div className="min-w-0">
         {title && <p className="font-semibold text-[13px] text-text">{title}</p>}
         {typeof message === "string" ? (

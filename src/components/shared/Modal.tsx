@@ -38,7 +38,7 @@ export function Modal({
       }}
     >
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 animate-fade-in bg-black/70 backdrop-blur-sm" />
+        <Dialog.Overlay className="fixed inset-0 z-50 animate-fade-in bg-black/70" />
         <Dialog.Content
           className="fixed inset-x-0 bottom-6 z-50 mx-auto w-[calc(100%-2rem)] max-w-sm animate-slide-up rounded-2xl border border-white/[0.10] bg-card-elevated p-6 shadow-[0_8px_32px_rgba(0,0,0,0.7)] focus:outline-none"
           aria-busy={loading}

@@ -3,7 +3,7 @@ pub mod errors;
 pub mod models;
 pub mod services;
 
-use commands::{cleaner, debloater, optimizer, repair, system};
+use commands::{cleaner, debloater, empty_folders, optimizer, repair, system};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -69,6 +69,9 @@ pub fn run() {
             repair::run_sfc,
             repair::run_dism,
             repair::create_restore_point,
+            // Empty Folders
+            empty_folders::scan_empty_folders,
+            empty_folders::delete_empty_folders,
         ])
         .run(tauri::generate_context!())
         .unwrap_or_else(|e| {

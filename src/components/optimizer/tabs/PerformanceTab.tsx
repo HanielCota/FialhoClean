@@ -164,7 +164,7 @@ export function PerformanceTab({
               disabled={gameModeState === "loading"}
               className={`focus-ring mt-0.5 flex h-10 flex-shrink-0 items-center gap-2 rounded-[10px] border px-5 font-semibold text-[14px] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
                 gameModeState === "done"
-                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                  ? "border-green/30 bg-green/[0.10] text-green"
                   : "border-accent/30 bg-accent/10 text-accent hover:bg-accent/15"
               }`}
             >

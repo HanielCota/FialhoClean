@@ -26,7 +26,7 @@ export default {
         warning: "#ff9f0a",
       },
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
+        sans: ["Geist", "sans-serif"],
       },
       borderRadius: {
         xl: "12px",

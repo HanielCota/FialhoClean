@@ -57,6 +57,12 @@ logs/
 coverage/
 .nyc_output/
 
+# ─── AI / IDE tooling ─────────────────────────────────────────────────────────
+.junie/
+.agents/
+.claude/skills/
+.claude/launch.json
+
 # ─── Misc ─────────────────────────────────────────────────────────────────────
 *.local
 .cache/

@@ -151,7 +151,7 @@ export function PrivacyTab({
                       <div className="mt-0.5 flex flex-shrink-0 items-center gap-2.5">
                         <span
                           className={`font-medium text-[12px] ${
-                            isEnabled ? "text-emerald-400" : "text-text-muted/50"
+                            isEnabled ? "text-green" : "text-text-muted/50"
                           }`}
                         >
                           {isEnabled ? t("optimizer.task.enabled") : t("optimizer.task.disabled")}

@@ -157,8 +157,12 @@ export function DebloaterView() {
       >
         {/* ── Search bar ──────────────────────────────────────────── */}
         <div className="relative mb-3">
-          <Search className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
+          <label htmlFor="debloater-search" className="sr-only">
+            {t("debloater.searchPlaceholder")}
+          </label>
+          <Search className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" aria-hidden="true" />
           <input
+            id="debloater-search"
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -169,7 +173,7 @@ export function DebloaterView() {
             <button
               type="button"
               onClick={() => setSearch("")}
-              className="absolute top-1/2 right-2.5 -translate-y-1/2 text-text-muted hover:text-text"
+              className="focus-ring absolute top-1/2 right-2.5 -translate-y-1/2 rounded text-text-muted hover:text-text"
               aria-label={t("debloater.clearSearch")}
             >
               <X className="h-3.5 w-3.5" />
@@ -327,7 +331,7 @@ export function DebloaterView() {
             )}
           </ul>
           {hasCautionSelected && (
-            <div className="flex items-start gap-2 text-[12px] text-amber-400">
+            <div className="flex items-start gap-2 text-[12px] text-orange">
               <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
               <span>{t("debloater.modal.cautionWarning")}</span>
             </div>
