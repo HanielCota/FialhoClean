@@ -3,6 +3,7 @@ import { CleanerView } from "./components/cleaner/CleanerView";
 import { DashboardView } from "./components/dashboard/DashboardView";
 import { DebloaterView } from "./components/debloater/DebloaterView";
 import { PageContainer } from "./components/layout/PageContainer";
+import { Sidebar } from "./components/layout/Sidebar";
 import { TitleBar } from "./components/layout/TitleBar";
 import { OptimizerView } from "./components/optimizer/OptimizerView";
 import { RepairView } from "./components/repair/RepairView";
@@ -32,7 +33,9 @@ export default function App() {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <TitleBar />
-      <PageContainer>
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar />
+        <PageContainer>
           {everVisited.has("dashboard") && (
             <div className={hide("dashboard")}>
               <ErrorBoundary key="dashboard">
@@ -76,6 +79,7 @@ export default function App() {
             </div>
           )}
         </PageContainer>
+      </div>
       <ToastContainer />
     </div>
   );
