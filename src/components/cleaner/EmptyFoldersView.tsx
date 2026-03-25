@@ -185,7 +185,7 @@ export function EmptyFoldersView() {
         </div>
 
         {/* Folder list */}
-        <div className="mb-5 space-y-1.5 max-h-[340px] overflow-y-auto pr-1">
+        <div className="mb-5 max-h-[340px] space-y-1.5 overflow-y-auto pr-1">
           {folders.map((folder) => {
             const isSelected = selected.has(folder.path);
             const basename = folder.path.split(/[\\/]/).pop() ?? folder.path;

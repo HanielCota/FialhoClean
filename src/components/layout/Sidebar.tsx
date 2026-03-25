@@ -57,7 +57,7 @@ function NavButton({
       {/* Left active bar */}
       {isActive && (
         <span
-          className="absolute left-0 top-[18%] h-[64%] w-[3px] rounded-r-full bg-white/55"
+          className="absolute top-[18%] left-0 h-[64%] w-[3px] rounded-r-full bg-white/55"
           aria-hidden="true"
         />
       )}
@@ -83,7 +83,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`relative flex-shrink-0 bg-sidebar flex flex-col transition-[width] duration-200 ease-in-out ${
+      className={`relative flex flex-shrink-0 flex-col bg-sidebar transition-[width] duration-200 ease-in-out ${
         collapsed ? "w-14" : "w-52"
       }`}
     >
@@ -92,7 +92,7 @@ export function Sidebar() {
 
       {/* ── Nav ── */}
       <div className="flex flex-1 flex-col gap-0 px-2 py-2">
-        <nav className="flex-1 flex flex-col gap-px" aria-label={t("nav.label")}>
+        <nav className="flex flex-1 flex-col gap-px" aria-label={t("nav.label")}>
           {NAV_ITEMS.map(({ id, icon: Icon }) => {
             const isActive = activeView === id;
             const { label } = navConfig[id];
@@ -118,7 +118,7 @@ export function Sidebar() {
         </nav>
 
         {/* ── Footer: settings + collapse toggle ── */}
-        <div className="flex flex-col gap-px border-t border-white/[0.05] pt-2">
+        <div className="flex flex-col gap-px border-white/[0.05] border-t pt-2">
           {/* Settings */}
           {(() => {
             const isActive = activeView === "settings";

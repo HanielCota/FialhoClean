@@ -24,7 +24,7 @@ export function formatElapsed(seconds: number): string {
 function useElapsedTimer(
   status: RepairStatus,
   setElapsed: (updater: (prev: RepairToolState) => RepairToolState) => void,
-  key: "sfc" | "dism",
+  _key: "sfc" | "dism",
 ) {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -40,7 +40,7 @@ function useElapsedTimer(
         intervalRef.current = null;
       }
     };
-  }, [status, setElapsed, key]);
+  }, [status, setElapsed]);
 }
 
 export function useRepair() {

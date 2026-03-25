@@ -59,11 +59,11 @@ function StatCard({
     <div className="flex flex-col rounded-2xl border border-white/[0.06] bg-card p-4">
       <div className="mb-2 flex items-center gap-1.5">
         <Icon className="h-3.5 w-3.5 text-text-tertiary" />
-        <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-tertiary">
+        <span className="font-medium text-[11px] text-text-tertiary uppercase tracking-[0.08em]">
           {title}
         </span>
       </div>
-      <p className="font-bold text-[17px] leading-tight text-text">{main}</p>
+      <p className="font-bold text-[17px] text-text leading-tight">{main}</p>
       <p className="mt-0.5 text-[11px] text-text-muted">{sub}</p>
       {progress !== undefined && (
         <div
@@ -135,7 +135,7 @@ function StepCard({
         </p>
       </div>
 
-      <p className="mb-4 flex-1 text-[12px] leading-relaxed text-text-muted">{description}</p>
+      <p className="mb-4 flex-1 text-[12px] text-text-muted leading-relaxed">{description}</p>
 
       <button
         type="button"
@@ -156,7 +156,7 @@ function StepCard({
 
 function SectionLabel({ children }: { children: string }) {
   return (
-    <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-text-tertiary">
+    <p className="mb-3 font-semibold text-[11px] text-text-tertiary uppercase tracking-[0.12em]">
       {children}
     </p>
   );
@@ -224,8 +224,8 @@ export function DashboardView() {
         </div>
 
         {/* Texto */}
-        <div className="flex-1 min-w-0">
-          <p className="font-bold text-[16px] leading-tight text-text">
+        <div className="min-w-0 flex-1">
+          <p className="font-bold text-[16px] text-text leading-tight">
             {isLoading && !systemInfo
               ? t("dashboard.healthChecking")
               : t(`dashboard.health.${health.key}`)}

@@ -24,7 +24,7 @@ const pkgPath = resolve(root, "package.json");
 const pkg = JSON.parse(readFileSync(pkgPath, "utf-8"));
 if (pkg.version !== version) {
   pkg.version = version;
-  writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n", "utf-8");
+  writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`, "utf-8");
   console.log(`package.json → ${version}`);
 }
 

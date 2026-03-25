@@ -68,7 +68,7 @@ export function TitleBar() {
   return (
     <div
       data-tauri-drag-region
-      className="relative flex h-10 flex-shrink-0 items-center justify-end border-b border-white/[0.06] bg-sidebar"
+      className="relative flex h-10 flex-shrink-0 items-center justify-end border-white/[0.06] border-b bg-sidebar"
     >
       {/* Window controls — right-aligned, Windows convention */}
       <div className="relative flex h-full items-stretch">

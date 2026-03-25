@@ -101,7 +101,7 @@ export function SuccessScreen({
               <div
                 key={cat.category}
                 className={`flex items-center gap-3 px-4 py-3 ${
-                  i < scanSummary.categories.length - 1 ? "border-b border-white/[0.06]" : ""
+                  i < scanSummary.categories.length - 1 ? "border-white/[0.06] border-b" : ""
                 }`}
               >
                 <Icon className="h-4 w-4 text-text-muted" />
@@ -137,7 +137,7 @@ export function SuccessScreen({
             </p>
             <p className="text-[12px] text-text-muted">{t("cleaner.success.upsell.description")}</p>
           </div>
-          <span className="text-[13px] font-semibold text-accent flex-shrink-0">
+          <span className="flex-shrink-0 font-semibold text-[13px] text-accent">
             {t("dashboard.steps.apps.cta")} →
           </span>
         </button>
