@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { CleanerView } from "./components/cleaner/CleanerView";
 import { DashboardView } from "./components/dashboard/DashboardView";
 import { DebloaterView } from "./components/debloater/DebloaterView";
-import { NavBar } from "./components/layout/NavBar";
 import { PageContainer } from "./components/layout/PageContainer";
 import { TitleBar } from "./components/layout/TitleBar";
 import { OptimizerView } from "./components/optimizer/OptimizerView";
@@ -33,7 +32,6 @@ export default function App() {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <TitleBar />
-      <NavBar />
       <PageContainer>
           {everVisited.has("dashboard") && (
             <div className={hide("dashboard")}>
