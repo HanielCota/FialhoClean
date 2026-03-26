@@ -28,7 +28,7 @@ export function useDebloater() {
     queryKey: ["bloatware-apps"],
     queryFn: async () => {
       const apps = await debloaterService.getInstalledApps();
-      useDebloaterStore.getState().setApps(apps);
+      useDebloaterStore.getState().setApps(apps ?? []);
       return apps;
     },
   });

@@ -17,7 +17,7 @@ export function usePowerSettings() {
     queryKey: ["power-plans"],
     queryFn: async () => {
       const plans = await optimizerService.getPowerPlans();
-      useOptimizerStore.getState().setPowerPlans(plans);
+      useOptimizerStore.getState().setPowerPlans(plans ?? []);
       return plans;
     },
   });

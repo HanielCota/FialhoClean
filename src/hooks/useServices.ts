@@ -18,7 +18,7 @@ export function useServices() {
     queryKey: ["services"],
     queryFn: async () => {
       const svcs = await optimizerService.getServices();
-      useOptimizerStore.getState().setServices(svcs);
+      useOptimizerStore.getState().setServices(svcs ?? []);
       return svcs;
     },
   });

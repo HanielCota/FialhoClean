@@ -17,7 +17,7 @@ export function useScheduledTasks() {
     queryKey: ["scheduled-tasks"],
     queryFn: async () => {
       const tasks = await optimizerService.getScheduledTasks();
-      useOptimizerStore.getState().setScheduledTasks(tasks);
+      useOptimizerStore.getState().setScheduledTasks(tasks ?? []);
       return tasks;
     },
   });

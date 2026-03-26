@@ -19,10 +19,10 @@ export function useSystemTweaks() {
         optimizerService.getPrivacySettings(),
       ]);
       const state = useOptimizerStore.getState();
-      state.setHibernateSettings(hibernateResult);
-      state.setNetworkSettings(networkResult);
-      state.setGpuSettings(gpuResult);
-      state.setPrivacySettings(privacyResult);
+      if (hibernateResult) state.setHibernateSettings(hibernateResult);
+      if (networkResult) state.setNetworkSettings(networkResult);
+      if (gpuResult) state.setGpuSettings(gpuResult);
+      if (privacyResult) state.setPrivacySettings(privacyResult);
       return { hibernateResult, networkResult, gpuResult, privacyResult };
     },
   });

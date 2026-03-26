@@ -17,7 +17,7 @@ export function useStartup() {
     queryKey: ["startup-items"],
     queryFn: async () => {
       const items = await optimizerService.getStartupItems();
-      useOptimizerStore.getState().setStartupItems(items);
+      useOptimizerStore.getState().setStartupItems(items ?? []);
       return items;
     },
   });
