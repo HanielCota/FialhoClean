@@ -27,6 +27,7 @@ export function Badge({ label, variant = "default" }: BadgeProps) {
 
   return (
     <span
+      role="status"
       className={`inline-flex h-5 items-center rounded px-2 font-semibold text-[11px] ${variants[variant] ?? variants.default}`}
       aria-label={ariaLabel}
     >

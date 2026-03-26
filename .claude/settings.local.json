@@ -80,7 +80,14 @@
       "Bash(gh repo:*)",
       "Bash(gh api:*)",
       "Bash(npx eslint:*)",
-      "Bash(RUSTFLAGS=\"-W unused\" cargo check)"
+      "Bash(RUSTFLAGS=\"-W unused\" cargo check)",
+      "Bash(npm --version)",
+      "Bash(git remote:*)",
+      "Bash(gh release:*)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\(''''version''''\\) or d.get\\(''''package'''',{}\\).get\\(''''version'''',''''?''''\\)\\)\")",
+      "Bash(ls src-tauri/target/release/*.exe)",
+      "Bash(gh run:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:1420)"
     ]
   }
 }

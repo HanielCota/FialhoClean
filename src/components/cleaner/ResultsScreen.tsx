@@ -73,6 +73,7 @@ export function ResultsScreen({
               key={cat.category}
               className="overflow-hidden rounded-2xl border border-white/[0.06] bg-card"
             >
+              {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: role is conditionally "button" when aria-expanded is present */}
               <div
                 className={`flex items-center gap-4 p-3 ${isExpandable ? "focus-ring cursor-pointer transition-colors hover:bg-white/[0.02]" : ""}`}
                 onClick={() => {

@@ -81,8 +81,7 @@ export function useCleaner() {
     store.setIsCleaning(true);
     store.setError(null);
 
-    const categories = store.scanSummary?.categories;
-    if (!categories) return;
+    const categories = store.scanSummary.categories;
 
     const fileGroups: FileGroup[] = categories
       .filter((c) => c.files.length > 0 || c.category === "recycle_bin")

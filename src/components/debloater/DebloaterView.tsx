@@ -45,7 +45,6 @@ export function DebloaterView() {
     loadApps,
     toggleApp,
     clearSelection,
-    selectAllApps,
     removeSelected,
     setLastRemovalCount,
   } = useDebloater();
@@ -63,7 +62,7 @@ export function DebloaterView() {
     const q = search.trim().toLowerCase();
     return (apps ?? []).filter((app) => {
       if (safetyFilter === "safe" && app.safety_level !== "safe") return false;
-      if (safetyFilter === "caution" && app.safety_level === "safe") return false;
+      if (safetyFilter === "caution" && app.safety_level !== "caution") return false;
       if (!q) return true;
       return (
         (app?.name ?? "").toLowerCase().includes(q) ||
@@ -94,6 +93,8 @@ export function DebloaterView() {
   );
 
   const count = selectedApps.size;
+  const allVisibleSelected =
+    visibleApps.length > 0 && visibleApps.every((a) => selectedApps.has(a.package_full_name));
   const appsStatus = useAsyncState(isLoading, error, (apps?.length ?? 0) === 0);
 
   // ── Success screen ──────────────────────────────────────────────────────
@@ -215,7 +216,7 @@ export function DebloaterView() {
         {/* ── Toolbar ─────────────────────────────────────────────── */}
         <div className="mb-3 flex items-center justify-between">
           <SectionHeading className="mb-0">{t("debloater.sectionTitle")}</SectionHeading>
-          {count === (apps?.length ?? 0) ? (
+          {allVisibleSelected ? (
             <Button
               variant="ghost"
               size="sm"
@@ -229,7 +230,11 @@ export function DebloaterView() {
             <Button
               variant="secondary"
               size="sm"
-              onClick={selectAllApps}
+              onClick={() => {
+                for (const app of visibleApps) {
+                  if (!selectedApps.has(app.package_full_name)) toggleApp(app.package_full_name);
+                }
+              }}
               className="gap-1.5 rounded-full border-white/[0.10] bg-white/[0.05] px-3.5 font-medium text-[11px] tracking-wide hover:border-white/[0.16] hover:bg-white/[0.09]"
             >
               <CheckSquare2 className="h-3.5 w-3.5 text-text" />

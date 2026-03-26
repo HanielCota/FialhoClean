@@ -109,9 +109,7 @@ export const useCleanerStore = create<CleanerState>((set) => ({
 
   updateCategoryProgress: (category, status) =>
     set((s) => {
-      if (!s.scanProgress) {
-        return { scanProgress: null };
-      }
+      if (!s.scanProgress) return {};
       return { scanProgress: { ...s.scanProgress, [category]: status } };
     }),
 
