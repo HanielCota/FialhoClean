@@ -8,10 +8,14 @@ on:
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     name: Build & Package
     runs-on: windows-latest
+    environment: production
     steps:
       - uses: actions/checkout@v4
 
