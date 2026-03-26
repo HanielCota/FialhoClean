@@ -3,6 +3,9 @@ use std::time::Duration;
 use tokio::process::Command;
 use tokio::time::timeout;
 
+#[cfg(windows)]
+const CREATE_NO_WINDOW: u32 = 0x08000000;
+
 /// Abstracts the repeated pattern of spawning a process with a timeout,
 /// checking its exit status, and returning stdout/stderr as strings.
 pub struct ProcessRunner {
@@ -55,6 +58,8 @@ impl ProcessRunner {
     /// Returns `Ok(ProcessOutput)` only if the process exits with status 0.
     /// Output is decoded as UTF-8 with cp850 fallback.
     pub async fn run(&self, mut cmd: Command) -> Result<ProcessOutput, AppError> {
+        #[cfg(windows)]
+        cmd.creation_flags(CREATE_NO_WINDOW);
         let output = timeout(self.timeout, cmd.output())
             .await
             .map_err(|_| AppError::Custom(format!("{} timed out", self.label)))?
@@ -98,6 +103,8 @@ impl ProcessRunner {
     /// Run a process and return stdout, ignoring failure (best-effort).
     /// Output is decoded as UTF-8 with cp850 fallback.
     pub async fn run_best_effort(&self, mut cmd: Command) -> Option<String> {
+        #[cfg(windows)]
+        cmd.creation_flags(CREATE_NO_WINDOW);
         let output = timeout(self.timeout, cmd.output()).await.ok()?.ok()?;
         if !output.status.success() {
             return None;

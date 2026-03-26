@@ -1,6 +1,6 @@
-# Sobre o FialhoClean
+# Sobre o Fialho Optimizer
 
-**FialhoClean** é um aplicativo desktop nativo para Windows, construído com **Tauri 2 + Rust + React + TypeScript**. Ele reúne em uma única interface dark-mode as quatro operações mais importantes para manter o sistema saudável: limpeza de arquivos desnecessários, otimização de desempenho, remoção de bloatware e reparo do sistema operacional.
+**Fialho Optimizer** é um aplicativo desktop nativo para Windows, construído com **Tauri 2 + Rust + React + TypeScript**. Ele reúne em uma única interface dark-mode as quatro operações mais importantes para manter o sistema saudável: limpeza de arquivos desnecessários, otimização de desempenho, remoção de bloatware e reparo do sistema operacional.
 
 > Zero Electron. Zero overhead. Binário final abaixo de **10 MB**, sem runtime Node.js ou WebView pesado.
 

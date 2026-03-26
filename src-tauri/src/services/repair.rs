@@ -4,6 +4,9 @@ use crate::services::process_runner::{decode_output, ProcessRunner};
 use std::time::Duration;
 use tokio::time::timeout;
 
+#[cfg(windows)]
+const CREATE_NO_WINDOW: u32 = 0x08000000;
+
 const SFC_TIMEOUT: Duration = Duration::from_secs(600); // 10 min
 const DISM_TIMEOUT: Duration = Duration::from_secs(900); // 15 min
 const RESTORE_RUNNER: ProcessRunner = ProcessRunner::new("restore-point", Duration::from_secs(60));
@@ -19,9 +22,13 @@ async fn run_system_tool(
 
     let output = timeout(
         timeout_duration,
-        tokio::process::Command::new("cmd")
-            .args(["/C", command])
-            .output(),
+        {
+            let mut cmd = tokio::process::Command::new("cmd");
+            cmd.args(["/C", command]);
+            #[cfg(windows)]
+            cmd.creation_flags(CREATE_NO_WINDOW);
+            cmd.output()
+        },
     )
     .await
     .map_err(|_| AppError::Custom(format!("{} timed out", tool_name)))?
@@ -39,7 +46,7 @@ async fn run_system_tool(
         return Ok(RepairResult {
             success: false,
             output: format!(
-                "{} requires administrator privileges. Please run FialhoClean as administrator.",
+                "{} requires administrator privileges. Please run Fialho Optimizer as administrator.",
                 tool_name
             ),
         });

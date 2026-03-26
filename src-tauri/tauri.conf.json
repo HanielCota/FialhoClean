@@ -1,8 +1,8 @@
 {
   "$schema": "./gen/schemas/desktop-schema.json",
-  "productName": "FialhoClean",
+  "productName": "FialhoOptimizer",
   "version": "1.0.0",
-  "identifier": "com.fialho.clean",
+  "identifier": "com.fialho.optimizer",
   "build": {
     "devUrl": "http://localhost:1420",
     "frontendDist": "../dist",
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "FialhoClean",
+        "title": "Fialho Optimizer",
         "width": 960,
         "height": 720,
         "minWidth": 820,

@@ -1,12 +1,12 @@
 name: Feature Request
-description: Suggest a new feature or improvement for FialhoClean
+description: Suggest a new feature or improvement for Fialho Optimizer
 title: "[Feature]: "
 labels: ["enhancement"]
 body:
   - type: markdown
     attributes:
       value: |
-        Have an idea to improve FialhoClean? We'd love to hear it.
+        Have an idea to improve Fialho Optimizer? We'd love to hear it.
 
   - type: textarea
     id: description
