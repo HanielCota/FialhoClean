@@ -1,16 +1,16 @@
 {
-  "name": "fialho-clean",
+  "name": "fialho-optimizer",
   "version": "1.0.0",
   "description": "Windows PC cleaner & optimizer built with Tauri 2 + Rust + React",
   "author": "Haniel Cota",
   "license": "MIT",
-  "homepage": "https://github.com/HanielCota/FialhoClean#readme",
+  "homepage": "https://github.com/HanielCota/FialhoOptimizer#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/HanielCota/FialhoClean.git"
+    "url": "https://github.com/HanielCota/FialhoOptimizer.git"
   },
   "bugs": {
-    "url": "https://github.com/HanielCota/FialhoClean/issues"
+    "url": "https://github.com/HanielCota/FialhoOptimizer/issues"
   },
   "keywords": [
     "windows",

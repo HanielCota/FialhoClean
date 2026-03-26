@@ -8,7 +8,7 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in FialhoClean, please report it responsibly.
+If you discover a security vulnerability in Fialho Optimizer, please report it responsibly.
 
 **Do NOT open a public GitHub issue for security vulnerabilities.**
 

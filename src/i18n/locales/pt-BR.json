@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "FialhoClean"
+    "name": "Fialho Optimizer"
   },
   "errorBoundary": {
     "title": "Algo deu errado",
@@ -477,7 +477,7 @@
     "restorePoint": {
       "title": "Criar Ponto de Restauração",
       "description": "Salva o estado atual do PC. Se algo der errado depois, você pode voltar para esse ponto.",
-      "defaultDescription": "FialhoClean Backup",
+      "defaultDescription": "Fialho Optimizer Backup",
       "placeholder": "Nome para lembrar depois (ex: Antes da limpeza)…",
       "button": "Criar"
     },

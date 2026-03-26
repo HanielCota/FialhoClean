@@ -4,6 +4,9 @@ use std::collections::HashSet;
 use std::time::Duration;
 use tokio::time::timeout;
 
+#[cfg(windows)]
+const CREATE_NO_WINDOW: u32 = 0x08000000;
+
 /// Maximum time to wait for Get-AppxPackage (can be slow on first call).
 const QUERY_TIMEOUT: Duration = Duration::from_secs(60);
 /// Maximum time to wait for Remove-AppxPackage per package.
@@ -832,8 +835,9 @@ const SYSTEM_CRITICAL_PREFIXES: &[&str] = &[
 pub async fn get_installed_apps() -> Result<Vec<AppInfo>, AppError> {
     let output = timeout(
         QUERY_TIMEOUT,
-        tokio::process::Command::new("powershell")
-            .args([
+        {
+            let mut cmd = tokio::process::Command::new("powershell");
+            cmd.args([
                 "-NoProfile",
                 "-Command",
                 "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; \
@@ -841,8 +845,11 @@ pub async fn get_installed_apps() -> Result<Vec<AppInfo>, AppError> {
                  Get-AppxPackage -AllUsers \
                  | Select-Object Name, PackageFullName, PackageFamilyName, Publisher, Version \
                  | ConvertTo-Json -Compress",
-            ])
-            .output(),
+            ]);
+            #[cfg(windows)]
+            cmd.creation_flags(CREATE_NO_WINDOW);
+            cmd.output()
+        },
     )
     .await
     .map_err(|_| AppError::Custom("get_installed_apps timed out".into()))?
@@ -949,14 +956,18 @@ pub async fn remove_apps(package_full_names: Vec<String>) -> Result<Vec<RemoveRe
 async fn remove_single_app(package_full_name: &str) -> RemoveResult {
     let result = timeout(
         REMOVAL_TIMEOUT,
-        tokio::process::Command::new("powershell")
-            .args([
+        {
+            let mut cmd = tokio::process::Command::new("powershell");
+            cmd.args([
                 "-NoProfile",
                 "-Command",
                 "Remove-AppxPackage -Package $env:FIALHO_PKG_NAME -AllUsers -ErrorAction Stop",
             ])
-            .env("FIALHO_PKG_NAME", package_full_name)
-            .output(),
+            .env("FIALHO_PKG_NAME", package_full_name);
+            #[cfg(windows)]
+            cmd.creation_flags(CREATE_NO_WINDOW);
+            cmd.output()
+        },
     )
     .await;
 

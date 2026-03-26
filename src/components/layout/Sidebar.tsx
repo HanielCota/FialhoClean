@@ -40,7 +40,7 @@ export function Sidebar() {
           <span className="select-none font-bold text-[11px] text-white/60 leading-none">F</span>
         </div>
         <span className="select-none font-semibold text-[13px] text-white/60 tracking-[-0.02em]">
-          FialhoClean
+          Fialho Optimizer
         </span>
       </div>
 

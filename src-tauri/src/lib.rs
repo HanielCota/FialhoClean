@@ -13,8 +13,8 @@ pub fn run() {
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
                 match cfg!(debug_assertions) {
-                    true => "fialho_clean_lib=debug".into(),
-                    false => "fialho_clean_lib=warn".into(),
+                    true => "fialho_optimizer_lib=debug".into(),
+                    false => "fialho_optimizer_lib=warn".into(),
                 }
             }),
         )
@@ -75,7 +75,7 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .unwrap_or_else(|e| {
-            eprintln!("FialhoClean failed to start: {e}");
+            eprintln!("Fialho Optimizer failed to start: {e}");
             std::process::exit(1);
         });
 }

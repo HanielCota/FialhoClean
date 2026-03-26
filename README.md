@@ -1,14 +1,14 @@
 <div align="center">
 
-<img width="80" src="src-tauri/icons/128x128.png" alt="FialhoClean logo" />
+<img width="80" src="src-tauri/icons/128x128.png" alt="Fialho Optimizer logo" />
 
-<h1>FialhoClean</h1>
+<h1>Fialho Optimizer</h1>
 
 <p>Limpeza, otimização e controle total do seu Windows — em um só lugar.</p>
 
 <p>
-  <a href="https://github.com/HanielCota/FialhoClean/releases/latest">
-    <img src="https://img.shields.io/github/v/release/HanielCota/FialhoClean?style=flat-square&color=ffffff&labelColor=111111&label=release" alt="Latest Release" />
+  <a href="https://github.com/HanielCota/FialhoOptimizer/releases/latest">
+    <img src="https://img.shields.io/github/v/release/HanielCota/FialhoOptimizer?style=flat-square&color=ffffff&labelColor=111111&label=release" alt="Latest Release" />
   </a>
   <img src="https://img.shields.io/badge/Windows-10%2F11-0078D4?style=flat-square&logo=windows&logoColor=white" alt="Windows" />
   <img src="https://img.shields.io/badge/Tauri-2.x-24C8D8?style=flat-square&logo=tauri&logoColor=white" alt="Tauri" />
@@ -23,7 +23,7 @@
   <a href="#-instalação">Instalação</a> ·
   <a href="#-funcionalidades">Funcionalidades</a> ·
   <a href="#-desenvolvimento">Desenvolvimento</a> ·
-  <a href="https://github.com/HanielCota/FialhoClean/issues">Reportar Bug</a>
+  <a href="https://github.com/HanielCota/FialhoOptimizer/issues">Reportar Bug</a>
 </p>
 
 </div>
@@ -32,7 +32,7 @@
 
 ## Sobre o projeto
 
-**FialhoClean** é um aplicativo desktop nativo para Windows construído com **Tauri 2 + React 19 + Rust**. Combina um frontend moderno com um backend de alta performance para entregar limpeza real do sistema, otimização de desempenho e remoção de bloatware — tudo numa interface dark mode minimalista.
+**Fialho Optimizer** é um aplicativo desktop nativo para Windows construído com **Tauri 2 + React 19 + Rust**. Combina um frontend moderno com um backend de alta performance para entregar limpeza real do sistema, otimização de desempenho e remoção de bloatware — tudo numa interface dark mode minimalista.
 
 > Zero Electron. Zero overhead. Binário final abaixo de **10 MB**, sem runtime Node.js ou WebView pesado.
 
@@ -75,12 +75,12 @@ Visão em tempo real de CPU, RAM, disco e uptime. Indicador de saúde do PC e ac
 
 ## 🚀 Instalação
 
-Baixe o instalador mais recente na página de [Releases](https://github.com/HanielCota/FialhoClean/releases/latest):
+Baixe o instalador mais recente na página de [Releases](https://github.com/HanielCota/FialhoOptimizer/releases/latest):
 
 | Formato | Arquivo |
 |---------|---------|
-| **NSIS** (recomendado) | `FialhoClean_x.x.x_x64-setup.exe` |
-| **MSI** | `FialhoClean_x.x.x_x64_en-US.msi` |
+| **NSIS** (recomendado) | `FialhoOptimizer_x.x.x_x64-setup.exe` |
+| **MSI** | `FialhoOptimizer_x.x.x_x64_en-US.msi` |
 
 > Requer **Windows 10 22H2** ou superior e **WebView2 Runtime** (pré-instalado no Windows 11).
 
@@ -111,8 +111,8 @@ WebView2 Runtime   (pré-instalado no Windows 11)
 
 ```bash
 # Clone o repositório
-git clone https://github.com/HanielCota/FialhoClean.git
-cd FialhoClean
+git clone https://github.com/HanielCota/FialhoOptimizer.git
+cd FialhoOptimizer
 
 # Instale as dependências
 npm install

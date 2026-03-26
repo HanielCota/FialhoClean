@@ -1,9 +1,9 @@
 [package]
-name = "fialho-clean"
+name = "fialho-optimizer"
 version = "1.0.0"
 edition = "2021"
 description = "Windows PC cleaner & optimizer"
-repository = "https://github.com/HanielCota/FialhoClean"
+repository = "https://github.com/HanielCota/FialhoOptimizer"
 license = "MIT"
 authors = ["Haniel Cota"]
 keywords = ["windows", "cleaner", "optimizer", "tauri"]
@@ -11,7 +11,7 @@ categories = ["gui", "utilities"]
 readme = "../README.md"
 
 [lib]
-name = "fialho_clean_lib"
+name = "fialho_optimizer_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to FialhoClean will be documented in this file.
+All notable changes to Fialho Optimizer will be documented in this file.
 
 ## [1.0.0] - 2026-03-23
 

@@ -1,5 +1,5 @@
 {
-  "app": { "name": "FialhoClean" },
+  "app": { "name": "Fialho Optimizer" },
   "errorBoundary": {
     "title": "Something went wrong",
     "message": "An unexpected error occurred in this view."
@@ -471,7 +471,7 @@
     "restorePoint": {
       "title": "Create Restore Point",
       "description": "Creates a Windows System Restore snapshot you can revert to if something goes wrong.",
-      "defaultDescription": "FialhoClean Backup",
+      "defaultDescription": "Fialho Optimizer Backup",
       "placeholder": "Restore point description…",
       "button": "Create"
     },

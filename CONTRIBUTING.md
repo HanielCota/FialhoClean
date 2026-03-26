@@ -1,4 +1,4 @@
-# Contributing to FialhoClean
+# Contributing to Fialho Optimizer
 
 Thank you for your interest in contributing!
 

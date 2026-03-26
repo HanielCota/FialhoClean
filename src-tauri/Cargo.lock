@@ -740,7 +740,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "fialho-clean"
+name = "fialho-optimizer"
 version = "1.0.0"
 dependencies = [
  "serde",
